@@ -7,7 +7,7 @@
     <h1>Criar Nova Conta</h1>
     <form action="/users/register" method="POST">
         <label>Nome:</label>
-        <input type="text" name="nome" required>
+        <input type="text" name="name" required>
 
         <label>Email:</label>
         <input type="email" name="email" required>
@@ -16,16 +16,17 @@
         <input type="password" name="password" required>
 
         <label>Morada:</label>
-        <input type="text" name="morada" required>
+        <input type="text" name="address" required>
 
         <label>Telefone:</label>
-        <input type="text" name="telefone" required>
+        <input type="text" name="phone" required>
 
         <label>Tipo de Utilizador:</label>
         <select name="role">
             <option value="cliente">Cliente</option>
             <option value="supermercado">Supermercado</option>
             <option value="estafeta">Estafeta</option>
+            <option value="admin">Admin</option>
         </select>
 
         <button type="submit">Registar</button>

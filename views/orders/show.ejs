@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhe da Encomenda</title>
+</head>
+<body>
+  <h1>Encomenda</h1>
+
+  <p><strong>Cliente:</strong> <%= order.cliente.nome %></p>
+  <p><strong>Email:</strong> <%= order.cliente.email %></p>
+  <p><strong>Supermercado:</strong> <%= order.supermercado.name %></p>
+  <p><strong>Método de entrega:</strong> <%= order.metodoEntrega %></p>
+  <p><strong>Custo de entrega:</strong> €<%= order.custoEntrega %></p>
+  <p><strong>Estado:</strong> <%= order.estado %></p>
+
+  <h2>Items</h2>
+  <ul>
+    <% order.items.forEach(item => { %>
+      <li>
+        <%= item.nome %> -
+        <%= item.quantidade %> x €<%= item.precoUnitario %> =
+        €<%= item.subtotal %>
+      </li>
+    <% }) %>
+  </ul>
+
+  <h3>Total: €<%= order.total %></h3>
+
+  <p><a href="/">Voltar</a></p>
+</body>
+</html>

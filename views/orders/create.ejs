@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Nova Venda</title>
+</head>
+<body>
+  <h1>Nova Venda - <%= supermarket.name %></h1>
+
+  <form action="/orders/create/<%= supermarket._id %>" method="POST">
+    <h2>Cliente</h2>
+
+    <label>Nome:</label>
+    <input type="text" name="nome" required>
+    <br>
+
+    <label>Email:</label>
+    <input type="email" name="email" required>
+    <br>
+
+    <label>Morada:</label>
+    <input type="text" name="morada" required>
+    <br>
+
+    <label>Telefone:</label>
+    <input type="text" name="telefone" required>
+    <br><br>
+
+    <h2>Produtos</h2>
+
+    <% products.forEach(product => { %>
+      <div style="margin-bottom: 10px; border-bottom: 1px solid #ccc;">
+        <p>
+          <strong><%= product.name %></strong> -
+          €<%= product.price %> -
+          Stock: <%= product.stock %>
+        </p>
+
+        <input type="checkbox" name="productIds" value="<%= product._id %>">
+        Selecionar
+
+        <label>Quantidade:</label>
+        <input type="number" name="quantities" min="1" value="1">
+      </div>
+    <% }) %>
+
+    <h2>Método de entrega</h2>
+    <select name="metodoEntrega" required>
+      <option value="levantamento_loja">Levantamento em loja</option>
+      <option value="estafeta">Entrega por estafeta</option>
+    </select>
+
+    <br><br>
+    <button type="submit">Registar Venda</button>
+  </form>
+</body>
+</html>

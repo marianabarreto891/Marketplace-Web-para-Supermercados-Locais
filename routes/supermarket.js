@@ -45,4 +45,12 @@ router.get("/:supermarketId/products", async function (req, res) {
   }
 });
 
+router.get("/", function (req, res) {
+  res.render("supermarket");
+});
+
+router.get("/dashboard", function (req, res) {
+  res.render("dashboard");
+});
+
 module.exports = router;

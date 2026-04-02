@@ -7,10 +7,13 @@ const supermarketSchema = new mongoose.Schema({
   hours: { type: String },
   deliveryMethods: [{ 
     type: String, 
-    enum: ['Pickup in Store', 'Delivery by Estafeta'] 
+    enum: ['levantamento_loja', 'estafeta'],
+    required: true
   }], 
-  deliveryCost: { type: Number, default: 0 },
-  manager: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
-});
+  deliveryCost: { type: Number, default: 0, min: 0 },
+  manager: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  
+  isApproved: { type: Boolean, default: false }
+}, { timestamps: true });
 
 module.exports = mongoose.model('Supermarket', supermarketSchema);

@@ -10,7 +10,7 @@ router.use(requireAuth, requireRole(["admin"]));
 router.get("/dashboard", async (req, res) => {
   try {
     const pendingSupermarkets = await Supermarket.find({
-      isApproved: false,
+      toApprove: false,
     }).populate("manager", "name email");
 
     const totalUsers = await User.countDocuments();
@@ -38,6 +38,7 @@ router.post("/supermarket/:id/approve", async (req, res) => {
       return res.status(404).send("Supermercado não encontrado!");
 
     supermarket.isApproved = true;
+    supermarket.toApprove = true;
     await supermarket.save();
 
     res.redirect("/admin/dashboard");
@@ -47,10 +48,27 @@ router.post("/supermarket/:id/approve", async (req, res) => {
   }
 });
 
+router.post("/supermarket/:id/disapprove", async (req, res) => {
+  try {
+    const supermarket = await Supermarket.findById(req.params.id);
+    if (!supermarket)
+      return res.status(404).send("Supermercado não encontrado!");
+
+    supermarket.isApproved = false;
+    supermarket.toApprove = true;
+    await supermarket.save();
+
+    res.redirect("/admin/dashboard");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro ao rejeitar supermercado!");
+  }
+});
+
 router.get("/users", async (req, res) => {
   try {
-    const users = await User.find();
-    res.render("admin/usersList", { users });
+    const allUsers = await User.find();
+    res.render("admin/usersList", { allUsers });
   } catch (error) {
     console.error(error);
     res.status(500).send("Erro ao listar utilizadores!");

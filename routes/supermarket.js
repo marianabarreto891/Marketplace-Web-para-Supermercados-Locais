@@ -25,6 +25,8 @@ router.get("/list", requireAuth, async (req, res) => {
 
     if (req.session.role === "cliente") {
       query = { isApproved: true };
+    } else if (req.session.role === "supermercado") {
+      query = { manager: req.session.userId };
     }
 
     const supermarkets = await Supermarket.find(query).populate(

@@ -32,6 +32,7 @@ var usersRouter = require("./routes/users");
 var supermarketRouter = require("./routes/supermarket");
 var adminRouter = require("./routes/admin");
 
+
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/supermarket", supermarketRouter);

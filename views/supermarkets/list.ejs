@@ -10,9 +10,10 @@
 
 <body class="container mt-5">
     <h1 class="mb-4">Supermercados Registados</h1>
-
+    
     <% if (typeof userRole !=='undefined' && (userRole==='supermercado' || userRole==='admin' )) { %>
         <a href="/supermarket/new" class="btn btn-primary mb-3">Criar Novo Supermercado</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar Sessão</a>
         <% } %>
 
             <table class="table table-striped table-bordered">
@@ -20,7 +21,7 @@
                     <tr>
                         <th>Nome</th>
                         <th>Localização</th>
-                        <th>Aprovado?</th>
+                        <th>Estado</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -35,8 +36,8 @@
                             </td>
                             <td>
                                 <span
-                                    class="badge <%= supermarket.isApproved ? 'bg-success' : 'bg-warning text-dark' %>">
-                                    <%= supermarket.isApproved ? 'Sim' : 'Pendente' %>
+                                    class="badge <%= !supermarket.toApprove ? 'bg-warning text-dark' : supermarket.isApproved ? 'bg-success' : 'bg-danger' %>">
+                                    <%= !supermarket.toApprove ? 'Pendente' : supermarket.isApproved ? 'Aprovado' : 'Rejeitado' %>
                                 </span>
                             </td>
                             <td>

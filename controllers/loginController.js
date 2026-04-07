@@ -6,32 +6,38 @@ exports.loginUser = async (req, res) => {
   try {
     const userFound = await user.findOne({ email });
     if (!userFound) {
-      return res.status(400).json({ message: "Utilizador não encontrado" });
-    }
-    
-    const isMatch = await bcrypt.compare(password, userFound.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Password incorreta" });
+      return res.status(400).send({ message: "Utilizador não encontrado!" });
     }
 
-    // 1º: GUARDAR A SESSÃO PRIMEIRO! (Isto tem de vir antes dos redirecionamentos)
+    const isMatch = await bcrypt.compare(password, userFound.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Password incorreta!" });
+    }
+
+    // 1º: GUARDAR OS DADOS NA SESSÃO
     req.session.userId = userFound._id;
     req.session.role = userFound.role;
 
-    // 2º: FAZER OS REDIRECIONAMENTOS (Sempre com 'return' atrás)
-    if (
-      userFound.role === "supermercado" ||
-      userFound.role === "estafeta" ||
-      userFound.role === "admin"
-    ) {
-      // Se quiseres ir direto para a lista para testar agora, podes mudar "dashboard" para "list" aqui também!
-      return res.redirect("/supermarket/list");
-    }
+    // 2º: FORÇAR A GRAVAÇÃO ANTES DE REDIRECIONAR
 
-    if (userFound.role === "cliente") {
-      return res.redirect("/supermarket/list");
-    }
+    req.session.save((err) => {
+      if (err) {
+        console.error("Erro ao gravar sessão:", err);
+        return res.status(500).json({ message: "Erro ao iniciar sessão." });
+      }
 
+      if (userFound.role === "admin") {
+        return res.redirect("/admin/dashboard");
+      }
+
+      if (userFound.role === "supermercado" || userFound.role === "estafeta") {
+        return res.redirect("/supermarket/dashboard");
+      }
+
+      if (userFound.role === "cliente") {
+        return res.redirect("/supermarket/list");
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erro no servidor" });

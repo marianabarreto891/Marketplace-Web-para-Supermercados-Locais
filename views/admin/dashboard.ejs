@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Administrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+
+<div class="container bg-white p-4 rounded shadow-sm">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <h1 class="mb-0">Administrador</h1>
+        <a href="/admin/users" class="btn btn-primary ms-2">Ver Todos os Utilizadores</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar Sessão</a>
+    </div>
+
+    <div class="row text-center mb-5 mt-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow-sm border-0">
+                <div class="card-body py-4">
+                    <h5 class="card-title fw-normal">Utilizadores Registados</h5>
+                    <p class="card-text fs-2 fw-bold mb-0"><%= totalUsers %></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow-sm border-0">
+                <div class="card-body py-4">
+                    <h5 class="card-title fw-normal">Supermercados Ativos</h5>
+                    <p class="card-text fs-2 fw-bold mb-0"><%= activeSupermarkets %></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow-sm border-0">
+                <div class="card-body py-4">
+                    <h5 class="card-title fw-normal">Total de Encomendas</h5>
+                    <p class="card-text fs-2 fw-bold mb-0"><%= totalOrders %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h2 class="h4 mb-3">Supermercados a Aguardar Aprovação</h2>
+    
+    <% if (pendingSupermarkets.length > 0) { %>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mt-2">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nome da Loja</th>
+                        <th>Localização</th>
+                        <th>Gestor</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% pendingSupermarkets.forEach(function(supermarket) { %>
+                        <tr>
+                            <td class="align-middle"><strong><%= supermarket.name %></strong></td>
+                            <td class="align-middle"><%= supermarket.location %></td>
+                            <td class="align-middle"><%= supermarket.manager.email %></td>
+                            <td class="align-middle">
+                                <form action="/admin/supermarket/<%= supermarket._id %>/approve" method="POST" class="m-0">
+                                    <button type="submit" class="btn btn-success btn-sm">Aprovar Supermercado</button>
+                                </form><br>
+                                <form action="/admin/supermarket/<%= supermarket._id %>/disapprove" method="POST" class="m-0">
+                                    <button type="submit" class="btn btn-danger btn-sm">Rejeitar Supermercado</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <p class="text-muted fst-italic mt-3">Não há supermercados a aguardar aprovação neste momento!</p>
+    <% } %>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

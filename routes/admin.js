@@ -4,6 +4,7 @@ const User = require("../models/User");
 const Supermarket = require("../models/Supermarket");
 const Order = require("../models/Order");
 const { requireAuth, requireRole } = require("../middlewares/auth");
+const Category = require("../models/Category");
 
 router.use(requireAuth, requireRole(["admin"]));
 
@@ -72,6 +73,26 @@ router.get("/users", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send("Erro ao listar utilizadores!");
+  }
+});
+
+
+//GESTÃO DE CATEGORIAS
+router.get("/categories", async (req, res) => {
+  try {
+    const categories = await Category.find();
+    res.render("admin/categories", { categories });
+  } catch (error) {
+    res.status(500).send("Erro ao listar categorias");
+  }
+});
+
+router.post("/categories/new", async (req, res) => {
+  try {
+    await Category.create({ name: req.body.name, description: req.body.description });
+    res.redirect("/admin/categories");
+  } catch (error) {
+    res.status(500).send("Erro ao criar categoria");
   }
 });
 

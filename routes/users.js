@@ -5,13 +5,16 @@ const loginController = require("../controllers/loginController");
 
 router.post("/login", loginController.loginUser);
 
+/* GET: Mostrar formulário de login */
 router.get("/login", function (req, res) {
-  res.render("login");
+  // CORRIGIDO: Adicionado "users/"
+  res.render("users/login");
 });
 
 /* GET: Mostrar formulário de registo */
 router.get("/register", function (req, res) {
-  res.render("register");
+  // CORRIGIDO: Adicionado "users/"
+  res.render("users/register");
 });
 
 /* POST: Processar o registo de um novo utilizador */
@@ -26,9 +29,10 @@ router.post("/register", async function (req, res) {
     }
 
     await newUser.save();
-    res.send(
-      'Utilizador registado com sucesso! <a href="/users/login">Ir para Login</a>',
-    );
+    
+    // Mostra a página de sucesso
+    res.render("users/registerSuccess");
+    
   } catch (error) {
     console.error(error);
     res.status(500).send("Erro ao registar utilizador: " + error.message);

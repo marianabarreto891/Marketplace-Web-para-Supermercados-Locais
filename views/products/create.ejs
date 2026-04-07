@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Novo Produto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h1>Novo Produto - <%= supermarket.name %></h1>
+    
+    <form action="/supermarket/<%= supermarket._id %>/products/new" method="POST" class="mt-4">
+        <div class="mb-3">
+            <label>Nome:</label>
+            <input type="text" name="name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Descrição:</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Pequena descrição do produto..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Categoria:</label>
+            <select name="category" class="form-select" required>
+                <option value="">Selecione...</option>
+                <% categories.forEach(cat => { %>
+                    <option value="<%= cat._id %>"><%= cat.name %></option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>URL da Imagem:</label>
+            <input type="text" name="image" class="form-control" placeholder="https://exemplo.com/imagem.jpg">
+        </div>
+
+        <div class="row">
+            <div class="col mb-3">
+                <label>Preço (€):</label>
+                <input type="number" step="0.01" name="price" class="form-control" required>
+            </div>
+            <div class="col mb-3">
+                <label>Stock:</label>
+                <input type="number" name="stock" class="form-control" value="0" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-secondary">Cancelar</a>
+    </form>
+</body>
+</html>

@@ -1,7 +1,9 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 
-mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI, {
+  dbName: process.env.MONGODB_DB || "Marketplace",
+});
 
 const db = mongoose.connection;
 db.on("error", (error) => {

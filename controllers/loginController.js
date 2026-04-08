@@ -2,9 +2,13 @@ const user = require("../models/User");
 const bcrypt = require("bcrypt");
 
 exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const loginValue = String(req.body.email || "").trim();
+  const normalizedEmail = loginValue.toLowerCase();
+  const { password } = req.body;
   try {
-    const userFound = await user.findOne({ email });
+    const userFound = await user.findOne({
+      $or: [{ email: normalizedEmail }, { name: loginValue }],
+    });
     if (!userFound) {
       return res.status(400).send({ message: "Utilizador não encontrado!" });
     }

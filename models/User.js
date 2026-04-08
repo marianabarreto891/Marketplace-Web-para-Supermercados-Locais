@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   address: { type: String, required: true },
-  phone: { type: String, required: true },
+  phone: { type: String },
+  telephone: { type: String },
   role: {
     type: String,
     enum: ["cliente", "supermercado", "estafeta", "admin"],
@@ -15,6 +16,16 @@ const userSchema = new mongoose.Schema({
   // Para supermercados: o admin precisa de aprovar a conta antes de poder usar a plataforma
   isApproved: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
+});
+
+userSchema.pre("validate", function () {
+  if (!this.phone && this.telephone) {
+    this.phone = this.telephone;
+  }
+
+  if (!this.telephone && this.phone) {
+    this.telephone = this.phone;
+  }
 });
 
 userSchema.pre("save", async function () {

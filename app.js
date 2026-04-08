@@ -31,12 +31,14 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var supermarketRouter = require("./routes/supermarket");
 var adminRouter = require("./routes/admin");
+var ordersRouter = require("./routes/orders");
 
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/supermarket", supermarketRouter);
 app.use("/admin", adminRouter);
+app.use("/orders", ordersRouter);
 
 app.use(function (req, res, next) {
   next(createError(404));
@@ -44,7 +46,9 @@ app.use(function (req, res, next) {
 
 module.exports = app;
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor a correr na porta ${PORT}`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Servidor a correr na porta ${PORT}`);
+  });
+}

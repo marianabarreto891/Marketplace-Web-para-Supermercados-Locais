@@ -67,6 +67,11 @@ const orderSchema = new mongoose.Schema(
       default: 0,
       min: 0
     },
+    estafeta: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
+    },
     estado: {
       type: String,
       enum: [

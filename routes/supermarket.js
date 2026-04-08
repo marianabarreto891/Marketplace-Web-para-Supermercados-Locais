@@ -1,11 +1,26 @@
 var express = require("express");
 var router = express.Router();
 const Product = require("../models/Product");
+const Order = require("../models/Order");
 const Supermarket = require("../models/Supermarket");
 const User = require("../models/User");
 const Category = require("../models/Category");
 
 const { requireAuth, requireRole } = require("../middlewares/auth");
+
+const ORDER_STATUS_LABELS = {
+  pendente: "Pendente",
+  confirmada: "Confirmada",
+  em_preparacao: "Em preparacao",
+  em_entrega: "Em entrega",
+  entregue: "Entregue",
+  cancelada: "Cancelada",
+};
+
+const DELIVERY_METHOD_LABELS = {
+  levantamento_loja: "Levantamento em loja",
+  estafeta: "Entrega por estafeta",
+};
 
 router.get("/", (req, res) => {
   res.redirect("/supermarket/list");
@@ -15,8 +30,106 @@ router.get(
   "/dashboard",
   requireAuth,
   requireRole(["admin", "supermercado", "estafeta"]),
-  function (req, res) {
-    res.render("dashboard");
+  async function (req, res) {
+    try {
+      if (req.session.role === "admin") {
+        return res.redirect("/admin/dashboard");
+      }
+
+      if (req.session.role === "supermercado") {
+        const supermarkets = await Supermarket.find({
+          manager: req.session.userId,
+        }).sort({ name: 1 });
+        const supermarketIds = supermarkets.map((supermarket) => supermarket._id);
+        const orderFilter = supermarketIds.length
+          ? { supermercado: { $in: supermarketIds } }
+          : { _id: null };
+
+        const totalOrders = await Order.countDocuments(orderFilter);
+        const openOrders = await Order.countDocuments({
+          ...orderFilter,
+          estado: { $in: ["confirmada", "em_preparacao", "em_entrega"] },
+        });
+        const revenueResult = await Order.aggregate([
+          {
+            $match: {
+              ...orderFilter,
+              estado: { $ne: "cancelada" },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$total" },
+            },
+          },
+        ]);
+        const recentOrders = await Order.find(orderFilter)
+          .populate("cliente", "name")
+          .populate("supermercado", "name")
+          .sort({ createdAt: -1 })
+          .limit(6);
+
+        return res.render("dashboard", {
+          role: req.session.role,
+          supermarkets,
+          summary: {
+            totalOrders,
+            totalRevenue: revenueResult[0] ? revenueResult[0].total : 0,
+            openOrders,
+            approvedSupermarkets: supermarkets.filter(
+              (supermarket) => supermarket.isApproved,
+            ).length,
+          },
+          recentOrders,
+          statusLabels: ORDER_STATUS_LABELS,
+          deliveryLabels: DELIVERY_METHOD_LABELS,
+        });
+      }
+
+      const availableDeliveries = await Order.countDocuments({
+        metodoEntrega: "estafeta",
+        estado: "em_preparacao",
+        estafeta: null,
+      });
+      const activeDeliveries = await Order.countDocuments({
+        metodoEntrega: "estafeta",
+        estado: "em_entrega",
+        estafeta: req.session.userId,
+      });
+      const deliveredCount = await Order.countDocuments({
+        metodoEntrega: "estafeta",
+        estado: "entregue",
+        estafeta: req.session.userId,
+      });
+      const recentOrders = await Order.find({
+        metodoEntrega: "estafeta",
+        $or: [
+          { estado: "em_preparacao", estafeta: null },
+          { estafeta: req.session.userId },
+        ],
+      })
+        .populate("cliente", "name")
+        .populate("supermercado", "name")
+        .sort({ createdAt: -1 })
+        .limit(6);
+
+      return res.render("dashboard", {
+        role: req.session.role,
+        supermarkets: [],
+        summary: {
+          availableDeliveries,
+          activeDeliveries,
+          deliveredCount,
+        },
+        recentOrders,
+        statusLabels: ORDER_STATUS_LABELS,
+        deliveryLabels: DELIVERY_METHOD_LABELS,
+      });
+    } catch (error) {
+      console.error("Erro ao carregar dashboard:", error);
+      return res.status(500).send("Erro ao carregar dashboard.");
+    }
   },
 );
 
@@ -103,7 +216,11 @@ router.get("/:id", requireAuth, async (req, res) => {
     if (!supermarket)
       return res.status(404).send("Supermercado não encontrado!");
 
-    res.render("supermarkets/show", { supermarket });
+    res.render("supermarkets/show", {
+      supermarket,
+      userRole: req.session.role,
+      userId: req.session.userId,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Erro ao carregar o supermercado!");

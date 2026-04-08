@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
+  <title>Dashboard de Supermercado</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -11,17 +11,17 @@
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
       <div>
         <% if (role === "supermercado") { %>
-          <h1 class="mb-1">Dashboard operacional</h1>
+          <h1 class="mb-1">Dashboard</h1>
           <p class="text-muted mb-0">Resumo de vendas, encomendas e supermercados geridos.</p>
         <% } else { %>
           <h1 class="mb-1">Dashboard de estafeta</h1>
-          <p class="text-muted mb-0">Resumo das entregas disponiveis e das tuas entregas.</p>
+          <p class="text-muted mb-0">Resumo das entregas disponíveis e das suas entregas.</p>
         <% } %>
       </div>
       <div class="d-flex flex-wrap gap-2">
         <a href="/orders" class="btn btn-primary"><%= role === "supermercado" ? "Ver encomendas" : "Ver entregas" %></a>
         <a href="/supermarket/list" class="btn btn-outline-secondary">Supermercados</a>
-        <a href="/users/logout" class="btn btn-danger">Terminar sessao</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar sessão</a>
       </div>
     </div>
 
@@ -55,7 +55,7 @@
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
               <div class="text-muted small">Total vendido</div>
-              <div class="display-6 fw-bold">EUR <%= Number(summary.totalRevenue).toFixed(2) %></div>
+              <div class="display-6 fw-bold">€  <%= Number(summary.totalRevenue).toFixed(2) %></div>
             </div>
           </div>
         </div>
@@ -64,12 +64,12 @@
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h4 mb-0">Supermercados geridos</h2>
-            <a href="/supermarket/new" class="btn btn-outline-primary btn-sm">Novo supermercado</a>
+            <h2 class="h4 mb-0">Supermercados registados</h2>
+            <a href="/supermarket/new" class="btn btn-outline-primary btn-sm">Adicionar novo supermercado</a>
           </div>
 
           <% if (!supermarkets.length) { %>
-            <div class="alert alert-info mb-0">Ainda nao tens supermercados registados.</div>
+            <div class="alert alert-info mb-0">Ainda não tem supermercados registados!</div>
           <% } else { %>
             <div class="table-responsive">
               <table class="table align-middle">
@@ -78,7 +78,7 @@
                     <th>Nome</th>
                     <th>Estado</th>
                     <th>Entrega</th>
-                    <th class="text-end">Acoes</th>
+                    <th class="text-end">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -89,8 +89,8 @@
                         <div class="small text-muted"><%= supermarket.location %></div>
                       </td>
                       <td>
-                        <span class="badge <%= supermarket.isApproved ? 'bg-success' : 'bg-warning text-dark' %>">
-                          <%= supermarket.isApproved ? 'Aprovado' : 'Pendente' %>
+                        <span class="badge <%= !supermarket.toApprove ? 'bg-warning text-dark' : supermarket.isApproved ? 'bg-success' : 'bg-danger' %>">
+                          <%= !supermarket.toApprove ? 'Pendente' : supermarket.isApproved ? 'Aprovado' : 'Rejeitado' %>
                         </span>
                       </td>
                       <td>
@@ -118,7 +118,7 @@
         <div class="col-md-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-              <div class="text-muted small">Entregas disponiveis</div>
+              <div class="text-muted small">Entregas disponíveis</div>
               <div class="display-6 fw-bold"><%= summary.availableDeliveries %></div>
             </div>
           </div>
@@ -134,7 +134,7 @@
         <div class="col-md-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-              <div class="text-muted small">Entregas concluidas</div>
+              <div class="text-muted small">Entregas concluídas</div>
               <div class="display-6 fw-bold"><%= summary.deliveredCount %></div>
             </div>
           </div>
@@ -145,12 +145,12 @@
     <div class="card border-0 shadow-sm">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="h4 mb-0"><%= role === "supermercado" ? "Ultimas encomendas" : "Ultimas entregas" %></h2>
+          <h2 class="h4 mb-0"><%= role === "supermercado" ? "Últimas encomendas" : "Últimas entregas" %></h2>
           <a href="/orders" class="btn btn-outline-primary btn-sm">Abrir listagem</a>
         </div>
 
         <% if (!recentOrders.length) { %>
-          <div class="alert alert-info mb-0">Ainda nao ha registos para mostrar.</div>
+          <div class="alert alert-info mb-0">Ainda não há registos para mostrar!</div>
         <% } else { %>
           <div class="table-responsive">
             <table class="table align-middle">
@@ -161,7 +161,7 @@
                   <th>Cliente</th>
                   <th>Estado</th>
                   <th>Total</th>
-                  <th class="text-end">Acoes</th>
+                  <th class="text-end">Ações</th>
                 </tr>
               </thead>
               <tbody>

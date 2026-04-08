@@ -25,7 +25,7 @@
 
     <% if (!products.length) { %>
       <div class="alert alert-warning">
-        Ainda nao existem produtos neste supermercado. Cria primeiro os produtos para poderes registar vendas.
+        Ainda não existem produtos neste supermercado. Crie primeiro os produtos para poder registar vendas!
       </div>
     <% } else { %>
       <form action="/orders/create/<%= supermarket._id %>" method="POST">
@@ -57,7 +57,7 @@
 
                 <h2 class="h4 mb-3">Entrega</h2>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Metodo de entrega</label>
+                  <label class="form-label fw-semibold">Método de entrega</label>
                   <select name="metodoEntrega" class="form-select" required>
                     <% supermarket.deliveryMethods.forEach((method) => { %>
                       <option value="<%= method %>" <%= deliveryMethod === method ? "selected" : "" %>>
@@ -88,7 +88,7 @@
                       <tr>
                         <th>Selecionar</th>
                         <th>Produto</th>
-                        <th>Preco</th>
+                        <th>Preço</th>
                         <th>Stock</th>
                         <th>Quantidade</th>
                       </tr>

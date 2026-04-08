@@ -16,16 +16,16 @@
 
       <div class="d-flex flex-wrap gap-2">
         <% if (userRole === "admin") { %>
-          <a href="/admin/dashboard" class="btn btn-outline-primary">Dashboard admin</a>
+          <a href="/admin/dashboard" class="btn btn-outline-primary">Voltar ao Dashboard</a>
         <% } %>
         <% if (userRole === "supermercado" || userRole === "estafeta") { %>
-          <a href="/supermarket/dashboard" class="btn btn-outline-primary">Dashboard operacional</a>
+          <a href="/supermarket/dashboard" class="btn btn-outline-primary">Voltar ao Dashboard</a>
         <% } %>
-        <% if (userRole === "supermercado" || userRole === "admin") { %>
+        <% if (userRole === "supermercado") { %>
           <a href="/supermarket/new" class="btn btn-primary">Criar novo supermercado</a>
         <% } %>
         <% if (userRole) { %>
-          <a href="/users/logout" class="btn btn-danger">Terminar sessao</a>
+          <a href="/users/logout" class="btn btn-danger">Terminar sessão</a>
         <% } %>
       </div>
     </div>
@@ -37,9 +37,9 @@
             <thead class="table-light">
               <tr>
                 <th>Nome</th>
-                <th>Localizacao</th>
+                <th>Localização</th>
                 <th>Estado</th>
-                <th class="text-end">Acoes</th>
+                <th class="text-end">Ações</th>
               </tr>
             </thead>
             <tbody>

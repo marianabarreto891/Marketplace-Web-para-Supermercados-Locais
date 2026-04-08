@@ -47,7 +47,7 @@
                 <div class="fw-semibold"><%= order.supermercado.name %></div>
               </div>
               <div class="col-md-6">
-                <div class="small text-muted">Metodo de entrega</div>
+                <div class="small text-muted">Método de entrega</div>
                 <div class="fw-semibold"><%= deliveryLabels[order.metodoEntrega] %></div>
               </div>
               <div class="col-md-6">
@@ -84,7 +84,7 @@
                   <tr>
                     <th>Produto</th>
                     <th>Quantidade</th>
-                    <th>Preco unitario</th>
+                    <th>Preço unitário</th>
                     <th>Subtotal</th>
                   </tr>
                 </thead>
@@ -122,7 +122,7 @@
       <div class="col-lg-4">
         <div class="card shadow-sm border-0">
           <div class="card-body">
-            <h2 class="h4 mb-3">Operacoes</h2>
+            <h2 class="h4 mb-3">Operações</h2>
 
             <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta) { %>
               <form action="/orders/<%= order._id %>/claim" method="POST" class="mb-3">
@@ -145,7 +145,7 @@
               </div>
             <% } else { %>
               <div class="alert alert-secondary mb-0">
-                Nao ha transicoes disponiveis para o teu perfil neste estado.
+                Não há transições disponíveis para o seu perfil neste estado.
               </div>
             <% } %>
           </div>

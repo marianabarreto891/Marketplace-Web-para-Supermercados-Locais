@@ -44,14 +44,14 @@
           <a href="/supermarket/<%= supermarket._id %>/products/new" class="btn btn-success">Adicionar produto</a>
         </div>
       <% } else { %>
-        <div class="alert alert-danger">Supermercado nao aprovado. Nao pode gerir produtos nem operar vendas.</div>
+        <div class="alert alert-danger">Supermercado não aprovado. Não pode gerir produtos nem operar vendas!</div>
       <% } %>
     <% } %>
 
     <div class="card shadow-sm border-0">
       <div class="card-body">
         <% if (!products.length) { %>
-          <div class="alert alert-info mb-0">Nao existem produtos para mostrar.</div>
+          <div class="alert alert-info mb-0">Não existem produtos para mostrar!</div>
         <% } else { %>
           <div class="table-responsive">
             <table class="table align-middle">
@@ -61,7 +61,7 @@
                   <th>Categoria</th>
                   <th>Preco</th>
                   <th>Stock</th>
-                  <th class="text-end">Acoes</th>
+                  <th class="text-end">Ações</th>
                 </tr>
               </thead>
               <tbody>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista de Supermercados</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+  <link rel="stylesheet" href="/style.css"> </head>
 <body class="bg-light">
   <div class="container py-5">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
@@ -58,7 +58,11 @@
 
                       <% if (userRole === "admin" || (userRole === "supermercado" && supermarket.manager && supermarket.manager._id.toString() === userId)) { %>
                         <a href="/supermarket/<%= supermarket._id %>/edit" class="btn btn-sm btn-warning">Editar</a>
-                        <a href="/orders?supermarketId=<%= supermarket._id %>" class="btn btn-sm btn-outline-dark">Encomendas</a>
+                        
+                        <% if (supermarket.isApproved) { %>
+                          <a href="/orders?supermarketId=<%= supermarket._id %>" class="btn btn-sm btn-outline-dark">Encomendas</a>
+                        <% } %>
+                        
                       <% } %>
                     </div>
                   </td>

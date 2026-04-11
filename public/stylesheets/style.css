@@ -1,8 +1,14 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: #f8f9fa;
 }
 
-a {
-  color: #00B7FF;
+.title-container {
+  padding: 4rem 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+  text-align: center;
+}
+
+.action-buttons-container {
+  padding-top: 1.5rem;
 }

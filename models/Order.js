@@ -49,7 +49,7 @@ const orderSchema = new mongoose.Schema(
         validator: function (value) {
           return Array.isArray(value) && value.length > 0;
         },
-        message: "A encomenda deve ter pelo menos um item."
+        message: "A encomenda deve ter pelo menos um produto."
       }
     },
     total: {

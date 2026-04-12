@@ -94,6 +94,8 @@ function buildFormData(body, rawItems) {
   });
 
   return {
+    customerType: normalizeText(body.customerType || "novo"), // NOVO
+    existingCustomerId: normalizeText(body.existingCustomerId), // NOVO
     customer: {
       name: normalizeText(body.name),
       email: normalizeEmail(body.email),
@@ -109,13 +111,17 @@ function buildFormData(body, rawItems) {
 function buildCreateViewModel(
   supermarket,
   products,
+  customers, // NOVO PARÂMETRO AQUI
   formData = {},
   errorMessage = null,
 ) {
   return {
     supermarket,
     products,
+    customers, // PASSAR PARA O EJS
     errorMessage,
+    customerType: formData.customerType || "novo",
+    existingCustomerId: formData.existingCustomerId || "",
     customer: formData.customer || {},
     quantities: formData.quantities || {},
     selectedProductIds: formData.selectedProductIds || [],
@@ -138,11 +144,19 @@ async function renderCreatePage(
     name: 1,
   });
 
+  const customers = await User.find({ role: "cliente" }).sort({ name: 1 });
+
   return res
     .status(statusCode)
     .render(
       "orders/create",
-      buildCreateViewModel(supermarket, products, formData, errorMessage),
+      buildCreateViewModel(
+        supermarket,
+        products,
+        customers,
+        formData,
+        errorMessage,
+      ),
     );
 }
 
@@ -511,7 +525,21 @@ router.post(
       let customer;
 
       try {
-        customer = await findOrCreateCustomer(formData.customer);
+        // LÓGICA NOVA: Verificar que tipo de cliente o operador escolheu
+        if (formData.customerType === "existente") {
+          if (!formData.existingCustomerId) {
+            throw new Error("Selecione um cliente existente na lista.");
+          }
+
+          customer = await User.findById(formData.existingCustomerId);
+
+          if (!customer || customer.role !== "cliente") {
+            throw new Error("O cliente selecionado não é válido.");
+          }
+        } else {
+          // Mantém a lógica original para clientes novos
+          customer = await findOrCreateCustomer(formData.customer);
+        }
       } catch (customerError) {
         return renderCreatePage(
           res,
@@ -683,7 +711,10 @@ router.post("/:id/claim", requireRole(["estafeta"]), async function (req, res) {
         );
     }
 
-    if (order.estafeta && String(order.estafeta) !== String(req.session.userId)) {
+    if (
+      order.estafeta &&
+      String(order.estafeta) !== String(req.session.userId)
+    ) {
       return res
         .status(403)
         .send("Esta entrega ja foi aceite por outro estafeta.");

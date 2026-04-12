@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nova Venda</title>
+  <link rel="stylesheet" href="/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -26,7 +27,7 @@
 
     <% if (!products.length) { %>
       <div class="alert alert-warning">
-        Ainda não existem produtos neste supermercado. Crie primeiro os produtos para poder registar vendas!
+        Ainda nao existem produtos neste supermercado. Crie primeiro os produtos para poder registar vendas.
       </div>
     <% } else { %>
     
@@ -34,9 +35,30 @@
         
         <div class="card shadow-sm border-0 mb-4">
           <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h2 class="h4 mb-0">Produtos</h2>
-              <span class="badge bg-secondary"><%= products.length %> disponíveis</span>
+            
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
+              <div>
+                <h2 class="h4 mb-1">Produtos</h2>
+                <p class="text-muted mb-0">Pesquise para filtrar a lista e registar a venda mais depressa.</p>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary" id="visibleProductsCounter"><%= products.length %> visíveis</span>
+                <span class="badge bg-dark"><%= products.length %> disponíveis</span>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-8">
+                <label class="form-label fw-semibold" for="productSearch">Pesquisar produto</label>
+                <input type="text" id="productSearch" class="form-control" placeholder="Nome ou descricao do produto">
+              </div>
+              <div class="col-md-4 d-flex align-items-end">
+                <button type="button" id="clearProductSearch" class="btn btn-outline-secondary w-100">Limpar pesquisa</button>
+              </div>
+            </div>
+
+            <div class="alert alert-info d-none" id="noProductsMatch">
+              Não existem produtos a corresponder a esta pesquisa.
             </div>
 
             <div class="table-responsive">
@@ -56,7 +78,12 @@
                     <% const selected = selectedProductIds.includes(productId); %>
                     <% const quantity = quantities[productId] || 1; %>
                     <% const outOfStock = product.stock <= 0; %>
-                    <tr class="<%= outOfStock ? 'table-secondary' : '' %>">
+                    
+                    <tr 
+                      data-product-row
+                      data-search="<%= [product.name, product.description || ''].join(' ').toLowerCase() %>"
+                      class="<%= outOfStock ? 'table-secondary' : '' %>">
+                      
                       <td>
                         <input class="form-check-input" type="checkbox" name="items[<%= index %>][selected]" value="1" <%= selected ? "checked" : "" %> <%= outOfStock ? "disabled" : "" %>>
                         <input type="hidden" name="items[<%= index %>][productId]" value="<%= productId %>">
@@ -102,73 +129,73 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               
-             <div class="modal-body">
-  <div class="row g-4">
-    <div class="col-md-6">
-      <h6 class="mb-3 text-primary">Informação do Cliente</h6>
-      
-      <div class="mb-4 d-flex justify-content-center">
-        <div class="btn-group" role="group">
-          <input type="radio" class="btn-check" name="customerType" id="btnNovo" value="novo" checked onchange="toggleCliente()">
-          <label class="btn btn-outline-primary" for="btnNovo">Cliente Novo</label>
+              <div class="modal-body">
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <h6 class="mb-3 text-primary">Informação do Cliente</h6>
+                    
+                    <div class="mb-4 d-flex justify-content-center">
+                      <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="customerType" id="btnNew" value="novo" checked onchange="toggleCustomer()">
+                        <label class="btn btn-outline-primary" for="btnNew">Cliente Novo</label>
 
-          <input type="radio" class="btn-check" name="customerType" id="btnExistente" value="existente" onchange="toggleCliente()">
-          <label class="btn btn-outline-primary" for="btnExistente">Cliente Existente</label>
-        </div>
-      </div>
+                        <input type="radio" class="btn-check" name="customerType" id="btnExisting" value="existente" onchange="toggleCustomer()">
+                        <label class="btn btn-outline-primary" for="btnExisting">Cliente Existente</label>
+                      </div>
+                    </div>
 
-      <div id="zonaClienteNovo">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Nome</label>
-          <input type="text" name="name" id="inputName" class="form-control" required value="<%= customer ? customer.name : '' %>">
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Email</label>
-          <input type="email" name="email" id="inputEmail" class="form-control" required value="<%= customer ? customer.email : '' %>">
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Morada</label>
-          <input type="text" name="address" id="inputAddress" class="form-control" required value="<%= customer ? customer.address : '' %>">
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Telefone</label>
-          <input type="text" name="phone" id="inputPhone" class="form-control" required value="<%= customer ? customer.phone : '' %>">
-        </div>
-      </div>
+                    <div id="newCustomerZone">
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Nome</label>
+                        <input type="text" name="name" id="inputName" class="form-control" required value="<%= customer ? customer.name : '' %>">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" name="email" id="inputEmail" class="form-control" required value="<%= customer ? customer.email : '' %>">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Morada</label>
+                        <input type="text" name="address" id="inputAddress" class="form-control" required value="<%= customer ? customer.address : '' %>">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Telefone</label>
+                        <input type="text" name="phone" id="inputPhone" class="form-control" required value="<%= customer ? customer.phone : '' %>">
+                      </div>
+                    </div>
 
-      <div id="zonaClienteExistente" class="d-none">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Pesquisar Cliente</label>
-          <select name="existingCustomerId" id="selectExistingCustomer" class="form-select">
-            <option value="">Selecione um cliente...</option>
-            <% if (typeof customers !== 'undefined') { %>
-              <% customers.forEach(c => { %>
-                <option value="<%= c._id %>"><%= c.name %> (<%= c.phone %>)</option>
-              <% }) %>
-            <% } %>
-          </select>
-        </div>
-      </div>
-    </div>
+                    <div id="existingCustomerZone" class="d-none">
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold">Pesquisar Cliente</label>
+                        <select name="existingCustomerId" id="selectExistingCustomer" class="form-select">
+                          <option value="">Selecione um cliente...</option>
+                          <% if (typeof customers !== 'undefined') { %>
+                            <% customers.forEach(c => { %>
+                              <option value="<%= c._id %>"><%= c.name %> (<%= c.phone %>)</option>
+                            <% }) %>
+                          <% } %>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
 
-    <div class="col-md-6">
-      <h6 class="mb-3 text-primary">Detalhes da Entrega</h6>
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Método de entrega</label>
-        <select name="metodoEntrega" class="form-select" required>
-          <% supermarket.deliveryMethods.forEach((method) => { %>
-            <option value="<%= method %>" <%= (typeof deliveryMethod !== 'undefined' && deliveryMethod === method) ? "selected" : "" %>>
-              <%= deliveryLabels[method] %>
-            </option>
-          <% }) %>
-        </select>
-      </div>
-      <div class="alert alert-info small">
-        Custo de entrega por estafeta: <strong>EUR <%= Number(supermarket.deliveryCost || 0).toFixed(2) %></strong>
-      </div>
-    </div>
-  </div>
-</div>
+                  <div class="col-md-6">
+                    <h6 class="mb-3 text-primary">Detalhes da Entrega</h6>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Método de entrega</label>
+                      <select name="metodoEntrega" class="form-select" required>
+                        <% supermarket.deliveryMethods.forEach((method) => { %>
+                          <option value="<%= method %>" <%= (typeof deliveryMethod !== 'undefined' && deliveryMethod === method) ? "selected" : "" %>>
+                            <%= deliveryLabels[method] %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+                    <div class="alert alert-info small">
+                      Custo de entrega por estafeta: <strong>EUR <%= Number(supermarket.deliveryCost || 0).toFixed(2) %></strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               <div class="modal-footer d-flex justify-content-between">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar aos produtos</button>
@@ -178,43 +205,83 @@
             </div>
           </div>
         </div>
-        </form>
+      </form>
     <% } %>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    (function () {
+      const searchInput = document.getElementById("productSearch");
+      const clearButton = document.getElementById("clearProductSearch");
+      const counter = document.getElementById("visibleProductsCounter");
+      const emptyState = document.getElementById("noProductsMatch");
+      const rows = Array.from(document.querySelectorAll("[data-product-row]"));
+
+      if (!searchInput || !counter || !rows.length) {
+        return;
+      }
+
+      function updateVisibleRows() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        rows.forEach((row) => {
+          const matches = !query || row.dataset.search.includes(query);
+          row.classList.toggle("d-none", !matches);
+
+          if (matches) {
+            visibleCount += 1;
+          }
+        });
+
+        counter.textContent = visibleCount + " visíveis";
+
+        if (emptyState) {
+          emptyState.classList.toggle("d-none", visibleCount === 0);
+        }
+      }
+
+      searchInput.addEventListener("input", updateVisibleRows);
+
+      if (clearButton) {
+        clearButton.addEventListener("click", function () {
+          searchInput.value = "";
+          updateVisibleRows();
+          searchInput.focus();
+        });
+      }
+
+      updateVisibleRows();
+    })();
+  </script>
+
+  <script>
+    function toggleCustomer() {
+      const selectedType = document.querySelector('input[name="customerType"]:checked').value;
+      
+      const newCustomerZone = document.getElementById('newCustomerZone');
+      const existingCustomerZone = document.getElementById('existingCustomerZone');
+      
+      const newInputs = newCustomerZone.querySelectorAll('input');
+      const existingSelect = document.getElementById('selectExistingCustomer');
+
+      if (selectedType === 'novo') {
+        newCustomerZone.classList.remove('d-none');
+        existingCustomerZone.classList.add('d-none');
+        
+        newInputs.forEach(input => input.setAttribute('required', 'true'));
+        existingSelect.removeAttribute('required');
+        
+      } else {
+        existingCustomerZone.classList.remove('d-none');
+        newCustomerZone.classList.add('d-none');
+        
+        newInputs.forEach(input => input.removeAttribute('required'));
+        existingSelect.setAttribute('required', 'true');
+      }
+    }
+  </script>
 </body>
 </html>
-
-<script>
-  function toggleCliente() {
-    // Descobre qual é a opção que está selecionada (novo ou existente)
-    const tipoSelecionado = document.querySelector('input[name="customerType"]:checked').value;
-    
-    const divNovo = document.getElementById('zonaClienteNovo');
-    const divExistente = document.getElementById('zonaClienteExistente');
-    
-    // Inputs
-    const inputsNovo = divNovo.querySelectorAll('input');
-    const selectExistente = document.getElementById('selectExistingCustomer');
-
-    if (tipoSelecionado === 'novo') {
-      // Mostra formulário novo, esconde o existente
-      divNovo.classList.remove('d-none');
-      divExistente.classList.add('d-none');
-      
-      // Torna os campos novos obrigatórios e o select opcional
-      inputsNovo.forEach(input => input.setAttribute('required', 'true'));
-      selectExistente.removeAttribute('required');
-      
-    } else {
-      // Mostra formulário existente, esconde o novo
-      divExistente.classList.remove('d-none');
-      divNovo.classList.add('d-none');
-      
-      // Torna os campos novos opcionais e o select obrigatório
-      inputsNovo.forEach(input => input.removeAttribute('required'));
-      selectExistente.setAttribute('required', 'true');
-    }
-  }
-</script>

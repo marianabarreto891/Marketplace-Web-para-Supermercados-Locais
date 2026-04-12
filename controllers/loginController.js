@@ -2,7 +2,7 @@ const user = require("../models/User");
 const bcrypt = require("bcrypt");
 
 exports.loginUser = async (req, res) => {
-  const loginValue = String(req.body.email || "").trim();
+  const loginValue = String(req.body.email || req.body.username || "").trim();
   const normalizedEmail = loginValue.toLowerCase();
   const { password } = req.body;
   try {

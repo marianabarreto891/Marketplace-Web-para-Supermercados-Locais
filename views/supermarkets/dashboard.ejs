@@ -3,39 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard de Supermercado</title>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
+  <%
+    const statusClasses = {
+      pendente: "bg-secondary",
+      confirmada: "bg-primary",
+      em_preparacao: "bg-warning text-dark",
+      em_entrega: "bg-info text-dark",
+      entregue: "bg-success",
+      cancelada: "bg-danger",
+    };
+  %>
+
   <div class="container py-5">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
       <div>
         <% if (role === "supermercado") { %>
-          <h1 class="mb-1">Dashboard</h1>
-          <p class="text-muted mb-0">Resumo de vendas, encomendas e supermercados geridos.</p>
+          <h1 class="mb-1">Dashboard do supermercado</h1>
+          <p class="text-muted mb-0">Resumo de encomendas, vendas e produtos mais vendidos.</p>
         <% } else { %>
-          <h1 class="mb-1">Dashboard de estafeta</h1>
-          <p class="text-muted mb-0">Resumo das entregas disponíveis e das suas entregas.</p>
+          <h1 class="mb-1">Dashboard do estafeta</h1>
+          <p class="text-muted mb-0">Resumo das entregas, disponibilidades e supermercados com mais entregas.</p>
         <% } %>
       </div>
       <div class="d-flex flex-wrap gap-2">
         <a href="/orders" class="btn btn-primary"><%= role === "supermercado" ? "Ver encomendas" : "Ver entregas" %></a>
         <a href="/supermarket/list" class="btn btn-outline-secondary">Supermercados</a>
-        <a href="/users/logout" class="btn btn-danger">Terminar sessão</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar sessao</a>
       </div>
     </div>
 
     <% if (role === "supermercado") { %>
       <div class="row g-4 mb-4">
-        <div class="col-md-3">
+        <div class="col-md-6 col-xl-3">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-              <div class="text-muted small">Total de vendas</div>
+              <div class="text-muted small">Numero de encomendas</div>
               <div class="display-6 fw-bold"><%= summary.totalOrders %></div>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6 col-xl-3">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
               <div class="text-muted small">Encomendas ativas</div>
@@ -43,87 +55,135 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6 col-xl-3">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-              <div class="text-muted small">Supermercados aprovados</div>
-              <div class="display-6 fw-bold"><%= summary.approvedSupermarkets %></div>
+              <div class="text-muted small">Produtos vendidos</div>
+              <div class="display-6 fw-bold"><%= summary.totalUnitsSold %></div>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6 col-xl-3">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
               <div class="text-muted small">Total vendido</div>
-              <div class="display-6 fw-bold">€  <%= Number(summary.totalRevenue).toFixed(2) %></div>
+              <div class="display-6 fw-bold">EUR <%= Number(summary.totalRevenue).toFixed(2) %></div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h4 mb-0">Supermercados registados</h2>
-            <a href="/supermarket/new" class="btn btn-outline-primary btn-sm">Adicionar novo supermercado</a>
-          </div>
+      <div class="row g-4 mb-4">
+        <div class="col-xl-7">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Produtos mais vendidos</h2>
+                <span class="badge bg-secondary"><%= topProducts.length %> em destaque</span>
+              </div>
 
-          <% if (!supermarkets.length) { %>
-            <div class="alert alert-info mb-0">Ainda não tem supermercados registados!</div>
-          <% } else { %>
-            <div class="table-responsive">
-              <table class="table align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th>Nome</th>
-                    <th>Estado</th>
-                    <th>Entrega</th>
-                    <th class="text-end">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% supermarkets.forEach((supermarket) => { %>
-                    <tr>
-                      <td>
-                        <div class="fw-semibold"><%= supermarket.name %></div>
-                        <div class="small text-muted"><%= supermarket.location %></div>
-                      </td>
-                      <td>
-                        <span class="badge <%= !supermarket.toApprove ? 'bg-warning text-dark' : supermarket.isApproved ? 'bg-success' : 'bg-danger' %>">
-                          <%= !supermarket.toApprove ? 'Pendente' : supermarket.isApproved ? 'Aprovado' : 'Rejeitado' %>
-                        </span>
-                      </td>
-                      <td>
-                        <%= supermarket.deliveryMethods.map((method) => deliveryLabels[method]).join(", ") %>
-                      </td>
-                      <td class="text-end">
-                        <div class="d-flex justify-content-end flex-wrap gap-2">
-                          <a href="/supermarket/<%= supermarket._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
-                          <a href="/orders?supermarketId=<%= supermarket._id %>" class="btn btn-sm btn-outline-primary">Encomendas</a>
-                          <% if (supermarket.isApproved) { %>
-                            <a href="/orders/create/<%= supermarket._id %>" class="btn btn-sm btn-primary">Nova venda</a>
-                          <% } %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
+              <% if (!topProducts.length) { %>
+                <div class="alert alert-info mb-0">Ainda nao ha vendas suficientes para mostrar produtos mais vendidos.</div>
+              <% } else { %>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Produto</th>
+                        <th>Unidades</th>
+                        <th>Encomendas</th>
+                        <th>Receita</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% topProducts.forEach((product) => { %>
+                        <tr>
+                          <td class="fw-semibold"><%= product.name %></td>
+                          <td><%= product.unitsSold %></td>
+                          <td><%= product.ordersCount %></td>
+                          <td>EUR <%= Number(product.revenue).toFixed(2) %></td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
             </div>
-          <% } %>
+          </div>
+        </div>
+
+        <div class="col-xl-5">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Supermercados geridos</h2>
+                <a href="/supermarket/new" class="btn btn-outline-primary btn-sm">Adicionar</a>
+              </div>
+
+              <% if (!supermarkets.length) { %>
+                <div class="alert alert-info mb-0">Ainda nao tem supermercados registados.</div>
+              <% } else { %>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Nome</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acoes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% supermarkets.forEach((supermarket) => { %>
+                        <tr>
+                          <td>
+                            <div class="fw-semibold"><%= supermarket.name %></div>
+                            <div class="small text-muted"><%= supermarket.location %></div>
+                          </td>
+                          <td>
+                            <span class="badge <%= !supermarket.toApprove ? 'bg-warning text-dark' : supermarket.isApproved ? 'bg-success' : 'bg-danger' %>">
+                              <%= !supermarket.toApprove ? 'Pendente' : supermarket.isApproved ? 'Aprovado' : 'Rejeitado' %>
+                            </span>
+                          </td>
+                          <td class="text-end">
+                            <a href="/supermarket/<%= supermarket._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
+            </div>
+          </div>
         </div>
       </div>
     <% } else { %>
       <div class="row g-4 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-6 col-xl-3">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-              <div class="text-muted small">Entregas disponíveis</div>
+              <div class="text-muted small">Numero de entregas</div>
+              <div class="display-6 fw-bold"><%= summary.totalDeliveries %></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="text-muted small">A aguardar preparacao</div>
+              <div class="display-6 fw-bold"><%= summary.pendingPreparation %></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="text-muted small">Disponiveis para aceitar</div>
               <div class="display-6 fw-bold"><%= summary.availableDeliveries %></div>
             </div>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6 col-xl-3">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
               <div class="text-muted small">Entregas em curso</div>
@@ -131,12 +191,49 @@
             </div>
           </div>
         </div>
-        <div class="col-md-4">
+      </div>
+
+      <div class="row g-4 mb-4">
+        <div class="col-xl-5">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-              <div class="text-muted small">Entregas concluídas</div>
-              <div class="display-6 fw-bold"><%= summary.deliveredCount %></div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Supermercados com mais entregas</h2>
+                <span class="badge bg-secondary"><%= topSupermarkets.length %> em destaque</span>
+              </div>
+
+              <% if (!topSupermarkets.length) { %>
+                <div class="alert alert-info mb-0">Ainda nao existem entregas concluidas ou em curso para calcular este ranking.</div>
+              <% } else { %>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Supermercado</th>
+                        <th>Entregas</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% topSupermarkets.forEach((supermarket) => { %>
+                        <tr>
+                          <td>
+                            <div class="fw-semibold"><%= supermarket.name || 'Supermercado removido' %></div>
+                            <div class="small text-muted"><%= supermarket.location || '-' %></div>
+                          </td>
+                          <td><%= supermarket.deliveries %></td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
             </div>
+          </div>
+        </div>
+
+        <div class="col-xl-7">
+          <div class="alert alert-info shadow-sm border-0 mb-0">
+            As encomendas com entrega por estafeta aparecem aqui logo apos serem confirmadas. Enquanto estiverem em <strong>Confirmada</strong>, o supermercado ainda esta a preparar o pedido. O botao de aceitar fica disponivel quando a encomenda passar para <strong>Em preparacao</strong>.
           </div>
         </div>
       </div>
@@ -145,12 +242,12 @@
     <div class="card border-0 shadow-sm">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="h4 mb-0"><%= role === "supermercado" ? "Últimas encomendas" : "Últimas entregas" %></h2>
+          <h2 class="h4 mb-0"><%= role === "supermercado" ? "Ultimas encomendas" : "Ultimas entregas e pedidos disponiveis" %></h2>
           <a href="/orders" class="btn btn-outline-primary btn-sm">Abrir listagem</a>
         </div>
 
         <% if (!recentOrders.length) { %>
-          <div class="alert alert-info mb-0">Ainda não há registos para mostrar!</div>
+          <div class="alert alert-info mb-0">Ainda nao ha registos para mostrar.</div>
         <% } else { %>
           <div class="table-responsive">
             <table class="table align-middle">
@@ -159,9 +256,15 @@
                   <th>Data</th>
                   <th>Supermercado</th>
                   <th>Cliente</th>
+                  <th>Entrega</th>
                   <th>Estado</th>
+                  <% if (role === "supermercado") { %>
+                    <th>Estafeta</th>
+                  <% } else { %>
+                    <th>Disponibilidade</th>
+                  <% } %>
                   <th>Total</th>
-                  <th class="text-end">Ações</th>
+                  <th class="text-end">Acoes</th>
                 </tr>
               </thead>
               <tbody>
@@ -170,10 +273,35 @@
                     <td><%= new Date(order.createdAt).toLocaleString("pt-PT") %></td>
                     <td><%= order.supermercado ? order.supermercado.name : "-" %></td>
                     <td><%= order.cliente ? order.cliente.name : "-" %></td>
-                    <td><%= statusLabels[order.estado] %></td>
+                    <td><%= deliveryLabels[order.metodoEntrega] %></td>
+                    <td>
+                      <span class="badge <%= statusClasses[order.estado] %>"><%= statusLabels[order.estado] %></span>
+                    </td>
+                    <% if (role === "supermercado") { %>
+                      <td><%= order.estafeta ? order.estafeta.name : "-" %></td>
+                    <% } else { %>
+                      <td>
+                        <% if (order.estafeta && order.estafeta.name) { %>
+                          <span class="small text-muted">Atribuida a <%= order.estafeta.name %></span>
+                        <% } else if (order.estado === "em_preparacao") { %>
+                          <span class="badge bg-success-subtle text-success">Pode aceitar</span>
+                        <% } else if (order.estado === "confirmada") { %>
+                          <span class="small text-muted">A aguardar preparacao</span>
+                        <% } else { %>
+                          <span class="small text-muted">Sem acao</span>
+                        <% } %>
+                      </td>
+                    <% } %>
                     <td>EUR <%= Number(order.total).toFixed(2) %></td>
                     <td class="text-end">
-                      <a href="/orders/<%= order._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
+                      <div class="d-flex justify-content-end gap-2 flex-wrap">
+                        <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta) { %>
+                          <form action="/orders/<%= order._id %>/claim" method="POST">
+                            <button type="submit" class="btn btn-sm btn-primary">Aceitar</button>
+                          </form>
+                        <% } %>
+                        <a href="/orders/<%= order._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
+                      </div>
                     </td>
                   </tr>
                 <% }) %>

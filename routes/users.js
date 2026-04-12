@@ -3,6 +3,14 @@ var router = express.Router();
 const User = require("../models/User");
 const loginController = require("../controllers/loginController");
 
+function normalizeText(value) {
+  return String(value || "").trim();
+}
+
+function normalizeEmail(value) {
+  return normalizeText(value).toLowerCase();
+}
+
 router.post("/login", loginController.loginUser);
 
 /* GET: Mostrar formulário de login */
@@ -20,7 +28,27 @@ router.get("/register", function (req, res) {
 /* POST: Processar o registo de um novo utilizador */
 router.post("/register", async function (req, res) {
   try {
-    const newUser = new User(req.body);
+    const baseAddress = normalizeText(req.body.address || req.body.morada);
+    const postalCode = normalizeText(
+      req.body.postalCode || req.body.codigoPostal,
+    );
+    const city = normalizeText(req.body.city || req.body.localidade);
+    const phone = normalizeText(
+      req.body.phone || req.body.telephone || req.body.telefone,
+    );
+    const address = [baseAddress, [postalCode, city].filter(Boolean).join(" ")]
+      .filter(Boolean)
+      .join(", ");
+
+    const newUser = new User({
+      name: normalizeText(req.body.name || req.body.nome),
+      email: normalizeEmail(req.body.email),
+      password: req.body.password,
+      address,
+      phone,
+      telephone: phone,
+      role: req.body.role,
+    });
 
     if (newUser.role === "supermercado") {
       newUser.isApproved = false;

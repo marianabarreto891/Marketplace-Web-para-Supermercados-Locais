@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Supermarket = require("../models/Supermarket");
@@ -22,6 +23,96 @@ const DELIVERY_METHOD_LABELS = {
   estafeta: "Entrega por estafeta",
 };
 
+const ACTIVE_ORDER_STATES = ["confirmada", "em_preparacao", "em_entrega"];
+
+function getManagedSupermarketFilter(supermarketIds) {
+  return supermarketIds.length
+    ? { supermercado: { $in: supermarketIds } }
+    : { _id: null };
+}
+
+async function getSupermarketTopProducts(orderFilter) {
+  const topProducts = await Order.aggregate([
+    {
+      $match: {
+        ...orderFilter,
+        estado: { $ne: "cancelada" },
+      },
+    },
+    { $unwind: "$items" },
+    {
+      $group: {
+        _id: {
+          product: "$items.product",
+          name: "$items.nome",
+        },
+        unitsSold: { $sum: "$items.quantidade" },
+        revenue: { $sum: "$items.subtotal" },
+        ordersCount: { $sum: 1 },
+      },
+    },
+    { $sort: { unitsSold: -1, revenue: -1, ordersCount: -1 } },
+    { $limit: 6 },
+  ]);
+
+  return topProducts.map((product) => ({
+    productId: product._id.product,
+    name: product._id.name,
+    unitsSold: product.unitsSold,
+    revenue: product.revenue,
+    ordersCount: product.ordersCount,
+  }));
+}
+
+async function getCourierTopSupermarkets(userId) {
+  return Order.aggregate([
+    {
+      $match: {
+        metodoEntrega: "estafeta",
+        estafeta: reqSessionObjectId(userId),
+        estado: { $ne: "cancelada" },
+      },
+    },
+    {
+      $group: {
+        _id: "$supermercado",
+        deliveries: { $sum: 1 },
+      },
+    },
+    { $sort: { deliveries: -1 } },
+    { $limit: 6 },
+    {
+      $lookup: {
+        from: "supermarkets",
+        localField: "_id",
+        foreignField: "_id",
+        as: "supermarket",
+      },
+    },
+    {
+      $unwind: {
+        path: "$supermarket",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        supermarketId: "$_id",
+        name: "$supermarket.name",
+        location: "$supermarket.location",
+        deliveries: 1,
+      },
+    },
+  ]);
+}
+
+function reqSessionObjectId(userId) {
+  return typeof userId === "string"
+    ? new mongoose.Types.ObjectId(userId)
+    : userId;
+}
+
 router.get("/", (req, res) => {
   res.redirect("/supermarket/list");
 });
@@ -43,14 +134,16 @@ router.get(
         const supermarketIds = supermarkets.map(
           (supermarket) => supermarket._id,
         );
-        const orderFilter = supermarketIds.length
-          ? { supermercado: { $in: supermarketIds } }
-          : { _id: null };
+        const orderFilter = getManagedSupermarketFilter(supermarketIds);
 
         const totalOrders = await Order.countDocuments(orderFilter);
         const openOrders = await Order.countDocuments({
           ...orderFilter,
-          estado: { $in: ["confirmada", "em_preparacao", "em_entrega"] },
+          estado: { $in: ACTIVE_ORDER_STATES },
+        });
+        const deliveredOrders = await Order.countDocuments({
+          ...orderFilter,
+          estado: "entregue",
         });
         const revenueResult = await Order.aggregate([
           {
@@ -66,11 +159,28 @@ router.get(
             },
           },
         ]);
+        const unitsSoldResult = await Order.aggregate([
+          {
+            $match: {
+              ...orderFilter,
+              estado: { $ne: "cancelada" },
+            },
+          },
+          { $unwind: "$items" },
+          {
+            $group: {
+              _id: null,
+              totalUnits: { $sum: "$items.quantidade" },
+            },
+          },
+        ]);
+        const topProducts = await getSupermarketTopProducts(orderFilter);
         const recentOrders = await Order.find(orderFilter)
           .populate("cliente", "name")
           .populate("supermercado", "name")
+          .populate("estafeta", "name")
           .sort({ createdAt: -1 })
-          .limit(6);
+          .limit(8);
 
         return res.render("supermarkets/dashboard", {
           role: req.session.role,
@@ -79,16 +189,24 @@ router.get(
             totalOrders,
             totalRevenue: revenueResult[0] ? revenueResult[0].total : 0,
             openOrders,
-            approvedSupermarkets: supermarkets.filter(
-              (supermarket) => supermarket.isApproved,
-            ).length,
+            deliveredOrders,
+            totalUnitsSold: unitsSoldResult[0]
+              ? unitsSoldResult[0].totalUnits
+              : 0,
           },
           recentOrders,
+          topProducts,
+          topSupermarkets: [],
           statusLabels: ORDER_STATUS_LABELS,
           deliveryLabels: DELIVERY_METHOD_LABELS,
         });
       }
 
+      const pendingPreparation = await Order.countDocuments({
+        metodoEntrega: "estafeta",
+        estado: "confirmada",
+        estafeta: null,
+      });
       const availableDeliveries = await Order.countDocuments({
         metodoEntrega: "estafeta",
         estado: "em_preparacao",
@@ -104,27 +222,40 @@ router.get(
         estado: "entregue",
         estafeta: req.session.userId,
       });
+      const totalDeliveries = await Order.countDocuments({
+        metodoEntrega: "estafeta",
+        estafeta: req.session.userId,
+        estado: { $ne: "cancelada" },
+      });
       const recentOrders = await Order.find({
         metodoEntrega: "estafeta",
         $or: [
-          { estado: "em_preparacao", estafeta: null },
+          { estado: { $in: ["confirmada", "em_preparacao"] }, estafeta: null },
           { estafeta: req.session.userId },
         ],
       })
         .populate("cliente", "name")
         .populate("supermercado", "name")
+        .populate("estafeta", "name")
         .sort({ createdAt: -1 })
-        .limit(6);
+        .limit(8);
+      const topSupermarkets = await getCourierTopSupermarkets(
+        req.session.userId,
+      );
 
       return res.render("supermarkets/dashboard", {
         role: req.session.role,
         supermarkets: [],
         summary: {
+          totalDeliveries,
+          pendingPreparation,
           availableDeliveries,
           activeDeliveries,
           deliveredCount,
         },
         recentOrders,
+        topProducts: [],
+        topSupermarkets,
         statusLabels: ORDER_STATUS_LABELS,
         deliveryLabels: DELIVERY_METHOD_LABELS,
       });
@@ -314,7 +445,6 @@ router.get("/:supermarketId/products", requireAuth, async (req, res) => {
     const supermarket = await Supermarket.findById(req.params.supermarketId);
     let query = { supermarket: req.params.supermarketId };
 
-    // Pesquisa simples por nome
     if (req.query.search) {
       query.name = { $regex: req.query.search, $options: "i" };
     }

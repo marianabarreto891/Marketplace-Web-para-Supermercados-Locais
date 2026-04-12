@@ -26,7 +26,7 @@
 
     <% if (!products.length) { %>
       <div class="alert alert-warning">
-        Ainda não existem produtos neste supermercado. Crie primeiro os produtos para poder registar vendas!
+        Ainda nao existem produtos neste supermercado. Crie primeiro os produtos para poder registar vendas.
       </div>
     <% } else { %>
       <form action="/orders/create/<%= supermarket._id %>" method="POST">
@@ -58,7 +58,7 @@
 
                 <h2 class="h4 mb-3">Entrega</h2>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Método de entrega</label>
+                  <label class="form-label fw-semibold">Metodo de entrega</label>
                   <select name="metodoEntrega" class="form-select" required>
                     <% supermarket.deliveryMethods.forEach((method) => { %>
                       <option value="<%= method %>" <%= deliveryMethod === method ? "selected" : "" %>>
@@ -78,9 +78,29 @@
           <div class="col-lg-8">
             <div class="card shadow-sm border-0">
               <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h2 class="h4 mb-0">Produtos</h2>
-                  <span class="badge bg-secondary"><%= products.length %> disponiveis</span>
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
+                  <div>
+                    <h2 class="h4 mb-1">Produtos</h2>
+                    <p class="text-muted mb-0">Pesquise para filtrar a lista e registar a venda mais depressa.</p>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary" id="visibleProductsCounter"><%= products.length %> visiveis</span>
+                    <span class="badge bg-dark"><%= products.length %> disponiveis</span>
+                  </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                  <div class="col-md-8">
+                    <label class="form-label fw-semibold" for="productSearch">Pesquisar produto</label>
+                    <input type="text" id="productSearch" class="form-control" placeholder="Nome ou descricao do produto">
+                  </div>
+                  <div class="col-md-4 d-flex align-items-end">
+                    <button type="button" id="clearProductSearch" class="btn btn-outline-secondary w-100">Limpar pesquisa</button>
+                  </div>
+                </div>
+
+                <div class="alert alert-info d-none" id="noProductsMatch">
+                  Nao existem produtos a corresponder a esta pesquisa.
                 </div>
 
                 <div class="table-responsive">
@@ -89,7 +109,7 @@
                       <tr>
                         <th>Selecionar</th>
                         <th>Produto</th>
-                        <th>Preço</th>
+                        <th>Preco</th>
                         <th>Stock</th>
                         <th>Quantidade</th>
                       </tr>
@@ -100,7 +120,10 @@
                         <% const selected = selectedProductIds.includes(productId); %>
                         <% const quantity = quantities[productId] || 1; %>
                         <% const outOfStock = product.stock <= 0; %>
-                        <tr class="<%= outOfStock ? 'table-secondary' : '' %>">
+                        <tr
+                          data-product-row
+                          data-search="<%= [product.name, product.description || ''].join(' ').toLowerCase() %>"
+                          class="<%= outOfStock ? 'table-secondary' : '' %>">
                           <td>
                             <input
                               class="form-check-input"
@@ -152,5 +175,51 @@
       </form>
     <% } %>
   </div>
+
+  <script>
+    (function () {
+      const searchInput = document.getElementById("productSearch");
+      const clearButton = document.getElementById("clearProductSearch");
+      const counter = document.getElementById("visibleProductsCounter");
+      const emptyState = document.getElementById("noProductsMatch");
+      const rows = Array.from(document.querySelectorAll("[data-product-row]"));
+
+      if (!searchInput || !counter || !rows.length) {
+        return;
+      }
+
+      function updateVisibleRows() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        rows.forEach((row) => {
+          const matches = !query || row.dataset.search.includes(query);
+          row.classList.toggle("d-none", !matches);
+
+          if (matches) {
+            visibleCount += 1;
+          }
+        });
+
+        counter.textContent = visibleCount + " visiveis";
+
+        if (emptyState) {
+          emptyState.classList.toggle("d-none", visibleCount !== 0);
+        }
+      }
+
+      searchInput.addEventListener("input", updateVisibleRows);
+
+      if (clearButton) {
+        clearButton.addEventListener("click", function () {
+          searchInput.value = "";
+          updateVisibleRows();
+          searchInput.focus();
+        });
+      }
+
+      updateVisibleRows();
+    })();
+  </script>
 </body>
 </html>

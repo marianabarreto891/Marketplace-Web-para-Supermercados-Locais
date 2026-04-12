@@ -26,6 +26,16 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
+function firstValue(...values) {
+  for (const value of values) {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return value;
+    }
+  }
+
+  return "";
+}
+
 function normalizeEmail(value) {
   return normalizeText(value).toLowerCase();
 }
@@ -42,11 +52,18 @@ function normalizeRawItems(rawItems) {
   const items = Array.isArray(rawItems) ? rawItems : Object.values(rawItems);
 
   return items.map((item) => ({
-    productId: normalizeText(item && item.productId),
-    quantity: Number(item && item.quantity ? item.quantity : 0),
+    productId: normalizeText(firstValue(item && item.productId, item && item.product)),
+    quantity: Number(
+      firstValue(item && item.quantity, item && item.quantidade, 0),
+    ),
     selected:
-      Boolean(item && item.selected) &&
-      ["1", "true", "on"].includes(String(item.selected).toLowerCase()),
+      Boolean(
+        item &&
+          firstValue(item.selected, item.selecionado, item.checked),
+      ) &&
+      ["1", "true", "on"].includes(
+        String(firstValue(item.selected, item.selecionado, item.checked)).toLowerCase(),
+      ),
   }));
 }
 
@@ -95,12 +112,25 @@ function buildFormData(body, rawItems) {
 
   return {
     customer: {
-      name: normalizeText(body.name),
-      email: normalizeEmail(body.email),
-      address: normalizeText(body.address),
-      phone: normalizePhone(body.phone),
+      name: normalizeText(
+        firstValue(body.name, body.nome, body.customerName),
+      ),
+      email: normalizeEmail(firstValue(body.email, body.customerEmail)),
+      address: normalizeText(
+        firstValue(body.address, body.morada, body.customerAddress),
+      ),
+      phone: normalizePhone(
+        firstValue(
+          body.phone,
+          body.telephone,
+          body.telefone,
+          body.customerPhone,
+        ),
+      ),
     },
-    deliveryMethod: normalizeText(body.metodoEntrega),
+    deliveryMethod: normalizeText(
+      firstValue(body.metodoEntrega, body.deliveryMethod, body.metodo),
+    ),
     quantities,
     selectedProductIds,
   };
@@ -336,7 +366,7 @@ async function buildOrderAccessFilter(req) {
     metodoEntrega: "estafeta",
     $or: [
       { estafeta: req.session.userId },
-      { estado: "em_preparacao", estafeta: null },
+      { estado: { $in: ["confirmada", "em_preparacao"] }, estafeta: null },
     ],
   };
 }
@@ -364,7 +394,7 @@ async function canAccessOrder(req, order) {
   }
 
   if (!order.estafeta) {
-    return order.estado === "em_preparacao";
+    return ["confirmada", "em_preparacao"].includes(order.estado);
   }
 
   return String(order.estafeta) === String(req.session.userId);

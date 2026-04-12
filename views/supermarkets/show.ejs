@@ -1,86 +1,84 @@
 <!DOCTYPE html>
 <html lang="pt">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detalhes do Supermercado</title>
-  <link rel="stylesheet" href="/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body class="bg-light">
-  <% const canManage=userRole==="admin" || (userRole==="supermercado" && supermarket.manager &&
-    String(supermarket.manager._id)===String(userId)); %>
 
-    <div class="d-flex flex-wrap gap-2">
-      <a href="/supermarket/list" class="btn btn-outline-secondary">Voltar à lista</a>
+  <%
+    const canManage =
+      userRole === "admin" ||
+      (userRole === "supermercado" &&
+        supermarket.manager &&
+        String(supermarket.manager._id) === String(userId));
+  %>
 
-      <% if (supermarket.isApproved) { %>
-        <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-primary">Ver produtos</a>
-        <% if (canManage) { %>
-          <a href="/orders?supermarketId=<%= supermarket._id %>" class="btn btn-outline-dark">Ver encomendas</a>
-          <a href="/orders/create/<%= supermarket._id %>" class="btn btn-primary">Registar venda</a>
-          <% } %>
+  <div class="container py-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+          <div>
+            <h1 class="mb-1"><%= supermarket.name %></h1>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="/supermarket/list" class="btn btn-outline-secondary">Voltar à lista</a>
+            <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-primary">Ver produtos</a>
+            
+            <% if (canManage) { %>
+              <a href="/orders?supermarketId=<%= supermarket._id %>" class="btn btn-outline-dark">Ver encomendas</a>
+              <% if (supermarket.isApproved) { %>
+                <a href="/orders/create/<%= supermarket._id %>" class="btn btn-primary">Registar venda</a>
+              <% } %>
             <% } %>
-    </div>
+          </div>
+        </div>
 
-    <% if (canManage) { %>
-      <div class="d-grid gap-2 mt-4">
-        <a href="/supermarket/<%= supermarket._id %>/edit" class="btn btn-outline-warning">Editar supermercado</a>
-
-        <% if (supermarket.isApproved) { %>
-          <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-primary">Gerir produtos</a>
-          <a href="/orders?supermarketId=<%= supermarket._id %>" class="btn btn-outline-dark">Histórico de vendas</a>
-          <% } %>
-
-      </div>
-      <% } %>
+        <% if (canManage && supermarket.toApprove === true && supermarket.isApproved === false) { %>
+          <div class="alert alert-danger">
+            Este supermercado foi rejeitado. Logo, não pode vender produtos!
+          </div>
+        <% } else if (canManage && supermarket.toApprove === false) { %>
+          <div class="alert alert-warning">
+            Este supermercado está a aguardar aprovação. Não pode vender produtos até ser aprovado!
+          </div>
+        <% } %>
 
         <div class="row g-4">
           <div class="col-lg-7">
             <div class="row g-3">
-
               <div class="col-md-6">
                 <div class="small text-muted">Descrição</div>
-                <div class="fw-semibold">
-                  <%= supermarket.description || "Sem descrição." %>
-                </div>
+                <div class="fw-semibold"><%= supermarket.description || "Sem descrição." %></div>
               </div>
               <div class="col-md-6">
                 <div class="small text-muted">Localização</div>
-                <div class="fw-semibold">
-                  <%= supermarket.location || "Não definida." %>
-                </div>
+                <div class="fw-semibold"><%= supermarket.location || "Não definida." %></div>
               </div>
-
               <div class="col-md-6">
                 <div class="small text-muted">Horário</div>
-                <div class="fw-semibold">
-                  <%= supermarket.hours || "Não definido" %>
-                </div>
+                <div class="fw-semibold"><%= supermarket.hours || "Não definido" %></div>
               </div>
               <div class="col-md-6">
                 <div class="small text-muted">Estado</div>
                 <div>
-                  <span
-                    class="badge <%= !supermarket.toApprove ? 'bg-warning text-dark' : supermarket.isApproved ? 'bg-success' : 'bg-danger' %>">
+                  <span class="badge <%= !supermarket.toApprove ? 'bg-warning text-dark' : supermarket.isApproved ? 'bg-success' : 'bg-danger' %>">
                     <%= !supermarket.toApprove ? 'Pendente' : supermarket.isApproved ? 'Aprovado' : 'Rejeitado' %>
                   </span>
                 </div>
               </div>
-
               <div class="col-md-6">
                 <div class="small text-muted">Métodos de entrega</div>
                 <div class="fw-semibold">
-                  <%= supermarket.deliveryMethods.map((method)=> method === "estafeta" ? "Entrega por estafeta" :
-                    "Levantamento em loja").join(", ") %>
+                  <%= supermarket.deliveryMethods.map((method) => method === "estafeta" ? "Entrega por estafeta" : "Levantamento em loja").join(", ") %>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="small text-muted">Custo de entrega</div>
-                <div class="fw-semibold">EUR <%= Number(supermarket.deliveryCost || 0).toFixed(2) %>
-                </div>
+                <div class="fw-semibold">EUR <%= Number(supermarket.deliveryCost || 0).toFixed(2) %></div>
               </div>
             </div>
           </div>
@@ -88,30 +86,23 @@
           <div class="col-lg-5">
             <div class="border rounded p-3 bg-light h-100">
               <div class="small text-muted">Gestor</div>
-              <div class="fw-semibold">
-                <%= supermarket.manager ? supermarket.manager.name : "-" %>
-              </div>
-              <div class="text-muted">
-                <%= supermarket.manager ? supermarket.manager.email : "" %>
-              </div>
-
+              <div class="fw-semibold"><%= supermarket.manager ? supermarket.manager.name : "-" %></div>
+              <div class="text-muted"><%= supermarket.manager ? supermarket.manager.email : "" %></div>
+              
               <% if (canManage) { %>
                 <div class="d-grid gap-2 mt-4">
-                  <a href="/supermarket/<%= supermarket._id %>/edit" class="btn btn-outline-warning">Editar
-                    supermercado</a>
-                  <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-primary">Gerir
-                    produtos</a>
-                  <a href="/orders?supermarketId=<%= supermarket._id %>" class="btn btn-outline-dark">Histórico de
-                    vendas</a>
+                  <a href="/supermarket/<%= supermarket._id %>/edit" class="btn btn-outline-warning">Editar supermercado</a>
+                  <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-primary">Gerir produtos</a>
+                  <a href="/orders?supermarketId=<%= supermarket._id %>" class="btn btn-outline-dark">Histórico de vendas</a>
                 </div>
-                <% } %>
+              <% } %>
             </div>
           </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
 
-        </div>
-        </div>
-        </div>
-        </div>
 </body>
-
 </html>

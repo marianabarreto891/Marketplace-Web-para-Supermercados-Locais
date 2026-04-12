@@ -77,7 +77,6 @@ router.get("/users", async (req, res) => {
 });
 
 
-//GESTÃO DE CATEGORIAS
 router.get("/categories", async (req, res) => {
   try {
     const categories = await Category.find();

@@ -1,60 +1,14 @@
+body {
+  background-color: #f8f9fa;
+}
 
-  body {
-    background-color: #f3f4f6 !important;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  }
+.title-container {
+  padding: 4rem 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+  text-align: center;
+}
 
-  /* Cartões com sombras suaves e cantos mais arredondados */
-  .card {
-    border: none !important;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    transition: transform 0.2s ease-in-out;
-  }
-  
-  /* Efeito hover nos cartões (por exemplo no Dashboard) */
-  .card:hover {
-    transform: translateY(-5px);
-  }
-
-  /* Personalizar a cor Primária (Mudar do azul clássico para um Indigo moderno) */
-  .btn-primary {
-    background-color: #4f46e5 !important;
-    border-color: #4f46e5 !important;
-    border-radius: 8px;
-    font-weight: 500;
-  }
-  .btn-primary:hover {
-    background-color: #4338ca !important;
-  }
-
-  /* Melhorar todos os botões */
-  .btn {
-    border-radius: 8px;
-    font-weight: 500;
-    padding: 0.5rem 1.25rem;
-  }
-
-  /* Tabelas mais limpas */
-  .table {
-    margin-bottom: 0;
-  }
-  .table > :not(caption) > * > * {
-    padding: 1rem 1.5rem;
-    border-bottom-color: #e5e7eb;
-  }
-  .table-light th {
-    background-color: #f9fafb !important;
-    color: #6b7280;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-  }
-
-  /* Badges (Estados) mais bonitos */
-  .badge {
-    padding: 0.4em 0.8em;
-    border-radius: 9999px; /* Formato pílula */
-    font-weight: 500;
-  }
+.action-buttons-container {
+  padding-top: 1.5rem;
+}

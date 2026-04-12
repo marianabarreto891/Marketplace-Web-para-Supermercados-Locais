@@ -15,13 +15,13 @@ router.post("/login", loginController.loginUser);
 
 /* GET: Mostrar formulário de login */
 router.get("/login", function (req, res) {
-  // CORRIGIDO: Adicionado "users/"
+  
   res.render("users/login");
 });
 
 /* GET: Mostrar formulário de registo */
 router.get("/register", function (req, res) {
-  // CORRIGIDO: Adicionado "users/"
+
   res.render("users/register");
 });
 
@@ -58,7 +58,7 @@ router.post("/register", async function (req, res) {
 
     await newUser.save();
     
-    // Mostra a página de sucesso
+    
     res.render("users/registerSuccess");
     
   } catch (error) {

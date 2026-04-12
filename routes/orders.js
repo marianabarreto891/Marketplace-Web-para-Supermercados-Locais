@@ -111,6 +111,8 @@ function buildFormData(body, rawItems) {
   });
 
   return {
+    customerType: normalizeText(body.customerType || "novo"), 
+    existingCustomerId: normalizeText(body.existingCustomerId), 
     customer: {
       name: normalizeText(
         firstValue(body.name, body.nome, body.customerName),
@@ -139,13 +141,17 @@ function buildFormData(body, rawItems) {
 function buildCreateViewModel(
   supermarket,
   products,
+  customers, 
   formData = {},
   errorMessage = null,
 ) {
   return {
     supermarket,
     products,
+    customers,
     errorMessage,
+    customerType: formData.customerType || "novo",
+    existingCustomerId: formData.existingCustomerId || "",
     customer: formData.customer || {},
     quantities: formData.quantities || {},
     selectedProductIds: formData.selectedProductIds || [],
@@ -168,11 +174,19 @@ async function renderCreatePage(
     name: 1,
   });
 
+  const customers = await User.find({ role: "cliente" }).sort({ name: 1 });
+
   return res
     .status(statusCode)
     .render(
       "orders/create",
-      buildCreateViewModel(supermarket, products, formData, errorMessage),
+      buildCreateViewModel(
+        supermarket,
+        products,
+        customers,
+        formData,
+        errorMessage,
+      ),
     );
 }
 
@@ -194,7 +208,7 @@ async function getCreateSupermarket(req, supermarketId) {
     return {
       error: {
         status: 403,
-        message: "Nao pode registar vendas para este supermercado.",
+        message: "Não pode registar vendas para este supermercado.",
       },
     };
   }
@@ -203,7 +217,7 @@ async function getCreateSupermarket(req, supermarketId) {
     return {
       error: {
         status: 403,
-        message: "O supermercado ainda nao esta aprovado para operar.",
+        message: "O supermercado ainda não está aprovado para operar.",
       },
     };
   }
@@ -232,7 +246,7 @@ async function findOrCreateCustomer(customerData) {
     String(userByEmail._id) !== String(userByPhone._id)
   ) {
     throw new Error(
-      "Ja existe um utilizador com este email e outro com este telefone.",
+      "Já existe um utilizador com este email e outro com este telefone.",
     );
   }
 
@@ -241,7 +255,7 @@ async function findOrCreateCustomer(customerData) {
   if (customer) {
     if (customer.role !== "cliente") {
       throw new Error(
-        "Os dados inseridos pertencem a um utilizador que nao e cliente.",
+        "Os dados inseridos pertencem a um utilizador que não é cliente.",
       );
     }
 
@@ -465,8 +479,8 @@ router.get(
 
       return renderCreatePage(res, result.supermarket);
     } catch (error) {
-      console.error("Erro ao abrir formulario de venda:", error);
-      return res.status(500).send("Erro ao abrir formulario de venda.");
+      console.error("Erro ao abrir formulário de venda:", error);
+      return res.status(500).send("Erro ao abrir formulário de venda.");
     }
   },
 );
@@ -491,7 +505,7 @@ router.post(
           res,
           supermarket,
           formData,
-          "Selecione um metodo de entrega valido.",
+          "Selecione um método de entrega válido!",
           400,
         );
       }
@@ -512,7 +526,7 @@ router.post(
             res,
             supermarket,
             formData,
-            "Selecione produtos com quantidades validas.",
+            "Selecione produtos com quantidades válidas.",
             400,
           );
         }
@@ -541,7 +555,19 @@ router.post(
       let customer;
 
       try {
-        customer = await findOrCreateCustomer(formData.customer);
+        if (formData.customerType === "existente") {
+          if (!formData.existingCustomerId) {
+            throw new Error("Selecione um cliente existente na lista!");
+          }
+
+          customer = await User.findById(formData.existingCustomerId);
+
+          if (!customer || customer.role !== "cliente") {
+            throw new Error("O cliente selecionado não é válido.");
+          }
+        } else {
+          customer = await findOrCreateCustomer(formData.customer);
+        }
       } catch (customerError) {
         return renderCreatePage(
           res,
@@ -622,7 +648,7 @@ router.get(
         if (!selectedSupermarket) {
           return res
             .status(403)
-            .send("Nao pode consultar encomendas deste supermercado.");
+            .send("Não pode consultar as encomendas deste supermercado.");
         }
 
         query.supermercado = selectedSupermarket._id;
@@ -668,11 +694,11 @@ router.get(
         .populate("estafeta", "name email");
 
       if (!order) {
-        return res.status(404).send("Encomenda nao encontrada.");
+        return res.status(404).send("Encomenda não encontrada.");
       }
 
       if (!(await canAccessOrder(req, order))) {
-        return res.status(403).send("Nao pode consultar esta encomenda.");
+        return res.status(403).send("Não pode consultar esta encomenda!");
       }
 
       return res.render("orders/show", {
@@ -698,25 +724,28 @@ router.post("/:id/claim", requireRole(["estafeta"]), async function (req, res) {
     const order = await Order.findById(req.params.id);
 
     if (!order) {
-      return res.status(404).send("Encomenda nao encontrada.");
+      return res.status(404).send("Encomenda não encontrada.");
     }
 
     if (order.metodoEntrega !== "estafeta") {
-      return res.status(400).send("Esta encomenda nao precisa de estafeta.");
+      return res.status(400).send("Esta encomenda não precisa de estafeta.");
     }
 
     if (order.estado !== "em_preparacao") {
       return res
         .status(400)
         .send(
-          "A entrega so pode ser aceite quando a encomenda esta em preparacao.",
+          "A entrega só pode ser aceite quando a encomenda está em preparação.",
         );
     }
 
-    if (order.estafeta && String(order.estafeta) !== String(req.session.userId)) {
+    if (
+      order.estafeta &&
+      String(order.estafeta) !== String(req.session.userId)
+    ) {
       return res
         .status(403)
-        .send("Esta entrega ja foi aceite por outro estafeta.");
+        .send("Esta entrega já foi aceite por outro estafeta!");
     }
 
     order.estafeta = req.session.userId;
@@ -738,11 +767,11 @@ router.post(
       const order = await Order.findById(req.params.id);
 
       if (!order) {
-        return res.status(404).send("Encomenda nao encontrada.");
+        return res.status(404).send("Encomenda não encontrada.");
       }
 
       if (!(await canAccessOrder(req, order))) {
-        return res.status(403).send("Nao pode alterar esta encomenda.");
+        return res.status(403).send("Não pode alterar esta encomenda.");
       }
 
       const nextStatus = normalizeText(req.body.estado);
@@ -753,7 +782,7 @@ router.post(
       );
 
       if (!allowedTransitions.includes(nextStatus)) {
-        return res.status(400).send("Transicao de estado invalida.");
+        return res.status(400).send("Transição de estado inválida.");
       }
 
       const previousStatus = order.estado;
@@ -776,8 +805,8 @@ router.post(
 
       return res.redirect(`/orders/${order._id}`);
     } catch (error) {
-      console.error("Erro ao atualizar estado da encomenda:", error);
-      return res.status(500).send("Erro ao atualizar estado da encomenda.");
+      console.error("Erro ao atualizar o estado da encomenda:", error);
+      return res.status(500).send("Erro ao atualizar o estado da encomenda.");
     }
   },
 );

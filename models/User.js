@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
     enum: ["cliente", "supermercado", "estafeta", "admin"],
     default: "cliente",
   },
-  // Para supermercados: o admin precisa de aprovar a conta antes de poder usar a plataforma
   isApproved: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });

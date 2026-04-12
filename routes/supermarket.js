@@ -131,7 +131,9 @@ router.get(
         const supermarkets = await Supermarket.find({
           manager: req.session.userId,
         }).sort({ name: 1 });
-        const supermarketIds = supermarkets.map((supermarket) => supermarket._id);
+        const supermarketIds = supermarkets.map(
+          (supermarket) => supermarket._id,
+        );
         const orderFilter = getManagedSupermarketFilter(supermarketIds);
 
         const totalOrders = await Order.countDocuments(orderFilter);
@@ -180,7 +182,7 @@ router.get(
           .sort({ createdAt: -1 })
           .limit(8);
 
-        return res.render("dashboard", {
+        return res.render("supermarkets/dashboard", {
           role: req.session.role,
           supermarkets,
           summary: {
@@ -188,7 +190,9 @@ router.get(
             totalRevenue: revenueResult[0] ? revenueResult[0].total : 0,
             openOrders,
             deliveredOrders,
-            totalUnitsSold: unitsSoldResult[0] ? unitsSoldResult[0].totalUnits : 0,
+            totalUnitsSold: unitsSoldResult[0]
+              ? unitsSoldResult[0].totalUnits
+              : 0,
           },
           recentOrders,
           topProducts,
@@ -235,9 +239,11 @@ router.get(
         .populate("estafeta", "name")
         .sort({ createdAt: -1 })
         .limit(8);
-      const topSupermarkets = await getCourierTopSupermarkets(req.session.userId);
+      const topSupermarkets = await getCourierTopSupermarkets(
+        req.session.userId,
+      );
 
-      return res.render("dashboard", {
+      return res.render("supermarkets/dashboard", {
         role: req.session.role,
         supermarkets: [],
         summary: {
@@ -289,7 +295,7 @@ router.get("/list", requireAuth, async (req, res) => {
 router.get(
   "/new",
   requireAuth,
-  requireRole(["supermercado", "admin"]),
+  requireRole(["supermercado"]),
   async (req, res) => {
     res.render("supermarkets/create");
   },
@@ -298,7 +304,7 @@ router.get(
 router.post(
   "/new",
   requireAuth,
-  requireRole(["supermercado", "admin"]),
+  requireRole(["supermercado"]),
   async (req, res) => {
     try {
       const {
@@ -418,6 +424,8 @@ router.post(
       supermarket.hours = hours;
       supermarket.deliveryMethods = methods;
       supermarket.deliveryCost = deliveryCost;
+      supermarket.toApprove = false;
+      supermarket.isApproved = false;
 
       await supermarket.save();
 
@@ -429,26 +437,25 @@ router.post(
   },
 );
 
-// PRODUTOS 
+// PRODUTOS
 
 // 1. LISTAR PRODUTOS COM PESQUISA
 router.get("/:supermarketId/products", requireAuth, async (req, res) => {
   try {
     const supermarket = await Supermarket.findById(req.params.supermarketId);
     let query = { supermarket: req.params.supermarketId };
-    
-    // Pesquisa simples por nome
+
     if (req.query.search) {
       query.name = { $regex: req.query.search, $options: "i" };
     }
 
     const products = await Product.find(query).populate("category");
 
-    res.render("products/list", { 
-      products, 
-      supermarket, 
+    res.render("products/list", {
+      products,
+      supermarket,
       searchQuery: req.query.search,
-      userRole: req.session.role 
+      userRole: req.session.role,
     });
   } catch (error) {
     res.status(500).send("Erro ao listar produtos!");
@@ -456,64 +463,94 @@ router.get("/:supermarketId/products", requireAuth, async (req, res) => {
 });
 
 // 2. FORMULÁRIO DE CRIAR PRODUTO
-router.get("/:supermarketId/products/new", requireAuth, requireRole(["supermercado", "admin"]), async (req, res) => {
-  try {
-    const supermarket = await Supermarket.findById(req.params.supermarketId);
-    if (!supermarket.isApproved) {
-      return res.status(403).send("O seu supermercado ainda não está aprovado.");
+router.get(
+  "/:supermarketId/products/new",
+  requireAuth,
+  requireRole(["supermercado"]),
+  async (req, res) => {
+    try {
+      const supermarket = await Supermarket.findById(req.params.supermarketId);
+      if (!supermarket.isApproved) {
+        return res
+          .status(403)
+          .send("O seu supermercado ainda não está aprovado.");
+      }
+      const categories = await Category.find();
+      res.render("products/create", { supermarket, categories });
+    } catch (error) {
+      res.status(500).send("Erro ao carregar formulário.");
     }
-    const categories = await Category.find();
-    res.render("products/create", { supermarket, categories });
-  } catch (error) {
-    res.status(500).send("Erro ao carregar formulário.");
-  }
-});
+  },
+);
 
 // 3. CRIAR PRODUTO
-router.post("/:supermarketId/products/new", requireAuth, requireRole(["supermercado", "admin"]), async (req, res) => {
-  try {
-    const supermarket = await Supermarket.findById(req.params.supermarketId);
-    if (!supermarket.isApproved) return res.status(403).send("Não aprovado.");
+router.post(
+  "/:supermarketId/products/new",
+  requireAuth,
+  requireRole(["supermercado"]),
+  async (req, res) => {
+    try {
+      const supermarket = await Supermarket.findById(req.params.supermarketId);
+      if (!supermarket.isApproved) return res.status(403).send("Não aprovado.");
 
-    await Product.create({ ...req.body, supermarket: req.params.supermarketId });
-    res.redirect(`/supermarket/${req.params.supermarketId}/products`);
-  } catch (error) {
-    res.status(500).send("Erro ao adicionar produto!");
-  }
-});
+      await Product.create({
+        ...req.body,
+        supermarket: req.params.supermarketId,
+      });
+      res.redirect(`/supermarket/${req.params.supermarketId}/products`);
+    } catch (error) {
+      res.status(500).send("Erro ao adicionar produto!");
+    }
+  },
+);
 
 // 4. FORMULÁRIO DE EDITAR PRODUTO
-router.get("/:supermarketId/products/:productId/edit", requireAuth, requireRole(["supermercado", "admin"]), async (req, res) => {
-  try {
-    const supermarket = await Supermarket.findById(req.params.supermarketId);
-    if (!supermarket.isApproved) return res.status(403).send("Não aprovado.");
-    
-    const product = await Product.findById(req.params.productId);
-    const categories = await Category.find();
-    res.render("products/edit", { product, supermarket, categories });
-  } catch (error) {
-    res.status(500).send("Erro ao carregar produto.");
-  }
-});
+router.get(
+  "/:supermarketId/products/:productId/edit",
+  requireAuth,
+  requireRole(["supermercado"]),
+  async (req, res) => {
+    try {
+      const supermarket = await Supermarket.findById(req.params.supermarketId);
+      if (!supermarket.isApproved) return res.status(403).send("Não aprovado.");
+
+      const product = await Product.findById(req.params.productId);
+      const categories = await Category.find();
+      res.render("products/edit", { product, supermarket, categories });
+    } catch (error) {
+      res.status(500).send("Erro ao carregar produto.");
+    }
+  },
+);
 
 // 5. ATUALIZAR PRODUTO
-router.post("/:supermarketId/products/:productId/edit", requireAuth, requireRole(["supermercado", "admin"]), async (req, res) => {
-  try {
-    await Product.findByIdAndUpdate(req.params.productId, req.body);
-    res.redirect(`/supermarket/${req.params.supermarketId}/products`);
-  } catch (error) {
-    res.status(500).send("Erro ao atualizar produto.");
-  }
-});
+router.post(
+  "/:supermarketId/products/:productId/edit",
+  requireAuth,
+  requireRole(["supermercado"]),
+  async (req, res) => {
+    try {
+      await Product.findByIdAndUpdate(req.params.productId, req.body);
+      res.redirect(`/supermarket/${req.params.supermarketId}/products`);
+    } catch (error) {
+      res.status(500).send("Erro ao atualizar produto.");
+    }
+  },
+);
 
 // 6. APAGAR PRODUTO
-router.post("/:supermarketId/products/:productId/delete", requireAuth, requireRole(["supermercado", "admin"]), async (req, res) => {
-  try {
-    await Product.findByIdAndDelete(req.params.productId);
-    res.redirect(`/supermarket/${req.params.supermarketId}/products`);
-  } catch (error) {
-    res.status(500).send("Erro ao apagar produto.");
-  }
-});
+router.post(
+  "/:supermarketId/products/:productId/delete",
+  requireAuth,
+  requireRole(["supermercado"]),
+  async (req, res) => {
+    try {
+      await Product.findByIdAndDelete(req.params.productId);
+      res.redirect(`/supermarket/${req.params.supermarketId}/products`);
+    } catch (error) {
+      res.status(500).send("Erro ao apagar produto.");
+    }
+  },
+);
 
 module.exports = router;

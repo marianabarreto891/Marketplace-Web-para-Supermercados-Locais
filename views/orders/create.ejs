@@ -46,34 +46,37 @@
               </div>
             </div>
 
-            <div class="mb-4">
-              <label class="form-label fw-semibold">Filtrar por Categoria:</label>
-              <div class="d-flex flex-wrap gap-2" id="categoryFilters">
-                <button type="button" class="btn btn-sm btn-primary category-btn" data-category="all">Todas</button>
-                <% 
-                  const categories = [...new Set(
-                    products.filter(p => p.category && p.category.name).map(p => p.category.name)
-                  )];
-                  categories.forEach(cat => { 
-                %>
-                  <button type="button" class="btn btn-sm btn-outline-primary category-btn" data-category="<%= cat %>">
-                    <%= cat %>
-                  </button>
-                <% }) %>
+            <div class="row g-3 align-items-end mb-4">
+              <div class="col-md-5">
+                <label class="form-label fw-semibold">Categoria</label>
+                <select id="categorySelect" class="form-select">
+                  <option value="all">Todas</option>
+                  <% 
+                    const categories = [...new Set(
+                      products.filter(p => p.category && p.category.name).map(p => p.category.name)
+                    )];
+                    categories.forEach(cat => { 
+                  %>
+                    <option value="<%= cat %>"><%= cat %></option>
+                  <% }) %>
+                </select>
               </div>
-            </div>
 
-            <div class="row g-3 mb-3">
-              <div class="col-md-5">
-                <label class="form-label fw-semibold text-primary" for="barcodeInput">📷 Simular Leitor de Código de Barras</label>
-                <input type="text" id="barcodeInput" class="form-control border-primary" placeholder="Cole aqui o ID do produto e prima Enter">
-              </div>
-              <div class="col-md-5">
+              <div class="col-md-4">
                 <label class="form-label fw-semibold" for="productSearch">Pesquisar produto</label>
                 <input type="text" id="productSearch" class="form-control" placeholder="Nome ou descrição">
               </div>
-              <div class="col-md-2 d-flex align-items-end">
-                <button type="button" id="clearProductSearch" class="btn btn-outline-secondary w-100">Limpar</button>
+
+              <div class="col-md-3 d-flex gap-2">
+                <button type="button" id="btnApplyFilter" class="btn btn-primary flex-fill">Filtrar</button>
+                <button type="button" id="clearProductSearch" class="btn btn-outline-secondary flex-fill">Limpar</button>
+              </div>
+            </div>
+
+            <div class="row mb-4">
+              <div class="col-md-5">
+                <label class="form-label fw-semibold text-primary" for="barcodeInput">Leitor de Código de Barras</label>
+                <input type="text" id="barcodeInput" class="form-control border-primary" placeholder="Insira o ID do produto e prima Enter">
               </div>
             </div>
 
@@ -101,8 +104,8 @@
                 <tbody>
                   <% products.forEach((product, index) => { %>
                     <% const productId = product._id.toString(); %>
-                    <% const selected = selectedProductIds.includes(productId); %>
-                    <% const quantity = quantities[productId] || 1; %>
+                    <% const selected = selectedProductIds && selectedProductIds.includes(productId); %>
+                    <% const quantity = (quantities && quantities[productId]) || 1; %>
                     <% const outOfStock = product.stock <= 0; %>
                     
                     <tr 
@@ -176,10 +179,10 @@
                       </div>
                     </div>
                     <div id="newCustomerZone">
-                      <div class="mb-3"><label class="form-label fw-semibold">Nome</label><input type="text" name="name" id="inputName" class="form-control" required value="<%= customer ? customer.name : '' %>"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Email</label><input type="email" name="email" id="inputEmail" class="form-control" required value="<%= customer ? customer.email : '' %>"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Morada</label><input type="text" name="address" id="inputAddress" class="form-control" required value="<%= customer ? customer.address : '' %>"></div>
-                      <div class="mb-3"><label class="form-label fw-semibold">Telefone</label><input type="text" name="phone" id="inputPhone" class="form-control" required value="<%= customer ? customer.phone : '' %>"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Nome</label><input type="text" name="name" id="inputName" class="form-control" required value="<%= typeof customer !== 'undefined' && customer ? customer.name : '' %>"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Email</label><input type="email" name="email" id="inputEmail" class="form-control" required value="<%= typeof customer !== 'undefined' && customer ? customer.email : '' %>"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Morada</label><input type="text" name="address" id="inputAddress" class="form-control" required value="<%= typeof customer !== 'undefined' && customer ? customer.address : '' %>"></div>
+                      <div class="mb-3"><label class="form-label fw-semibold">Telefone</label><input type="text" name="phone" id="inputPhone" class="form-control" required value="<%= typeof customer !== 'undefined' && customer ? customer.phone : '' %>"></div>
                     </div>
                     <div id="existingCustomerZone" class="d-none">
                       <div class="mb-3">
@@ -224,16 +227,16 @@
   document.addEventListener("DOMContentLoaded", () => {
     
     // --- LÓGICA DE FILTRO DE PRODUTOS ---
-    const categoryBtns = document.querySelectorAll(".category-btn");
+    const categorySelect = document.getElementById("categorySelect");
+    const searchInput = document.getElementById("productSearch");
+    const btnApplyFilter = document.getElementById("btnApplyFilter");
+    const clearSearchBtn = document.getElementById("clearProductSearch");
     const productRows = document.querySelectorAll("tr[data-product-row]");
     const visibleCounter = document.getElementById("visibleProductsCounter");
-    const searchInput = document.getElementById("productSearch");
-    const clearSearchBtn = document.getElementById("clearProductSearch");
     const noProductsAlert = document.getElementById("noProductsMatch");
 
     function filterProducts() {
-      const activeCategoryBtn = document.querySelector(".category-btn.btn-primary");
-      const activeCategory = activeCategoryBtn ? activeCategoryBtn.getAttribute("data-category") : "all";
+      const activeCategory = categorySelect ? categorySelect.value : "all";
       const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : "";
       let visibleCount = 0;
 
@@ -260,22 +263,16 @@
       }
     }
 
-    categoryBtns.forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        categoryBtns.forEach(b => {
-          b.classList.remove("btn-primary");
-          b.classList.add("btn-outline-primary");
-        });
-        e.target.classList.remove("btn-outline-primary");
-        e.target.classList.add("btn-primary");
-        filterProducts();
-      });
-    });
+    // Botão Filtrar
+    if (btnApplyFilter) {
+      btnApplyFilter.addEventListener("click", filterProducts);
+    }
 
-    if (searchInput) searchInput.addEventListener("input", filterProducts);
+    // Botão Limpar
     if (clearSearchBtn) {
       clearSearchBtn.addEventListener("click", () => {
-        searchInput.value = "";
+        if (searchInput) searchInput.value = "";
+        if (categorySelect) categorySelect.value = "all";
         filterProducts();
       });
     }

@@ -24,40 +24,34 @@
         <% } %>
       </div>
     </div>
-<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card shadow-sm border-0 mb-4">
       <div class="card-body">
-        <form action="/supermarket/<%= supermarket._id %>/products" method="GET" class="row g-3 align-items-center">
-          
-          <div class="col-md-12 col-lg-5">
-            <label class="form-label fw-semibold">Categoria:</label>
-            <div class="d-flex flex-wrap gap-2">
-              <button type="submit" name="category" value="all" 
-                      class="btn btn-sm <%= selectedCategory === 'all' ? 'btn-primary' : 'btn-outline-primary' %>">
-                Todas
-              </button>
-              
+        <form action="/supermarket/<%= supermarket._id %>/products" method="GET" class="row g-3 align-items-end">
+
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Categoria</label>
+            <select name="category" class="form-select">
+              <option value="all" <%= (typeof selectedCategory === 'undefined' || selectedCategory === 'all') ? 'selected' : '' %>>Todas</option>
               <% if (typeof categories !== 'undefined') { %>
                 <% categories.forEach(cat => { %>
-                  <button type="submit" name="category" value="<%= cat.name %>" 
-                          class="btn btn-sm <%= selectedCategory === cat.name ? 'btn-primary' : 'btn-outline-primary' %>">
+                  <option value="<%= cat._id %>" <%= (typeof selectedCategory !== 'undefined' && selectedCategory === String(cat._id)) ? 'selected' : '' %>>
                     <%= cat.name %>
-                  </button>
+                  </option>
                 <% }) %>
               <% } %>
-            </div>
+            </select>
           </div>
 
-          <div class="col-md-8 col-lg-5">
-            <label class="form-label fw-semibold">Pesquisar por nome:</label>
-            <div class="input-group">
-              <input type="text" name="search" class="form-control" placeholder="Nome do produto..." value="<%= searchQuery || '' %>">
-              <input type="hidden" name="category" value="<%= selectedCategory %>">
-              <button type="submit" class="btn btn-primary">Pesquisar</button>
-            </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Pesquisar produto</label>
+            <input type="text" name="search" class="form-control" placeholder="Nome ou descrição"
+              value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
           </div>
 
-          <div class="col-md-4 col-lg-2 text-end mt-auto">
-            <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-secondary w-100">Limpar tudo</a>
+          <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
+            <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-secondary flex-fill">Limpar</a>
           </div>
 
         </form>

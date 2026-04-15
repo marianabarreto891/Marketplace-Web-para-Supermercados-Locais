@@ -12,28 +12,24 @@ exports.listProducts = async (req, res) => {
       query.name = { $regex: req.query.search, $options: "i" };
     }
 
-    // 2. Filtro por Categoria (Nova lógica)
+    // 2. Filtro por Categoria
     if (req.query.category && req.query.category !== "all") {
-      // Procura a Categoria pelo nome na BD para obter o ID
-      const category = await Category.findOne({ name: req.query.category });
-      if (category) {
-        query.category = category._id; 
-      }
+      query.category = req.query.category;
     }
 
     // Vai buscar os produtos filtrados
     const products = await Product.find(query).populate("category");
-    
+
     // Vai buscar todas as categorias para construir os botões no EJS
     const categories = await Category.find();
 
-    res.render("products/list", { 
-      products, 
-      supermarket, 
-      categories, // Enviamos as categorias para a View
-      searchQuery: req.query.search || "", 
-      selectedCategory: req.query.category || "all", // Enviamos a categoria selecionada
-      userRole: req.session.role 
+    res.render("products/list", {
+      products,
+      supermarket,
+      categories,
+      searchQuery: req.query.search || "",
+      selectedCategory: req.query.category || "all",
+      userRole: req.session.role,
     });
   } catch (error) {
     res.status(500).send("Erro ao listar produtos!");
@@ -43,7 +39,10 @@ exports.listProducts = async (req, res) => {
 exports.renderCreateForm = async (req, res) => {
   try {
     const supermarket = await Supermarket.findById(req.params.supermarketId);
-    if (!supermarket.isApproved) return res.status(403).send("O seu supermercado ainda não está aprovado.");
+    if (!supermarket.isApproved)
+      return res
+        .status(403)
+        .send("O seu supermercado ainda não está aprovado.");
     const categories = await Category.find();
     res.render("products/create", { supermarket, categories });
   } catch (error) {
@@ -56,11 +55,10 @@ exports.createProduct = async (req, res) => {
     const supermarket = await Supermarket.findById(req.params.supermarketId);
     if (!supermarket.isApproved) return res.status(403).send("Não aprovado.");
 
-    // Criar o objeto do produto com os dados do body + o ficheiro do Multer
     const productData = {
       ...req.body,
       supermarket: req.params.supermarketId,
-      image: req.file ? req.file.filename : 'default-product.png' // Guarda o nome do ficheiro
+      image: req.file ? req.file.filename : "default-product.png",
     };
 
     await Product.create(productData);

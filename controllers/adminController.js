@@ -49,8 +49,10 @@ exports.disapproveSupermarket = async (req, res) => {
     supermarket.isApproved = false;
     supermarket.toApprove = true;
     // Capta o motivo que vem do modal do frontend:
-    supermarket.rejectionReason = req.body.rejectionReason || "Nenhum motivo especificado pelo administrador."; 
-    
+    supermarket.rejectionReason =
+      req.body.rejectionReason ||
+      "Nenhum motivo especificado pelo administrador.";
+
     await supermarket.save();
     res.redirect("/admin/dashboard");
   } catch (error) {
@@ -64,5 +66,39 @@ exports.listUsers = async (req, res) => {
     res.render("admin/usersList", { allUsers });
   } catch (error) {
     res.status(500).send("Erro ao listar utilizadores!");
+  }
+}; 
+
+
+exports.renderCreateAdminForm = (req, res) => {
+  res.render("admin/createAdmin");
+};
+
+exports.createAdmin = async (req, res) => {
+  try {
+    const { name, email, password, phone, address } = req.body;
+
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).send("Já existe um utilizador com este email.");
+    }
+
+    const newAdmin = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
+      phone,
+      telephone: phone,
+      address,
+      role: "admin",
+      isApproved: true,
+    });
+
+    await newAdmin.save();
+
+    res.redirect("/admin/users");
+  } catch (error) {
+    console.error("Erro ao criar admin:", error);
+    res.status(500).send("Erro ao criar novo administrador.");
   }
 };

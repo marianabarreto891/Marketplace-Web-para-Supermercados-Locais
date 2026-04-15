@@ -37,7 +37,6 @@ exports.registerUser = async (req, res) => {
       password: req.body.password,
       address,
       phone,
-      telephone: phone,
       role: req.body.role,
     });
 

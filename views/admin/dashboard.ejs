@@ -21,6 +21,7 @@
                 <a href="/users/logout" class="btn btn-danger">Terminar Sessão</a>
             </div>
         </div>
+        
         <div class="row text-center mb-5 mt-4">
             <div class="col-md-4">
                 <div class="card bg-primary text-white shadow-sm border-0">
@@ -55,9 +56,10 @@
                 </div>
             </div>
         </div>
+        
         <h2 class="h4 mb-3">Supermercados a Aguardar Aprovação</h2>
 
-        <% if (pendingSupermarkets.length> 0) { %>
+        <% if (pendingSupermarkets.length > 0) { %>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover mt-2">
                     <thead class="table-light">
@@ -71,35 +73,53 @@
                     <tbody>
                         <% pendingSupermarkets.forEach(function(supermarket) { %>
                             <tr>
-                                <td class="align-middle"><strong>
-                                        <%= supermarket.name %>
-                                    </strong></td>
-                                <td class="align-middle">
-                                    <%= supermarket.location %>
-                                </td>
-                                <td class="align-middle">
-                                    <%= supermarket.manager.email %>
-                                </td>
-                                <td class="align-middle">
-                                    <form action="/admin/supermarket/<%= supermarket._id %>/approve" method="POST"
-                                        class="m-0">
-                                        <button type="submit" class="btn btn-success btn-sm">Aprovar
-                                            Supermercado</button>
-                                    </form><br>
-                                    <form action="/admin/supermarket/<%= supermarket._id %>/disapprove" method="POST"
-                                        class="m-0">
-                                        <button type="submit" class="btn btn-danger btn-sm">Rejeitar
-                                            Supermercado</button>
+                                <td class="align-middle"><strong><%= supermarket.name %></strong></td>
+                                <td class="align-middle"><%= supermarket.location %></td>
+                                <td class="align-middle"><%= supermarket.manager.email %></td>
+                                
+                                <td class="align-middle" style="min-width: 180px;">
+                                    <form action="/admin/supermarket/<%= supermarket._id %>/approve" method="POST" class="m-0 mb-2">
+                                        <button type="submit" class="btn btn-success btn-sm w-100">Aprovar Supermercado</button>
                                     </form>
-                                </td>
+                                    
+                                    <button type="button" class="btn btn-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#rejectModal<%= supermarket._id %>">
+                                        Rejeitar Supermercado
+                                    </button>
+
+                                    <div class="modal fade text-start" id="rejectModal<%= supermarket._id %>" tabindex="-1" aria-hidden="true">
+                                      <div class="modal-dialog">
+                                        <div class="modal-content">
+                                          <div class="modal-header">
+                                            <h5 class="modal-title text-danger">Rejeitar Supermercado</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                          </div>
+                                          
+                                          <form action="/admin/supermarket/<%= supermarket._id %>/disapprove" method="POST">
+                                            <div class="modal-body">
+                                              <p>Tem a certeza que pretende rejeitar o supermercado <strong><%= supermarket.name %></strong>?</p>
+                                              <div class="mb-3">
+                                                <label class="form-label fw-bold">Motivo da Rejeição (Obrigatório):</label>
+                                                <textarea name="rejectionReason" class="form-control" rows="3" required placeholder="Ex: A morada não existe, dados falsos..."></textarea>
+                                              </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                              <button type="submit" class="btn btn-danger">Confirmar Rejeição</button>
+                                            </div>
+                                          </form>
+                                          
+                                        </div>
+                                      </div>
+                                    </div>
+                                    </td>
                             </tr>
-                            <% }); %>
+                        <% }); %>
                     </tbody>
                 </table>
             </div>
-            <% } else { %>
-                <p class="text-muted fst-italic mt-3">Não há supermercados a aguardar aprovação neste momento!</p>
-                <% } %>
+        <% } else { %>
+            <p class="text-muted fst-italic mt-3">Não há supermercados a aguardar aprovação neste momento!</p>
+        <% } %>
 
     </div>
 

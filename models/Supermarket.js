@@ -21,9 +21,10 @@ const supermarketSchema = new mongoose.Schema(
     },
 
     isApproved: { type: Boolean, default: false },
-
     toApprove: { type: Boolean, default: false },
+    rejectionReason: { type: String, default: "" } // <-- ADICIONAR ESTA LINHA
   },
+  { timestamps: true },
   { timestamps: true },
 );
 

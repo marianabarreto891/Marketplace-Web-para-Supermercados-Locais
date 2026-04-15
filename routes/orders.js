@@ -1,49 +1,50 @@
+// routes/orders.js COMPLETO E CORRIGIDO
 var express = require("express");
 var router = express.Router();
-
-const { requireAuth, requireRole } = require("../middlewares/auth");
 const orderController = require("../controllers/orderController");
+const { requireAuth, requireRole } = require("../middlewares/auth");
 
-router.use(requireAuth);
+// --- ROTAS GERAIS ---
 
-// Criar Venda (Apenas Admin e Supermercado)
+// Listar encomendas (com filtros)
+router.get("/", requireAuth, orderController.listOrders);
+
+// Ver detalhes de uma encomenda específica
+router.get("/:id", requireAuth, orderController.showOrder);
+
+// --- ROTAS DE CRIAÇÃO (Apenas Supermercado/Admin) ---
+
+// Renderizar o formulário de criação de venda POS
 router.get(
   "/create/:supermarketId",
-  requireRole(["admin", "supermercado"]),
-  orderController.renderCreateForm,
+  requireAuth,
+  requireRole(["supermercado", "admin"]),
+  orderController.renderCreateForm
 );
+
+// Processar a criação da venda
 router.post(
   "/create/:supermarketId",
-  requireRole(["admin", "supermercado"]),
-  orderController.createOrder,
+  requireAuth,
+  requireRole(["supermercado", "admin"]),
+  orderController.createOrder
 );
 
-// Histórico e Listagem 
-router.get(
-  "/",
-  requireRole(["admin", "supermercado", "estafeta"]),
-  orderController.listOrders,
-);
+// --- ROTAS DE OPERAÇÕES ---
 
-// Detalhes de uma Encomenda específica
-router.get(
-  "/:id",
-  requireRole(["admin", "supermercado", "estafeta"]),
-  orderController.showOrder,
-);
-
-// Aceitar Encomenda (Apenas Estafeta)
+// Estafeta aceitar/reivindicar uma entrega
 router.post(
   "/:id/claim",
+  requireAuth,
   requireRole(["estafeta"]),
-  orderController.claimOrder,
+  orderController.claimOrder
 );
 
-// Atualizar Estado da Encomenda
-router.post(
-  "/:id/status",
-  requireRole(["admin", "supermercado", "estafeta"]),
-  orderController.updateOrderStatus,
-);
+// Atualizar o estado da encomenda (transições permitidas)
+router.post("/:id/status", requireAuth, orderController.updateOrderStatus);
+
+// --- NOVA ROTA DE AVALIAÇÃO (Ponto 3) ---
+// Cliente submeter a avaliação (requireAuth garante que é o cliente logado)
+router.post("/:id/rate", requireAuth, orderController.rateOrder);
 
 module.exports = router;

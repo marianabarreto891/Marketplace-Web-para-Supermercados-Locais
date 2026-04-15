@@ -48,6 +48,9 @@ exports.disapproveSupermarket = async (req, res) => {
 
     supermarket.isApproved = false;
     supermarket.toApprove = true;
+    // Capta o motivo que vem do modal do frontend:
+    supermarket.rejectionReason = req.body.rejectionReason || "Nenhum motivo especificado pelo administrador."; 
+    
     await supermarket.save();
     res.redirect("/admin/dashboard");
   } catch (error) {

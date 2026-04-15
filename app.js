@@ -9,6 +9,7 @@ const session = require("express-session");
 
 var app = express();
 
+// Configuração do motor de vistas
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
@@ -16,6 +17,9 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// --- CONFIGURAÇÃO DE FICHEIROS ESTÁTICOS ---
+// Esta linha permite que o navegador aceda a tudo dentro de 'public'
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
@@ -27,20 +31,21 @@ app.use(
   }),
 );
 
+// Importação de Rotas
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var supermarketRouter = require("./routes/supermarket");
 var adminRouter = require("./routes/admin");
 var ordersRouter = require("./routes/orders");
 
-
+// Definição de Rotas
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/supermarket", supermarketRouter);
 app.use("/admin", adminRouter);
 app.use("/orders", ordersRouter);
 
-
+// Erro 404
 app.use(function (req, res, next) {
   next(createError(404));
 });

@@ -11,6 +11,7 @@ const { requireAuth, requireRole } = require("../middlewares/auth");
 
 const supermarketController = require("../controllers/supermarketController");
 const productController = require("../controllers/productController");
+const upload = require("../middlewares/upload"); // Importação do middleware do Multer
 
 const ORDER_STATUS_LABELS = {
   pendente: "Pendente",
@@ -28,6 +29,7 @@ const DELIVERY_METHOD_LABELS = {
 
 const ACTIVE_ORDER_STATES = ["confirmada", "em_preparacao", "em_entrega"];
 
+// Funções Auxiliares
 function getManagedSupermarketFilter(supermarketIds) {
   return supermarketIds.length
     ? { supermercado: { $in: supermarketIds } }
@@ -116,6 +118,7 @@ function reqSessionObjectId(userId) {
     : userId;
 }
 
+// --- ROTAS DE NAVEGAÇÃO GERAL ---
 router.get("/", (req, res) => {
   res.redirect("/supermarket/list");
 });
@@ -134,9 +137,7 @@ router.get(
         const supermarkets = await Supermarket.find({
           manager: req.session.userId,
         }).sort({ name: 1 });
-        const supermarketIds = supermarkets.map(
-          (supermarket) => supermarket._id,
-        );
+        const supermarketIds = supermarkets.map((s) => s._id);
         const orderFilter = getManagedSupermarketFilter(supermarketIds);
 
         const totalOrders = await Order.countDocuments(orderFilter);
@@ -148,35 +149,18 @@ router.get(
           ...orderFilter,
           estado: "entregue",
         });
+        
         const revenueResult = await Order.aggregate([
-          {
-            $match: {
-              ...orderFilter,
-              estado: { $ne: "cancelada" },
-            },
-          },
-          {
-            $group: {
-              _id: null,
-              total: { $sum: "$total" },
-            },
-          },
+          { $match: { ...orderFilter, estado: { $ne: "cancelada" } } },
+          { $group: { _id: null, total: { $sum: "$total" } } },
         ]);
+        
         const unitsSoldResult = await Order.aggregate([
-          {
-            $match: {
-              ...orderFilter,
-              estado: { $ne: "cancelada" },
-            },
-          },
+          { $match: { ...orderFilter, estado: { $ne: "cancelada" } } },
           { $unwind: "$items" },
-          {
-            $group: {
-              _id: null,
-              totalUnits: { $sum: "$items.quantidade" },
-            },
-          },
+          { $group: { _id: null, totalUnits: { $sum: "$items.quantidade" } } },
         ]);
+
         const topProducts = await getSupermarketTopProducts(orderFilter);
         const recentOrders = await Order.find(orderFilter)
           .populate("cliente", "name")
@@ -193,9 +177,7 @@ router.get(
             totalRevenue: revenueResult[0] ? revenueResult[0].total : 0,
             openOrders,
             deliveredOrders,
-            totalUnitsSold: unitsSoldResult[0]
-              ? unitsSoldResult[0].totalUnits
-              : 0,
+            totalUnitsSold: unitsSoldResult[0] ? unitsSoldResult[0].totalUnits : 0,
           },
           recentOrders,
           topProducts,
@@ -205,31 +187,13 @@ router.get(
         });
       }
 
-      const pendingPreparation = await Order.countDocuments({
-        metodoEntrega: "estafeta",
-        estado: "confirmada",
-        estafeta: null,
-      });
-      const availableDeliveries = await Order.countDocuments({
-        metodoEntrega: "estafeta",
-        estado: "em_preparacao",
-        estafeta: null,
-      });
-      const activeDeliveries = await Order.countDocuments({
-        metodoEntrega: "estafeta",
-        estado: "em_entrega",
-        estafeta: req.session.userId,
-      });
-      const deliveredCount = await Order.countDocuments({
-        metodoEntrega: "estafeta",
-        estado: "entregue",
-        estafeta: req.session.userId,
-      });
-      const totalDeliveries = await Order.countDocuments({
-        metodoEntrega: "estafeta",
-        estafeta: req.session.userId,
-        estado: { $ne: "cancelada" },
-      });
+      // Lógica para Estafeta no Dashboard
+      const pendingPreparation = await Order.countDocuments({ metodoEntrega: "estafeta", estado: "confirmada", estafeta: null });
+      const availableDeliveries = await Order.countDocuments({ metodoEntrega: "estafeta", estado: "em_preparacao", estafeta: null });
+      const activeDeliveries = await Order.countDocuments({ metodoEntrega: "estafeta", estado: "em_entrega", estafeta: req.session.userId });
+      const deliveredCount = await Order.countDocuments({ metodoEntrega: "estafeta", estado: "entregue", estafeta: req.session.userId });
+      const totalDeliveries = await Order.countDocuments({ metodoEntrega: "estafeta", estafeta: req.session.userId, estado: { $ne: "cancelada" } });
+      
       const recentOrders = await Order.find({
         metodoEntrega: "estafeta",
         $or: [
@@ -237,25 +201,15 @@ router.get(
           { estafeta: req.session.userId },
         ],
       })
-        .populate("cliente", "name")
-        .populate("supermercado", "name")
-        .populate("estafeta", "name")
-        .sort({ createdAt: -1 })
-        .limit(8);
-      const topSupermarkets = await getCourierTopSupermarkets(
-        req.session.userId,
-      );
+      .populate("cliente", "name").populate("supermercado", "name").populate("estafeta", "name")
+      .sort({ createdAt: -1 }).limit(8);
+
+      const topSupermarkets = await getCourierTopSupermarkets(req.session.userId);
 
       return res.render("supermarkets/dashboard", {
         role: req.session.role,
         supermarkets: [],
-        summary: {
-          totalDeliveries,
-          pendingPreparation,
-          availableDeliveries,
-          activeDeliveries,
-          deliveredCount,
-        },
+        summary: { totalDeliveries, pendingPreparation, availableDeliveries, activeDeliveries, deliveredCount },
         recentOrders,
         topProducts: [],
         topSupermarkets,
@@ -266,70 +220,55 @@ router.get(
       console.error("Erro ao carregar dashboard:", error);
       return res.status(500).send("Erro ao carregar dashboard.");
     }
-  },
+  }
 );
 
+// --- ROTAS DE SUPERMERCADOS ---
 router.get("/list", requireAuth, supermarketController.listSupermarkets);
-router.get(
-  "/new",
-  requireAuth,
-  requireRole(["supermercado"]),
-  supermarketController.renderCreateForm,
-);
-router.post(
-  "/new",
-  requireAuth,
-  requireRole(["supermercado"]),
-  supermarketController.createSupermarket,
-);
+router.get("/new", requireAuth, requireRole(["supermercado"]), supermarketController.renderCreateForm);
+router.post("/new", requireAuth, requireRole(["supermercado"]), supermarketController.createSupermarket);
 router.get("/:id", requireAuth, supermarketController.showSupermarket);
+router.get("/:id/edit", requireAuth, requireRole(["supermercado", "admin"]), supermarketController.renderEditForm);
+router.post("/:id/edit", requireAuth, requireRole(["supermercado", "admin"]), supermarketController.updateSupermarket);
+
+// --- ROTAS DE PRODUTOS ---
+router.get("/:supermarketId/products", requireAuth, productController.listProducts);
+
 router.get(
-  "/:id/edit",
+  "/:supermarketId/products/new",
   requireAuth,
-  requireRole(["supermercado", "admin"]),
-  supermarketController.renderEditForm,
+  requireRole(["supermercado"]),
+  productController.renderCreateForm
 );
+
+// ROTA COM MULTER PARA CRIAR PRODUTO
 router.post(
-  "/:id/edit",
+  "/:supermarketId/products/new",
   requireAuth,
-  requireRole(["supermercado", "admin"]),
-  supermarketController.updateSupermarket,
+  requireRole(["supermercado"]),
+  upload.single('image'), // Processa a imagem e preenche o req.body
+  productController.createProduct
 );
 
 router.get(
-  "/:supermarketId/products",
-  requireAuth,
-  productController.listProducts,
-);
-router.get(
-  "/:supermarketId/products/new",
-  requireAuth,
-  requireRole(["supermercado"]),
-  productController.renderCreateForm,
-);
-router.post(
-  "/:supermarketId/products/new",
-  requireAuth,
-  requireRole(["supermercado"]),
-  productController.createProduct,
-);
-router.get(
   "/:supermarketId/products/:productId/edit",
   requireAuth,
   requireRole(["supermercado"]),
-  productController.renderEditForm,
+  productController.renderEditForm
 );
+
 router.post(
   "/:supermarketId/products/:productId/edit",
   requireAuth,
   requireRole(["supermercado"]),
-  productController.updateProduct,
+  productController.updateProduct
 );
+
 router.post(
   "/:supermarketId/products/:productId/delete",
   requireAuth,
   requireRole(["supermercado"]),
-  productController.deleteProduct,
+  productController.deleteProduct
 );
 
 module.exports = router;

@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detalhe da Encomenda</title>
-  <link rel="stylesheet" href="/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body class="bg-light">
-  <%
+  <% 
     const statusClasses = {
       pendente: "bg-secondary",
       confirmada: "bg-primary",
@@ -20,104 +20,84 @@
   %>
 
   <div class="container py-5">
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h1 class="mb-1">Encomenda</h1>
+        <h1 class="mb-1">Encomenda #<%= order._id.toString().slice(-6).toUpperCase() %></h1>
         <p class="text-muted mb-0">Criada em <%= new Date(order.createdAt).toLocaleString("pt-PT") %></p>
       </div>
-      <div class="d-flex flex-wrap gap-2">
-        <a href="/orders" class="btn btn-outline-primary">Voltar a encomendas</a>
-        <% if (order.supermercado && order.supermercado._id && role !== "estafeta") { %>
-          <a href="/supermarket/<%= order.supermercado._id %>" class="btn btn-outline-secondary">Voltar ao supermercado</a>
-        <% } %>
+      <div class="d-flex gap-2">
+        <a href="/orders" class="btn btn-outline-primary">Voltar</a>
       </div>
     </div>
 
-    <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && !order.estafeta && order.estado === "confirmada") { %>
-      <div class="alert alert-info shadow-sm border-0 mb-4">
-        Esta entrega ja esta visivel para si, mas so pode ser aceite quando o supermercado a passar para <strong>Em preparacao</strong>.
-      </div>
-    <% } %>
-
     <div class="row g-4">
       <div class="col-lg-8">
+        
         <div class="card shadow-sm border-0 mb-4">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h2 class="h4 mb-0">Resumo</h2>
-              <span class="badge <%= statusClasses[order.estado] %>"><%= statusLabels[order.estado] %></span>
+              <h2 class="h4 mb-0">Resumo da Encomenda</h2>
+              <span class="badge <%= statusClasses[order.estado] %> px-3 py-2">
+                <%= statusLabels[order.estado] %>
+              </span>
             </div>
 
             <div class="row g-3">
               <div class="col-md-6">
                 <div class="small text-muted">Supermercado</div>
-                <div class="fw-semibold"><%= order.supermercado ? order.supermercado.name : "-" %></div>
+                <div class="fw-bold"><%= order.supermercado ? order.supermercado.name : "-" %></div>
               </div>
               <div class="col-md-6">
-                <div class="small text-muted">Método de entrega</div>
-                <div class="fw-semibold"><%= deliveryLabels[order.metodoEntrega] %></div>
+                <div class="small text-muted">Método de Entrega</div>
+                <div class="fw-bold"><%= deliveryLabels[order.metodoEntrega] %></div>
               </div>
               <div class="col-md-6">
                 <div class="small text-muted">Cliente</div>
-                <div class="fw-semibold"><%= order.cliente ? order.cliente.name : "-" %></div>
-              </div>
-              <div class="col-md-6">
-                <div class="small text-muted">Email</div>
-                <div class="fw-semibold"><%= order.cliente ? order.cliente.email : "-" %></div>
+                <div class="fw-bold"><%= order.cliente ? order.cliente.name : "-" %></div>
               </div>
               <div class="col-md-6">
                 <div class="small text-muted">Telefone</div>
-                <div class="fw-semibold"><%= order.cliente ? (order.cliente.phone || order.cliente.telephone || "-") : "-" %></div>
-              </div>
-              <div class="col-md-6">
-                <div class="small text-muted">Estafeta</div>
-                <div class="fw-semibold"><%= order.estafeta ? order.estafeta.name : "Não atribuído" %></div>
+                <div class="fw-bold"><%= order.cliente ? (order.cliente.phone || "-") : "-" %></div>
               </div>
               <div class="col-12">
-                <div class="small text-muted">Morada</div>
-                <div class="fw-semibold"><%= order.cliente ? order.cliente.address : "-" %></div>
+                <div class="small text-muted">Morada de Entrega</div>
+                <div class="fw-bold"><%= order.cliente ? order.cliente.address : "Levantamento em loja" %></div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm border-0 mb-4">
           <div class="card-body">
-            <h2 class="h4 mb-3">Produtos da venda</h2>
-
+            <h2 class="h4 mb-3">Produtos</h2>
             <div class="table-responsive">
               <table class="table align-middle">
                 <thead class="table-light">
                   <tr>
                     <th>Produto</th>
-                    <th>Quantidade</th>
-                    <th>Preco unitario</th>
-                    <th>Subtotal</th>
+                    <th class="text-center">Qtd</th>
+                    <th class="text-end">Preço Un.</th>
+                    <th class="text-end">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
                   <% order.items.forEach((item) => { %>
                     <tr>
-                      <td>
-                        <div class="fw-semibold"><%= item.nome %></div>
-                        <% if (item.product && item.product.description) { %>
-                          <div class="small text-muted"><%= item.product.description %></div>
-                        <% } %>
-                      </td>
-                      <td><%= item.quantidade %></td>
-                      <td>EUR <%= Number(item.precoUnitario).toFixed(2) %></td>
-                      <td>EUR <%= Number(item.subtotal).toFixed(2) %></td>
+                      <td><%= item.nome %></td>
+                      <td class="text-center"><%= item.quantidade %></td>
+                      <td class="text-end">EUR <%= Number(item.precoUnitario).toFixed(2) %></td>
+                      <td class="text-end fw-bold">EUR <%= Number(item.subtotal).toFixed(2) %></td>
                     </tr>
                   <% }) %>
                 </tbody>
-                <tfoot>
+                <tfoot class="table-group-divider">
                   <tr>
-                    <th colspan="3" class="text-end">Custo de entrega</th>
-                    <th>EUR <%= Number(order.custoEntrega || 0).toFixed(2) %></th>
+                    <td colspan="3" class="text-end text-muted">Custo de Entrega:</td>
+                    <td class="text-end text-muted">EUR <%= Number(order.custoEntrega || 0).toFixed(2) %></td>
                   </tr>
-                  <tr>
-                    <th colspan="3" class="text-end">Total</th>
-                    <th>EUR <%= Number(order.total).toFixed(2) %></th>
+                  <tr class="fs-5">
+                    <td colspan="3" class="text-end fw-bold">Total:</td>
+                    <td class="text-end fw-bold text-primary">EUR <%= Number(order.total).toFixed(2) %></td>
                   </tr>
                 </tfoot>
               </table>
@@ -127,13 +107,13 @@
       </div>
 
       <div class="col-lg-4">
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm border-0 sticky-top" style="top: 2rem;">
           <div class="card-body">
-            <h2 class="h4 mb-3">Operacoes</h2>
+            <h2 class="h4 mb-3">Operações</h2>
 
             <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta) { %>
               <form action="/orders/<%= order._id %>/claim" method="POST" class="mb-3">
-                <button type="submit" class="btn btn-primary w-100">Aceitar entrega</button>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Aceitar Entrega</button>
               </form>
             <% } %>
 
@@ -142,21 +122,90 @@
                 <% allowedTransitions.forEach((nextStatus) => { %>
                   <form action="/orders/<%= order._id %>/status" method="POST">
                     <input type="hidden" name="estado" value="<%= nextStatus %>">
-                    <button type="submit" class="btn w-100 <%= nextStatus === 'cancelada' ? 'btn-outline-danger' : 'btn-outline-primary' %>">
+                    <button type="submit" class="btn w-100 py-2 <%= nextStatus === 'cancelada' ? 'btn-outline-danger' : 'btn-outline-primary' %>">
                       Marcar como <%= statusLabels[nextStatus] %>
                     </button>
                   </form>
                 <% }) %>
               </div>
             <% } else { %>
-              <div class="alert alert-secondary mb-0">
-                Nao ha transicoes disponiveis para o seu perfil neste estado.
+              <div class="alert alert-light border text-center mb-0">
+                Sem ações disponíveis para este estado.
               </div>
             <% } %>
           </div>
         </div>
       </div>
     </div>
+
+    <% if (order.estado === 'entregue' && role === 'cliente' && (!order.avaliacaoSupermercado || !order.avaliacaoSupermercado.rating)) { %>
+      <div class="card shadow-sm border-0 mt-4 bg-white border-start border-4 border-success">
+        <div class="card-body p-4">
+          <h3 class="h4 mb-4 text-success">Avalie a sua experiência</h3>
+          <form action="/orders/<%= order._id %>/rate" method="POST">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Supermercado</label>
+                <select name="ratingSupermarket" class="form-select mb-2" required>
+                  <option value="5">5 Estrelas - Excelente</option>
+                  <option value="4">4 Estrelas - Muito Bom</option>
+                  <option value="3" selected>3 Estrelas - Bom</option>
+                  <option value="2">2 Estrelas - Razoável</option>
+                  <option value="1">1 Estrela - Mau</option>
+                </select>
+                <textarea name="commentSupermarket" class="form-control" rows="2" placeholder="Comentário sobre os produtos..."></textarea>
+              </div>
+              <% if (order.metodoEntrega === 'estafeta' && order.estafeta) { %>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Estafeta</label>
+                  <select name="ratingCourier" class="form-select mb-2" required>
+                    <option value="5">5 Estrelas - Rápido e Gentil</option>
+                    <option value="4">4 Estrelas - Bom serviço</option>
+                    <option value="3" selected>3 Estrelas - Normal</option>
+                    <option value="2">2 Estrelas - Atrasado</option>
+                    <option value="1">1 Estrela - Muito mau</option>
+                  </select>
+                  <textarea name="commentCourier" class="form-control" rows="2" placeholder="Comentário sobre a entrega..."></textarea>
+                </div>
+              <% } %>
+            </div>
+            <button type="submit" class="btn btn-success w-100 fw-bold">Submeter Avaliação</button>
+          </form>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (order.avaliacaoSupermercado && order.avaliacaoSupermercado.rating) { %>
+      <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body p-4">
+          <h3 class="h4 mb-3">A sua avaliação</h3>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-1 fw-bold">Supermercado:</p>
+              <div class="mb-2">
+                <% for(let i=0; i<5; i++) { %>
+                  <span class="<%= i < order.avaliacaoSupermercado.rating ? 'text-warning' : 'text-muted' %> fs-5">★</span>
+                <% } %>
+              </div>
+              <p class="text-muted italic small">"<%= order.avaliacaoSupermercado.comentario || 'Sem comentário.' %>"</p>
+            </div>
+            <% if (order.avaliacaoEstafeta && order.avaliacaoEstafeta.rating) { %>
+              <div class="col-md-6 border-start">
+                <p class="mb-1 fw-bold">Estafeta:</p>
+                <div class="mb-2">
+                  <% for(let i=0; i<5; i++) { %>
+                    <span class="<%= i < order.avaliacaoEstafeta.rating ? 'text-warning' : 'text-muted' %> fs-5">★</span>
+                  <% } %>
+                </div>
+                <p class="text-muted italic small">"<%= order.avaliacaoEstafeta.comentario || 'Sem comentário.' %>"</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -83,9 +83,16 @@ const orderSchema = new mongoose.Schema(
         "cancelada"
       ],
       default: "confirmada"
+    },
+    
+    avaliacaoSupermercado: {
+      rating: { type: Number, min: 1, max: 5 },
+      comentario: { type: String }
+    },
+    avaliacaoEstafeta: {
+      rating: { type: Number, min: 1, max: 5 },
+      comentario: { type: String }
     }
-  },
-  { timestamps: true }
-);
-
+}, { timestamps: true });
+ 
 module.exports = mongoose.model("Order", orderSchema);

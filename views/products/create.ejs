@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
     <meta charset="UTF-8">
     <title>Novo Produto</title>
     <link rel="stylesheet" href="/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="container mt-5">
     <h1>Novo Produto - <%= supermarket.name %></h1>
-    
-    <form action="/supermarket/<%= supermarket._id %>/products/new" method="POST" class="mt-4">
+
+    <form action="/supermarket/<%= supermarket._id %>/products/new" method="POST" enctype="multipart/form-data" class="mt-4">
+        
         <div class="mb-3">
             <label>Nome:</label>
             <input type="text" name="name" class="form-control" required>
@@ -25,14 +28,16 @@
             <select name="category" class="form-select" required>
                 <option value="">Selecione...</option>
                 <% categories.forEach(cat => { %>
-                    <option value="<%= cat._id %>"><%= cat.name %></option>
+                    <option value="<%= cat._id %>">
+                        <%= cat.name %>
+                    </option>
                 <% }) %>
             </select>
         </div>
 
         <div class="mb-3">
-            <label>URL da Imagem:</label>
-            <input type="text" name="image" class="form-control" placeholder="https://exemplo.com/imagem.jpg">
+            <label class="form-label">Imagem do Produto:</label>
+            <input type="file" name="image" class="form-control" accept="image/*">
         </div>
 
         <div class="row">
@@ -50,4 +55,5 @@
         <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-secondary">Cancelar</a>
     </form>
 </body>
+
 </html>

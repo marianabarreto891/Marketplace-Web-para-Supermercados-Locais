@@ -9,13 +9,14 @@
 </head>
 <body class="bg-light">
   <div class="container py-5">
+    
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
       <div>
         <h1 class="mb-1">Produtos</h1>
         <p class="text-muted mb-0"><%= supermarket.name %></p>
       </div>
       <div class="d-flex flex-wrap gap-2">
-        <a href="/supermarket/list" class="btn btn-outline-secondary">Voltar a lista</a>
+        <a href="/supermarket/list" class="btn btn-outline-secondary">Voltar à lista</a>
         <a href="/supermarket/<%= supermarket._id %>" class="btn btn-outline-info">Voltar ao detalhe</a>
         <% if (supermarket.isApproved && (userRole === "supermercado" || userRole === "admin")) { %>
           <a href="/orders/create/<%= supermarket._id %>" class="btn btn-primary">Registar venda</a>
@@ -23,72 +24,116 @@
         <% } %>
       </div>
     </div>
-
-    <div class="card shadow-sm border-0 mb-4">
+<div class="card shadow-sm border-0 mb-4">
       <div class="card-body">
-        <form action="/supermarket/<%= supermarket._id %>/products" method="GET" class="row g-3 align-items-end">
+        <form action="/supermarket/<%= supermarket._id %>/products" method="GET" class="row g-3 align-items-center">
+          
+          <div class="col-md-12 col-lg-5">
+            <label class="form-label fw-semibold">Categoria:</label>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="submit" name="category" value="all" 
+                      class="btn btn-sm <%= selectedCategory === 'all' ? 'btn-primary' : 'btn-outline-primary' %>">
+                Todas
+              </button>
+              
+              <% if (typeof categories !== 'undefined') { %>
+                <% categories.forEach(cat => { %>
+                  <button type="submit" name="category" value="<%= cat.name %>" 
+                          class="btn btn-sm <%= selectedCategory === cat.name ? 'btn-primary' : 'btn-outline-primary' %>">
+                    <%= cat.name %>
+                  </button>
+                <% }) %>
+              <% } %>
+            </div>
+          </div>
+
           <div class="col-md-8 col-lg-5">
-            <label class="form-label fw-semibold">Pesquisar por nome</label>
-            <input type="text" name="search" class="form-control" placeholder="Pesquisar..." value="<%= searchQuery || '' %>">
+            <label class="form-label fw-semibold">Pesquisar por nome:</label>
+            <div class="input-group">
+              <input type="text" name="search" class="form-control" placeholder="Nome do produto..." value="<%= searchQuery || '' %>">
+              <input type="hidden" name="category" value="<%= selectedCategory %>">
+              <button type="submit" class="btn btn-primary">Pesquisar</button>
+            </div>
           </div>
-          <div class="col-md-4 col-lg-3 d-flex gap-2">
-            <button type="submit" class="btn btn-primary flex-fill">Pesquisar</button>
-            <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-secondary flex-fill">Limpar</a>
+
+          <div class="col-md-4 col-lg-2 text-end mt-auto">
+            <a href="/supermarket/<%= supermarket._id %>/products" class="btn btn-outline-secondary w-100">Limpar tudo</a>
           </div>
+
         </form>
       </div>
     </div>
 
     <% if (userRole === "supermercado" || userRole === "admin") { %>
       <% if (supermarket.isApproved) { %>
-        <div class="mb-3 d-flex gap-2 flex-wrap">
+        <div class="mb-3">
           <a href="/supermarket/<%= supermarket._id %>/products/new" class="btn btn-success">Adicionar produto</a>
         </div>
       <% } else { %>
-        <div class="alert alert-danger">Supermercado não aprovado. Não pode gerir produtos nem realizar vendas!</div>
+        <div class="alert alert-danger">Supermercado não aprovado. Não pode gerir produtos!</div>
       <% } %>
     <% } %>
 
     <div class="card shadow-sm border-0">
       <div class="card-body">
-        <% if (!products.length) { %>
+        <% if (!products || products.length === 0) { %>
           <div class="alert alert-info mb-0">Não existem produtos para mostrar!</div>
         <% } else { %>
           <div class="table-responsive">
-            <table class="table align-middle">
+            <table class="table align-middle table-hover">
               <thead class="table-light">
                 <tr>
+                  <th style="width: 80px;">Foto</th>
                   <th>Nome</th>
                   <th>Categoria</th>
-                  <th>Preco</th>
+                  <th>Preço</th>
                   <th>Stock</th>
                   <th class="text-end">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                <% products.forEach((p) => { %>
+                <% products.forEach(function(product) { %>
                   <tr>
                     <td>
-                      <div class="fw-semibold"><%= p.name %></div>
-                      <% if (p.description) { %>
-                        <div class="small text-muted"><%= p.description %></div>
-                      <% } %>
-                    </td>
-                    <td><%= p.category ? p.category.name : "Sem categoria" %></td>
-                    <td>EUR <%= Number(p.price).toFixed(2) %></td>
-                    <td><%= p.stock %></td>
-                    <td class="text-end">
-                      <% if (supermarket.isApproved && (userRole === "supermercado" || userRole === "admin")) { %>
-                        <div class="d-flex justify-content-end gap-2">
-                          <a href="/supermarket/<%= supermarket._id %>/products/<%= p._id %>/edit" class="btn btn-sm btn-warning">Editar</a>
-                          <form action="/supermarket/<%= supermarket._id %>/products/<%= p._id %>/delete" method="POST">
-                            <button type="submit" class="btn btn-sm btn-danger">Apagar</button>
-                          </form>
+                      <% if (product.image && product.image !== 'default-product.png') { %>
+                        <img src="/uploads/products/<%= product.image %>" 
+                             alt="<%= product.name %>" 
+                             class="rounded shadow-sm border" 
+                             style="width: 50px; height: 50px; object-fit: cover;">
+                      <% } else { %>
+                        <div class="bg-light d-flex align-items-center justify-content-center rounded border" 
+                             style="width: 50px; height: 50px;">
+                          <small class="text-muted" style="font-size: 10px;">Sem foto</small>
                         </div>
                       <% } %>
                     </td>
+                    <td>
+                      <div class="fw-bold"><%= product.name %></div>
+                      <div class="small text-muted"><%= product.description %></div>
+                    </td>
+                    <td>
+                      <span class="badge bg-light text-dark border">
+                        <%= product.category ? product.category.name : 'Sem categoria' %>
+                      </span>
+                    </td>
+                    <td class="fw-semibold">EUR <%= Number(product.price).toFixed(2) %></td>
+                    <td>
+                      <span class="badge <%= product.stock > 0 ? 'bg-success' : 'bg-danger' %>">
+                        <%= product.stock %>
+                      </span>
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2">
+                        <% if (userRole === "supermercado" || userRole === "admin") { %>
+                          <a href="/supermarket/<%= supermarket._id %>/products/<%= product._id %>/edit" class="btn btn-sm btn-warning">Editar</a>
+                          <form action="/supermarket/<%= supermarket._id %>/products/<%= product._id %>/delete" method="POST" onsubmit="return confirm('Tem a certeza?')">
+                            <button type="submit" class="btn btn-sm btn-danger">Apagar</button>
+                          </form>
+                        <% } %>
+                      </div>
+                    </td>
                   </tr>
-                <% }) %>
+                <% }); %>
               </tbody>
             </table>
           </div>

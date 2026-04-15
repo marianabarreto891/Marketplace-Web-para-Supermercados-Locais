@@ -91,7 +91,6 @@ function buildCreateViewModel(supermarket, products, customers, formData = {}, e
   };
 }
 
-// ATUALIZADO: Recebe req para processar os filtros de Backend
 async function renderCreatePage(req, res, supermarket, formData = {}, errorMessage = null, statusCode = 200) {
   let query = { supermarket: supermarket._id };
 
@@ -197,7 +196,6 @@ async function restoreOrderStock(order) {
 async function buildOrderAccessFilter(req) {
   if (req.session.role === "admin") return {};
   
-  // CORREÇÃO: Adicionada a regra para o Cliente! Só vê as dele.
   if (req.session.role === "cliente") {
     return { cliente: req.session.userId };
   }
@@ -217,7 +215,6 @@ async function buildOrderAccessFilter(req) {
 async function canAccessOrder(req, order) {
   if (req.session.role === "admin") return true;
   
-  // CORREÇÃO: Adicionada a permissão para o Cliente entrar no detalhe da encomenda!
   if (req.session.role === "cliente") {
     const clienteId = order.cliente && order.cliente._id ? order.cliente._id : order.cliente;
     return String(clienteId) === String(req.session.userId);
@@ -267,14 +264,12 @@ function getAllowedTransitions(order, role, userId) {
   return transitions;
 }
 
-// --- EXPORTS ---
 
 exports.renderCreateForm = async (req, res) => {
   try {
     const result = await getCreateSupermarket(req, req.params.supermarketId);
     if (result.error) return res.status(result.error.status).send(result.error.message);
     
-    // ATUALIZADO: Passa o req
     return renderCreatePage(req, res, result.supermarket);
   } catch (error) {
     console.error("Erro ao abrir formulário de venda:", error);
@@ -292,7 +287,6 @@ exports.createOrder = async (req, res) => {
     const formData = buildFormData(req.body, rawItems);
 
     if (!supermarket.deliveryMethods.includes(formData.deliveryMethod)) {
-      // ATUALIZADO: Passa o req
       return renderCreatePage(req, res, supermarket, formData, "Selecione um método de entrega válido!", 400);
     }
 
@@ -300,7 +294,7 @@ exports.createOrder = async (req, res) => {
     for (const item of rawItems) {
       if (!item.selected) continue;
       if (!item.productId || !Number.isInteger(item.quantity) || item.quantity <= 0) {
-        // ATUALIZADO: Passa o req
+    
         return renderCreatePage(req, res, supermarket, formData, "Selecione produtos com quantidades válidas.", 400);
       }
       const currentQuantity = selectionMap.get(item.productId) || 0;
@@ -309,7 +303,6 @@ exports.createOrder = async (req, res) => {
 
     const selections = Array.from(selectionMap.entries()).map(([productId, quantity]) => ({ productId, quantity }));
     if (selections.length === 0) {
-      // ATUALIZADO: Passa o req
       return renderCreatePage(req, res, supermarket, formData, "Tem de selecionar pelo menos um produto.", 400);
     }
 
@@ -320,12 +313,11 @@ exports.createOrder = async (req, res) => {
         customer = await User.findById(formData.existingCustomerId);
         if (!customer || customer.role !== "cliente") throw new Error("O cliente selecionado não é válido.");
       } else { customer = await findOrCreateCustomer(formData.customer); }
-    // ATUALIZADO: Passa o req
+    
     } catch (customerError) { return renderCreatePage(req, res, supermarket, formData, customerError.message, 400); }
 
     let reservation;
     try { reservation = await reserveStock(supermarket._id, selections);
-    // ATUALIZADO: Passa o req
     } catch (reservationError) { return renderCreatePage(req, res, supermarket, formData, reservationError.message, 400); }
 
     let custoEntrega = 0;
@@ -403,8 +395,7 @@ exports.updateOrderStatus = async (req, res) => {
     await order.save(); return res.redirect(`/orders/${order._id}`);
   } catch (error) { console.error("Erro ao atualizar o estado da encomenda:", error); return res.status(500).send("Erro ao atualizar o estado da encomenda."); }
 };
-
-// Nova função de avaliação 
+ 
 exports.rateOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);

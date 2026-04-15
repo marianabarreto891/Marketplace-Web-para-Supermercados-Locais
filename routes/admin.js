@@ -17,4 +17,8 @@ router.get("/users", adminController.listUsers);
 router.get("/categories", categoryController.listCategories);
 router.post("/categories/new", categoryController.createCategory);
 
+// Criar novo Administrador
+router.get("/createAdmin", adminController.renderCreateAdminForm);
+router.post("/createAdmin", adminController.createAdmin);
+
 module.exports = router;

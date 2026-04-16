@@ -5,17 +5,23 @@ exports.loginUser = async (req, res) => {
   const loginValue = String(req.body.email || req.body.username || "").trim();
   const normalizedEmail = loginValue.toLowerCase();
   const { password } = req.body;
+
   try {
     const userFound = await user.findOne({
       $or: [{ email: normalizedEmail }, { name: loginValue }],
     });
+
     if (!userFound) {
-      return res.status(400).send({ message: "Utilizador não encontrado!" });
+      return res.status(400).render("users/login", {
+        errorMessage: "Utilizador não encontrado!",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, userFound.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Password incorreta!" });
+      return res.status(400).render("users/login", {
+        errorMessage: "Password incorreta, tente novamente!",
+      });
     }
 
     // 1º: GUARDAR OS DADOS NA SESSÃO
@@ -23,11 +29,12 @@ exports.loginUser = async (req, res) => {
     req.session.role = userFound.role;
 
     // 2º: FORÇAR A GRAVAÇÃO ANTES DE REDIRECIONAR
-
     req.session.save((err) => {
       if (err) {
         console.error("Erro ao gravar sessão:", err);
-        return res.status(500).json({ message: "Erro ao iniciar sessão." });
+        return res.status(500).render("users/login", {
+          errorMessage: "Erro ao iniciar sessão.",
+        });
       }
 
       if (userFound.role === "admin") {
@@ -44,6 +51,8 @@ exports.loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erro no servidor" });
+    res.status(500).render("users/login", {
+      errorMessage: "Erro interno no servidor.",
+    });
   }
 };

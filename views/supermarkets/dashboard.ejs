@@ -22,232 +22,145 @@
   <div class="container py-5">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
       <div>
-        <% if (role === "supermercado") { %>
-          <h1 class="mb-1">Supermercado </h1>
-
-        <% } else { %>
-          <h1 class="mb-1">Dashboard do estafeta</h1>
-          <p class="text-muted mb-0">Resumo das entregas, disponibilidades e supermercados com mais entregas.</p>
-        <% } %>
+        <h1 class="mb-1">Dashboard do supermercado</h1>
+        <p class="text-muted mb-0">Resumo de encomendas, vendas e produtos mais vendidos.</p>
       </div>
       <div class="d-flex flex-wrap gap-2">
-        <a href="/orders" class="btn btn-primary"><%= role === "supermercado" ? "Ver encomendas" : "Ver entregas" %></a>
+        <a href="/orders" class="btn btn-primary">Ver encomendas</a>
         <a href="/supermarket/list" class="btn btn-outline-secondary">Supermercados</a>
-        <a href="/users/logout" class="btn btn-danger">Terminar sessão</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar sessao</a>
       </div>
     </div>
 
-    <% if (role === "supermercado") { %>
-      <div class="row g-4 mb-4">
-        <div class="col-md-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="text-muted small">Número de encomendas</div>
-              <div class="display-6 fw-bold"><%= summary.totalOrders %></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="text-muted small">Encomendas ativas</div>
-              <div class="display-6 fw-bold"><%= summary.openOrders %></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="text-muted small">Produtos vendidos</div>
-              <div class="display-6 fw-bold"><%= summary.totalUnitsSold %></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="text-muted small">Total vendido</div>
-              <div class="display-6 fw-bold">€ <%= Number(summary.totalRevenue).toFixed(2) %></div>
-            </div>
+    <div class="row g-4 mb-4">
+      <div class="col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small">Numero de encomendas</div>
+            <div class="display-6 fw-bold"><%= summary.totalOrders %></div>
           </div>
         </div>
       </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small">Encomendas ativas</div>
+            <div class="display-6 fw-bold"><%= summary.openOrders %></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small">Produtos vendidos</div>
+            <div class="display-6 fw-bold"><%= summary.totalUnitsSold %></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="text-muted small">Total vendido</div>
+            <div class="display-6 fw-bold">EUR <%= Number(summary.totalRevenue).toFixed(2) %></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <div class="row g-4 mb-4">
-        <div class="col-xl-7">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h4 mb-0">Produtos mais vendidos</h2> 
-                <span class="badge bg-secondary">Total: <%= topProducts.length %></span>
-              </div>
+    <div class="row g-4 mb-4">
+      <div class="col-xl-7">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h4 mb-0">Produtos mais vendidos</h2>
+              <span class="badge bg-secondary">Total: <%= topProducts.length %></span>
+            </div>
 
-              <% if (!topProducts.length) { %>
-                <div class="alert alert-info mb-0">Ainda não existem vendas suficientes para mostrar os produtos mais vendidos!</div>
-              <% } else { %>
-                <div class="table-responsive">
-                  <table class="table align-middle mb-0">
-                    <thead class="table-light">
+            <% if (!topProducts.length) { %>
+              <div class="alert alert-info mb-0">Ainda nao existem vendas suficientes para mostrar os produtos mais vendidos.</div>
+            <% } else { %>
+              <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Produto</th>
+                      <th>Unidades</th>
+                      <th>Encomendas</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% topProducts.forEach((product) => { %>
                       <tr>
-                        <th>Produto</th>
-                        <th>Unidades</th>
-                        <th>Encomendas</th>
-                        <th>Total</th>
+                        <td class="fw-semibold"><%= product.name %></td>
+                        <td><%= product.unitsSold %></td>
+                        <td><%= product.ordersCount %></td>
+                        <td>EUR <%= Number(product.revenue).toFixed(2) %></td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      <% topProducts.forEach((product) => { %>
-                        <tr>
-                          <td class="fw-semibold"><%= product.name %></td>
-                          <td><%= product.unitsSold %></td>
-                          <td><%= product.ordersCount %></td>
-                          <td>€ <%= Number(product.revenue).toFixed(2) %></td>
-                        </tr>
-                      <% }) %>
-                    </tbody>
-                  </table>
-                </div>
-              <% } %>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xl-5">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h4 mb-0">Supermercados geridos</h2>
-                <a href="/supermarket/new" class="btn btn-outline-primary btn-sm">Adicionar</a>
+                    <% }) %>
+                  </tbody>
+                </table>
               </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
 
-              <% if (!supermarkets.length) { %>
-                <div class="alert alert-info mb-0">Ainda não existem supermercados registados!</div>
-              <% } else { %>
-                <div class="table-responsive">
-                  <table class="table align-middle mb-0">
-                    <thead class="table-light">
+      <div class="col-xl-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h4 mb-0">Supermercados geridos</h2>
+              <a href="/supermarket/new" class="btn btn-outline-primary btn-sm">Adicionar</a>
+            </div>
+
+            <% if (!supermarkets.length) { %>
+              <div class="alert alert-info mb-0">Ainda nao existem supermercados registados.</div>
+            <% } else { %>
+              <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Nome</th>
+                      <th>Estado</th>
+                      <th class="text-end">Acoes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% supermarkets.forEach((supermarket) => { %>
                       <tr>
-                        <th>Nome</th>
-                        <th>Estado</th>
-                        <th class="text-end">Ações</th>
+                        <td>
+                          <div class="fw-semibold"><%= supermarket.name %></div>
+                          <div class="small text-muted"><%= supermarket.location %></div>
+                        </td>
+                        <td>
+                          <span class="badge <%= !supermarket.toApprove ? 'bg-warning text-dark' : supermarket.isApproved ? 'bg-success' : 'bg-danger' %>">
+                            <%= !supermarket.toApprove ? 'Pendente' : supermarket.isApproved ? 'Aprovado' : 'Rejeitado' %>
+                          </span>
+                        </td>
+                        <td class="text-end">
+                          <a href="/supermarket/<%= supermarket._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      <% supermarkets.forEach((supermarket) => { %>
-                        <tr>
-                          <td>
-                            <div class="fw-semibold"><%= supermarket.name %></div>
-                            <div class="small text-muted"><%= supermarket.location %></div>
-                          </td>
-                          <td>
-                            <span class="badge <%= !supermarket.toApprove ? 'bg-warning text-dark' : supermarket.isApproved ? 'bg-success' : 'bg-danger' %>">
-                              <%= !supermarket.toApprove ? 'Pendente' : supermarket.isApproved ? 'Aprovado' : 'Rejeitado' %>
-                            </span>
-                          </td>
-                          <td class="text-end">
-                            <a href="/supermarket/<%= supermarket._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
-                          </td>
-                        </tr>
-                      <% }) %>
-                    </tbody>
-                  </table>
-                </div>
-              <% } %>
-            </div>
-          </div>
-        </div>
-      </div>
-    <% } else { %>
-      <div class="row g-4 mb-4">
-        <div class="col-md-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="text-muted small">Número de entregas</div>
-              <div class="display-6 fw-bold"><%= summary.totalDeliveries %></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="text-muted small">A aguardar preparação</div>
-              <div class="display-6 fw-bold"><%= summary.pendingPreparation %></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="text-muted small">Disponíveis para aceitar</div>
-              <div class="display-6 fw-bold"><%= summary.availableDeliveries %></div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="text-muted small">Entregas em curso</div>
-              <div class="display-6 fw-bold"><%= summary.activeDeliveries %></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row g-4 mb-4">
-        <div class="col-xl-5">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="h4 mb-0">Supermercados com mais entregas</h2>
-                <span class="badge bg-secondary"><%= topSupermarkets.length %></span>
+                    <% }) %>
+                  </tbody>
+                </table>
               </div>
-
-              <% if (!topSupermarkets.length) { %>
-                <div class="alert alert-info mb-0">Ainda não existem entregas concluídas ou em curso para calcular este ranking!</div>
-              <% } else { %>
-                <div class="table-responsive">
-                  <table class="table align-middle mb-0">
-                    <thead class="table-light">
-                      <tr>
-                        <th>Supermercado</th>
-                        <th>Entregas</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <% topSupermarkets.forEach((supermarket) => { %>
-                        <tr>
-                          <td>
-                            <div class="fw-semibold"><%= supermarket.name || 'Supermercado removido' %></div>
-                            <div class="small text-muted"><%= supermarket.location || '-' %></div>
-                          </td>
-                          <td><%= supermarket.deliveries %></td>
-                        </tr>
-                      <% }) %>
-                    </tbody>
-                  </table>
-                </div>
-              <% } %>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xl-7">
-          <div class="alert alert-info shadow-sm border-0 mb-0">
-            As encomendas com entrega por estafeta aparecem aqui logo após serem confirmadas! Enquanto estiverem em <strong>Confirmada</strong>, o supermercado ainda esta a preparar o pedido. O botao de aceitar fica disponivel quando a encomenda passar para <strong>Em preparacao</strong>.
+            <% } %>
           </div>
         </div>
       </div>
-    <% } %>
+    </div>
 
     <div class="card border-0 shadow-sm">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="h4 mb-0"><%= role === "supermercado" ? "Últimas encomendas" : "Últimas entregas e pedidos disponíveis" %></h2>
+          <h2 class="h4 mb-0">Ultimas encomendas</h2>
           <a href="/orders" class="btn btn-outline-primary btn-sm">Abrir listagem</a>
         </div>
 
         <% if (!recentOrders.length) { %>
-          <div class="alert alert-info mb-0">Ainda não existem registos para mostrar!</div>
+          <div class="alert alert-info mb-0">Ainda nao existem registos para mostrar.</div>
         <% } else { %>
           <div class="table-responsive">
             <table class="table align-middle">
@@ -258,13 +171,9 @@
                   <th>Cliente</th>
                   <th>Entrega</th>
                   <th>Estado</th>
-                  <% if (role === "supermercado") { %>
-                    <th>Estafeta</th>
-                  <% } else { %>
-                    <th>Disponibilidade</th>
-                  <% } %>
+                  <th>Estafeta</th>
                   <th>Total</th>
-                  <th class="text-end">Ações</th>
+                  <th class="text-end">Acoes</th>
                 </tr>
               </thead>
               <tbody>
@@ -273,35 +182,14 @@
                     <td><%= new Date(order.createdAt).toLocaleString("pt-PT") %></td>
                     <td><%= order.supermercado ? order.supermercado.name : "-" %></td>
                     <td><%= order.cliente ? order.cliente.name : "-" %></td>
-                    <td><%= deliveryLabels[order.metodoEntrega] %></td>
+                    <td><%= deliveryLabels[order.metodoEntrega] || order.metodoEntrega %></td>
                     <td>
                       <span class="badge <%= statusClasses[order.estado] %>"><%= statusLabels[order.estado] %></span>
                     </td>
-                    <% if (role === "supermercado") { %>
-                      <td><%= order.estafeta ? order.estafeta.name : "-" %></td>
-                    <% } else { %>
-                      <td>
-                        <% if (order.estafeta && order.estafeta.name) { %>
-                          <span class="small text-muted">Atribuida a <%= order.estafeta.name %></span>
-                        <% } else if (order.estado === "em_preparacao") { %>
-                          <span class="badge bg-success-subtle text-success">Pode aceitar</span>
-                        <% } else if (order.estado === "confirmada") { %>
-                          <span class="small text-muted">A aguardar preparacao</span>
-                        <% } else { %>
-                          <span class="small text-muted">Sem acao</span>
-                        <% } %>
-                      </td>
-                    <% } %>
-                    <td> € <%= Number(order.total).toFixed(2) %></td>
+                    <td><%= order.estafetaDisplayName || "-" %></td>
+                    <td>EUR <%= Number(order.total).toFixed(2) %></td>
                     <td class="text-end">
-                      <div class="d-flex justify-content-end gap-2 flex-wrap">
-                        <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta) { %>
-                          <form action="/orders/<%= order._id %>/claim" method="POST">
-                            <button type="submit" class="btn btn-sm btn-primary">Aceitar</button>
-                          </form>
-                        <% } %>
-                        <a href="/orders/<%= order._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
-                      </div>
+                      <a href="/orders/<%= order._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
                     </td>
                   </tr>
                 <% }) %>

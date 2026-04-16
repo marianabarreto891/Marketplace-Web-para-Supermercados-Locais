@@ -41,8 +41,12 @@ exports.loginUser = async (req, res) => {
         return res.redirect("/admin/dashboard");
       }
 
-      if (userFound.role === "supermercado" || userFound.role === "estafeta") {
+      if (userFound.role === "supermercado") {
         return res.redirect("/supermarket/dashboard");
+      }
+
+      if (userFound.role === "estafeta") {
+        return res.redirect("/courier/dashboard");
       }
 
       if (userFound.role === "cliente") {

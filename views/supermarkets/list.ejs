@@ -20,8 +20,12 @@
           <a href="/admin/dashboard" class="btn btn-outline-primary">Voltar ao Dashboard</a>
         <% } %>
         
-        <% if (userRole === "supermercado" || userRole === "estafeta") { %>
+        <% if (userRole === "supermercado") { %>
           <a href="/supermarket/dashboard" class="btn btn-outline-primary">Voltar ao Dashboard</a>
+        <% } %>
+
+        <% if (userRole === "estafeta") { %>
+          <a href="/courier/dashboard" class="btn btn-outline-primary">Voltar ao Dashboard</a>
         <% } %>
         
         <% if (userRole === "supermercado") { %>

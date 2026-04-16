@@ -118,6 +118,53 @@ function reqSessionObjectId(userId) {
     : userId;
 }
 
+function getOrderCourierId(order) {
+  if (!order || !order.estafeta) {
+    return null;
+  }
+
+  return order.estafeta._id ? order.estafeta._id : order.estafeta;
+}
+
+async function attachCourierMetadata(orderInput) {
+  const orders = Array.isArray(orderInput) ? orderInput : [orderInput];
+  const courierIds = [
+    ...new Set(
+      orders
+        .map((order) => getOrderCourierId(order))
+        .filter(Boolean)
+        .map((id) => String(id)),
+    ),
+  ];
+
+  const couriers = courierIds.length
+    ? await User.find({ _id: { $in: courierIds } })
+        .select("name email")
+        .lean()
+    : [];
+
+  const courierMap = new Map(
+    couriers.map((courier) => [String(courier._id), courier]),
+  );
+
+  orders.forEach((order) => {
+    if (!order) {
+      return;
+    }
+
+    const courierId = getOrderCourierId(order);
+    const courier = courierId ? courierMap.get(String(courierId)) : null;
+
+    order.estafetaDisplayName = courier
+      ? courier.name
+      : courierId
+      ? order.nomeEstafeta || "Estafeta removido"
+      : "-";
+  });
+
+  return orderInput;
+}
+
 // --- ROTAS DE NAVEGAÇÃO GERAL ---
 router.get("/", (req, res) => {
   res.redirect("/supermarket/list");
@@ -131,6 +178,10 @@ router.get(
     try {
       if (req.session.role === "admin") {
         return res.redirect("/admin/dashboard");
+      }
+
+      if (req.session.role === "estafeta") {
+        return res.redirect("/courier/dashboard");
       }
 
       if (req.session.role === "supermercado") {
@@ -165,9 +216,10 @@ router.get(
         const recentOrders = await Order.find(orderFilter)
           .populate("cliente", "name")
           .populate("supermercado", "name")
-          .populate("estafeta", "name")
           .sort({ createdAt: -1 })
           .limit(8);
+
+        await attachCourierMetadata(recentOrders);
 
         return res.render("supermarkets/dashboard", {
           role: req.session.role,

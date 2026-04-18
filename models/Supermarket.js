@@ -5,6 +5,8 @@ const supermarketSchema = new mongoose.Schema(
     name: { type: String, required: true },
     description: { type: String },
     location: { type: String, required: true },
+    lat: { type: Number },
+    lon: { type: Number },
     hours: { type: String },
     deliveryMethods: [
       {

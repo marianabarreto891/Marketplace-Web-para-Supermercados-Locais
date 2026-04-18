@@ -5,9 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detalhes do Supermercado</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="/stylesheets/map.css">
 </head>
 <body class="bg-light">
-
+  
   <%
     const canManage =
       userRole === "admin" ||
@@ -80,6 +85,23 @@
                 <div class="small text-muted">Custo de entrega</div>
                 <div class="fw-semibold">EUR <%= Number(supermarket.deliveryCost || 0).toFixed(2) %></div>
               </div>
+              <div class="col-12">
+                <div id="map" style="height: 300px;" class="rounded"></div>
+                
+                <script>
+                  const map = L.map('map').setView([<%= supermarket.lat || 0 %>, <%= supermarket.lon || 0 %>], 13);
+                  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                  }).addTo(map);
+                  <% if (supermarket.lat && supermarket.lon) { %>
+                    L.marker([<%= supermarket.lat %>, <%= supermarket.lon %>]).addTo(map)
+                      .bindPopup('<b><%= supermarket.name %></b><br><%= supermarket.location %>').openPopup();
+                  <% } else { %>
+                    map.setView([0, 0], 2); 
+                  <% } %>
+                </script>
+              </div>
+                
             </div>
           </div>
 

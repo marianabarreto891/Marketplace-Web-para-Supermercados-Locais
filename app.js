@@ -32,6 +32,7 @@ app.use(
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var supermarketRouter = require("./routes/supermarket");
+var courierRouter = require("./routes/courier");
 var adminRouter = require("./routes/admin");
 var ordersRouter = require("./routes/orders");
 
@@ -39,6 +40,8 @@ var ordersRouter = require("./routes/orders");
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/supermarket", supermarketRouter);
+app.use("/courier", courierRouter);
+app.use("/estafeta", courierRouter);
 app.use("/admin", adminRouter);
 app.use("/orders", ordersRouter);
 

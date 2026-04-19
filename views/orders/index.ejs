@@ -17,35 +17,55 @@
       entregue: "bg-success",
       cancelada: "bg-danger",
     };
+
+    const showSupermarketFilter = role === "admin" || role === "supermercado";
   %>
 
   <div class="container py-5">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
       <div>
-        <h1 class="mb-1">Encomendas e vendas</h1>
+        <% if (role === "cliente") { %>
+          <h1 class="mb-1">As minhas encomendas</h1>
+          <p class="text-muted mb-0">Historico das encomendas feitas na plataforma.</p>
+        <% } else { %>
+          <h1 class="mb-1">Encomendas e vendas</h1>
+          <p class="text-muted mb-0">
+            <% if (role === "estafeta") { %>
+              Entregas disponiveis, pedidos a aguardar preparacao e entregas a seu cargo.
+            <% } else { %>
+              Historico de encomendas por supermercado.
+            <% } %>
+          </p>
+        <% } %>
       </div>
       <div class="d-flex flex-wrap gap-2">
-        <a href="/supermarket/dashboard" class="btn btn-outline-primary">Voltar ao dashboard</a>
-        <a href="/supermarket/list" class="btn btn-outline-secondary">Supermercados</a>
+        <a href="<%= dashboardPath %>" class="btn btn-outline-primary">Voltar ao dashboard</a>
+        <% if (role === "cliente") { %>
+          <a href="/supermarket/list" class="btn btn-outline-secondary">Supermercados</a>
+        <% } else { %>
+          <a href="/supermarket/list" class="btn btn-outline-secondary">Supermercados</a>
+        <% } %>
       </div>
     </div>
 
-    <% if (role !== "estafeta") { %>
+    <% if (showSupermarketFilter || role === "cliente") { %>
       <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
           <form action="/orders" method="GET" class="row g-3 align-items-end">
-            <div class="col-md-5">
-              <label class="form-label fw-semibold">Supermercado</label>
-              <select name="supermarketId" class="form-select">
-                <option value="">Todos</option>
-                <% supermarkets.forEach((supermarket) => { %>
-                  <option value="<%= supermarket._id %>" <%= filters.supermarketId === String(supermarket._id) ? "selected" : "" %>>
-                    <%= supermarket.name %>
-                  </option>
-                <% }) %>
-              </select>
-            </div>
-            <div class="col-md-4">
+            <% if (showSupermarketFilter) { %>
+              <div class="col-md-5">
+                <label class="form-label fw-semibold">Supermercado</label>
+                <select name="supermarketId" class="form-select">
+                  <option value="">Todos</option>
+                  <% supermarkets.forEach((supermarket) => { %>
+                    <option value="<%= supermarket._id %>" <%= filters.supermarketId === String(supermarket._id) ? "selected" : "" %>>
+                      <%= supermarket.name %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+            <% } %>
+            <div class="<%= showSupermarketFilter ? 'col-md-4' : 'col-md-6' %>">
               <label class="form-label fw-semibold">Estado</label>
               <select name="status" class="form-select">
                 <option value="">Todos</option>
@@ -56,7 +76,7 @@
                 <% }) %>
               </select>
             </div>
-            <div class="col-md-3 d-flex gap-2">
+            <div class="<%= showSupermarketFilter ? 'col-md-3' : 'col-md-6' %> d-flex gap-2">
               <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
               <a href="/orders" class="btn btn-outline-secondary flex-fill">Limpar</a>
             </div>
@@ -80,35 +100,61 @@
                 <tr>
                   <th>Data</th>
                   <th>Supermercado</th>
-                  <th>Cliente</th>
+                  <% if (role !== "cliente") { %>
+                    <th>Cliente</th>
+                  <% } %>
                   <th>Entrega</th>
                   <th>Estado</th>
-                  <th>Estafeta</th>
+                  <% if (role !== "cliente") { %>
+                    <th>Estafeta</th>
+                  <% } %>
                   <th>Total</th>
                   <th class="text-end">Acoes</th>
                 </tr>
               </thead>
               <tbody>
                 <% orders.forEach((order) => { %>
+                  <%
+                    const orderCourierId =
+                      order.estafeta && order.estafeta._id
+                        ? String(order.estafeta._id)
+                        : order.estafeta
+                        ? String(order.estafeta)
+                        : null;
+                  %>
                   <tr>
                     <td><%= new Date(order.createdAt).toLocaleString("pt-PT") %></td>
                     <td><%= order.supermercado ? order.supermercado.name : "-" %></td>
-                    <td>
-                      <div class="fw-semibold"><%= order.cliente ? order.cliente.name : "-" %></div>
-                      <div class="small text-muted"><%= order.cliente ? order.cliente.email : "" %></div>
-                    </td>
-                    <td><%= deliveryLabels[order.metodoEntrega] %></td>
+                    <% if (role !== "cliente") { %>
+                      <td>
+                        <div class="fw-semibold"><%= order.cliente ? order.cliente.name : "-" %></div>
+                        <div class="small text-muted"><%= order.cliente ? order.cliente.email : "" %></div>
+                      </td>
+                    <% } %>
+                    <td><%= deliveryLabels[order.metodoEntrega] || order.metodoEntrega %></td>
                     <td>
                       <span class="badge <%= statusClasses[order.estado] %>"><%= statusLabels[order.estado] %></span>
                       <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && !order.estafeta && order.estado === "confirmada") { %>
                         <div class="small text-muted mt-1">A aguardar preparacao do supermercado</div>
                       <% } %>
                     </td>
-                    <td><%= order.estafeta ? order.estafeta.name : "-" %></td>
+                    <% if (role !== "cliente") { %>
+                      <td>
+                        <% if (order.estafetaDisplayName && order.estafetaDisplayName !== "-") { %>
+                          <%= order.estafetaDisplayName %>
+                        <% } else if (role === "estafeta" && order.estado === "em_preparacao") { %>
+                          Disponivel
+                        <% } else if (order.estado === "confirmada" && role === "estafeta") { %>
+                          A aguardar preparacao
+                        <% } else { %>
+                          -
+                        <% } %>
+                      </td>
+                    <% } %>
                     <td>EUR <%= Number(order.total).toFixed(2) %></td>
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2 flex-wrap">
-                        <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta) { %>
+                        <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta && !courierHasDeliveryInProgress) { %>
                           <form action="/orders/<%= order._id %>/claim" method="POST">
                             <button type="submit" class="btn btn-sm btn-primary">Aceitar</button>
                           </form>

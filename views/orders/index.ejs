@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Encomendas</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/stylesheets/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -26,14 +26,14 @@
       <div>
         <% if (role === "cliente") { %>
           <h1 class="mb-1">As minhas encomendas</h1>
-          <p class="text-muted mb-0">Historico das encomendas feitas na plataforma.</p>
+          <p class="text-muted mb-0">Histórico das encomendas feitas na plataforma.</p>
         <% } else { %>
           <h1 class="mb-1">Encomendas e vendas</h1>
           <p class="text-muted mb-0">
             <% if (role === "estafeta") { %>
-              Entregas disponiveis, pedidos a aguardar preparacao e entregas a seu cargo.
+              Entregas disponíveis, pedidos a aguardar preparação e entregas a seu cargo.
             <% } else { %>
-              Historico de encomendas por supermercado.
+              Histórico de encomendas por supermercado.
             <% } %>
           </p>
         <% } %>
@@ -85,14 +85,14 @@
       </div>
     <% } else { %>
       <div class="alert alert-info shadow-sm border-0 mb-4">
-        As encomendas com entrega por estafeta aparecem aqui logo apos serem confirmadas. O botao <strong>Aceitar</strong> so fica disponivel quando passam para <strong>Em preparacao</strong>.
+        As encomendas com entrega por estafeta aparecem aqui, logo após serem confirmadas. O botão <strong>Aceitar</strong> só fica disponível quando passam para <strong>Em preparação</strong>.
       </div>
     <% } %>
 
     <div class="card shadow-sm border-0">
       <div class="card-body">
         <% if (!orders.length) { %>
-          <div class="alert alert-info mb-0">Nao foram encontradas encomendas para os filtros escolhidos.</div>
+          <div class="alert alert-info mb-0">Não foram encontradas encomendas para os filtros escolhidos.</div>
         <% } else { %>
           <div class="table-responsive">
             <table class="table align-middle">
@@ -135,7 +135,7 @@
                     <td>
                       <span class="badge <%= statusClasses[order.estado] %>"><%= statusLabels[order.estado] %></span>
                       <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && !order.estafeta && order.estado === "confirmada") { %>
-                        <div class="small text-muted mt-1">A aguardar preparacao do supermercado</div>
+                        <div class="small text-muted mt-1">A aguardar preparação do supermercado</div>
                       <% } %>
                     </td>
                     <% if (role !== "cliente") { %>
@@ -145,7 +145,7 @@
                         <% } else if (role === "estafeta" && order.estado === "em_preparacao") { %>
                           Disponivel
                         <% } else if (order.estado === "confirmada" && role === "estafeta") { %>
-                          A aguardar preparacao
+                          A aguardar preparação
                         <% } else { %>
                           -
                         <% } %>

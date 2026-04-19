@@ -24,13 +24,13 @@
   <div class="container py-5">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
       <div>
-        <h1 class="mb-1">Dashboard do estafeta</h1>
+        <h1 class="mb-1">Estafeta</h1>
         <p class="text-muted mb-0">Resumo das entregas, disponibilidades e supermercados com mais entregas.</p>
       </div>
       <div class="d-flex flex-wrap gap-2">
         <a href="/orders" class="btn btn-primary">Ver entregas</a>
         <a href="/supermarket/list" class="btn btn-outline-secondary">Supermercados</a>
-        <a href="/users/logout" class="btn btn-danger">Terminar sessao</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar sessão</a>
       </div>
     </div>
 
@@ -38,7 +38,7 @@
       <div class="col-md-6 col-xl-3">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
-            <div class="text-muted small">Numero de entregas</div>
+            <div class="text-muted small">Número de entregas</div>
             <div class="display-6 fw-bold"><%= summary.totalDeliveries %></div>
           </div>
         </div>
@@ -46,7 +46,7 @@
       <div class="col-md-6 col-xl-3">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
-            <div class="text-muted small">A aguardar preparacao</div>
+            <div class="text-muted small">A aguardar preparação</div>
             <div class="display-6 fw-bold"><%= summary.pendingPreparation %></div>
           </div>
         </div>
@@ -54,7 +54,7 @@
       <div class="col-md-6 col-xl-3">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
-            <div class="text-muted small">Disponiveis para aceitar</div>
+            <div class="text-muted small">Disponíveis para aceitar</div>
             <div class="display-6 fw-bold"><%= summary.availableDeliveries %></div>
           </div>
         </div>
@@ -79,7 +79,7 @@
             </div>
 
             <% if (!topSupermarkets.length) { %>
-              <div class="alert alert-info mb-0">Ainda nao existem entregas suficientes para calcular este ranking.</div>
+              <div class="alert alert-info mb-0">Ainda não existem entregas suficientes para calcular este ranking!</div>
             <% } else { %>
               <div class="table-responsive">
                 <table class="table align-middle mb-0">
@@ -109,10 +109,10 @@
 
       <div class="col-xl-7">
         <div class="alert alert-info shadow-sm border-0 mb-0 h-100">
-          As encomendas com entrega por estafeta aparecem aqui logo apos serem confirmadas. Enquanto estiverem em <strong>Confirmada</strong>, o supermercado ainda esta a preparar o pedido. O botao de aceitar fica disponivel quando a encomenda passar para <strong>Em preparacao</strong>.
+          As encomendas com entrega por estafeta aparecem aqui, logo após serem confirmadas. Enquanto estiverem em <strong>Confirmada</strong>, o supermercado ainda está a preparar o pedido. O botão de aceitar fica disponível quando a encomenda passar para <strong>Em preparação</strong>.
           <% if (hasActiveDelivery) { %>
             <hr>
-            <strong>Nota:</strong> So pode realizar uma entrega de cada vez. Termine a entrega atual para aceitar a proxima.
+            <strong>Nota:</strong> Só pode realizar uma entrega de cada vez. Termine a entrega atual para aceitar a próxima!
           <% } %>
         </div>
       </div>
@@ -121,12 +121,12 @@
     <div class="card border-0 shadow-sm">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="h4 mb-0">Ultimas entregas e pedidos disponiveis</h2>
+          <h2 class="h4 mb-0">Últimas entregas e pedidos disponíveis</h2>
           <a href="/orders" class="btn btn-outline-primary btn-sm">Abrir listagem</a>
         </div>
 
         <% if (!recentOrders.length) { %>
-          <div class="alert alert-info mb-0">Ainda nao existem registos para mostrar.</div>
+          <div class="alert alert-info mb-0">Ainda não existem registos para mostrar.</div>
         <% } else { %>
           <div class="table-responsive">
             <table class="table align-middle">
@@ -138,7 +138,7 @@
                   <th>Estado</th>
                   <th>Disponibilidade</th>
                   <th>Total</th>
-                  <th class="text-end">Acoes</th>
+                  <th class="text-end">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,11 +163,11 @@
                       <% if (isMine && order.estado === "em_entrega") { %>
                         <span class="badge bg-info text-dark">Entrega em curso</span>
                       <% } else if (isMine && order.estado === "entregue") { %>
-                        <span class="badge bg-success">Entrega concluida</span>
+                        <span class="badge bg-success">Entrega concluída</span>
                       <% } else if (order.estafetaDisplayName && order.estafetaDisplayName !== "-" && !isMine) { %>
-                        <span class="small text-muted">Ja atribuida a <%= order.estafetaDisplayName %></span>
+                        <span class="small text-muted">Ja atribuída a <%= order.estafetaDisplayName %></span>
                       <% } else if (order.estado === "confirmada") { %>
-                        <span class="small text-muted">A aguardar preparacao</span>
+                        <span class="small text-muted">A aguardar preparação</span>
                       <% } else if (order.estado === "em_preparacao" && hasActiveDelivery) { %>
                         <span class="small text-muted">Termine a entrega atual</span>
                       <% } else if (order.estado === "em_preparacao") { %>

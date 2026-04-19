@@ -37,7 +37,7 @@
 
     <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && !order.estafeta && order.estado === "confirmada") { %>
       <div class="alert alert-info shadow-sm border-0 mb-4">
-        Esta entrega ja esta visivel para si, mas so pode ser aceite quando o supermercado a passar para <strong>Em preparacao</strong>.
+        Esta entrega já está visível para si, mas só pode ser aceite quando o supermercado a passar para <strong>Em preparação</strong>.
       </div>
     <% } %>
 
@@ -75,7 +75,7 @@
               </div>
               <div class="col-md-6">
                 <div class="small text-muted">Estafeta</div>
-                <div class="fw-bold"><%= order.estafetaDisplayName && order.estafetaDisplayName !== "-" ? order.estafetaDisplayName : "Nao atribuido" %></div>
+                <div class="fw-bold"><%= order.estafetaDisplayName && order.estafetaDisplayName !== "-" ? order.estafetaDisplayName : "Não atribuído" %></div>
               </div>
               <div class="col-12">
                 <div class="small text-muted">Morada de entrega</div>
@@ -127,7 +127,7 @@
       <div class="col-lg-4">
         <div class="card shadow-sm border-0 sticky-top" style="top: 2rem;">
           <div class="card-body">
-            <h2 class="h4 mb-3">Operacoes</h2>
+            <h2 class="h4 mb-3">Operações</h2>
 
             <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta && !courierHasDeliveryInProgress) { %>
               <form action="/orders/<%= order._id %>/claim" method="POST" class="mb-3">
@@ -135,7 +135,7 @@
               </form>
             <% } else if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta && courierHasDeliveryInProgress) { %>
               <div class="alert alert-warning">
-                Ja tem uma entrega em curso. Termine-a antes de aceitar outra.
+                Já tem uma entrega em curso. Termine-a antes de aceitar outra!
               </div>
             <% } %>
 
@@ -152,7 +152,7 @@
               </div>
             <% } else { %>
               <div class="alert alert-light border text-center mb-0">
-                Sem acoes disponiveis para este estado.
+                Não existem ações disponíveis para esta encomenda no momento.
               </div>
             <% } %>
           </div>
@@ -163,7 +163,7 @@
     <% if (order.estado === "entregue" && role === "cliente" && (!order.avaliacaoSupermercado || !order.avaliacaoSupermercado.rating)) { %>
       <div class="card shadow-sm border-0 mt-4 bg-white border-start border-4 border-success">
         <div class="card-body p-4">
-          <h3 class="h4 mb-4 text-success">Avalie a sua experiencia</h3>
+          <h3 class="h4 mb-4 text-success">Avalie a sua experiência!</h3>
           <form action="/orders/<%= order._id %>/rate" method="POST">
             <div class="row">
               <div class="col-md-6 mb-3">
@@ -172,22 +172,22 @@
                   <option value="5">5 Estrelas - Excelente</option>
                   <option value="4">4 Estrelas - Muito Bom</option>
                   <option value="3" selected>3 Estrelas - Bom</option>
-                  <option value="2">2 Estrelas - Razoavel</option>
+                  <option value="2">2 Estrelas - Razoável</option>
                   <option value="1">1 Estrela - Mau</option>
                 </select>
-                <textarea name="commentSupermarket" class="form-control" rows="2" placeholder="Comentario sobre os produtos..."></textarea>
+                <textarea name="commentSupermarket" class="form-control" rows="2" placeholder="Comentário sobre os produtos..."></textarea>
               </div>
               <% if (order.metodoEntrega === "estafeta" && order.estafeta) { %>
                 <div class="col-md-6 mb-3">
                   <label class="form-label fw-bold">Estafeta</label>
                   <select name="ratingCourier" class="form-select mb-2" required>
-                    <option value="5">5 Estrelas - Rapido e gentil</option>
-                    <option value="4">4 Estrelas - Bom servico</option>
+                    <option value="5">5 Estrelas - Rápido e gentil</option>
+                    <option value="4">4 Estrelas - Bom serviço</option>
                     <option value="3" selected>3 Estrelas - Normal</option>
                     <option value="2">2 Estrelas - Atrasado</option>
                     <option value="1">1 Estrela - Muito mau</option>
                   </select>
-                  <textarea name="commentCourier" class="form-control" rows="2" placeholder="Comentario sobre a entrega..."></textarea>
+                  <textarea name="commentCourier" class="form-control" rows="2" placeholder="Comentário sobre a entrega..."></textarea>
                 </div>
               <% } %>
             </div>
@@ -200,7 +200,7 @@
     <% if (order.avaliacaoSupermercado && order.avaliacaoSupermercado.rating) { %>
       <div class="card shadow-sm border-0 mt-4">
         <div class="card-body p-4">
-          <h3 class="h4 mb-3">A sua avaliacao</h3>
+          <h3 class="h4 mb-3">A sua avaliação</h3>
           <div class="row">
             <div class="col-md-6">
               <p class="mb-1 fw-bold">Supermercado:</p>

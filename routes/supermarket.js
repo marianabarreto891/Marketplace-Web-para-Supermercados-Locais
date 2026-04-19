@@ -158,8 +158,8 @@ async function attachCourierMetadata(orderInput) {
     order.estafetaDisplayName = courier
       ? courier.name
       : courierId
-      ? order.nomeEstafeta || "Estafeta removido"
-      : "-";
+        ? order.nomeEstafeta || "Estafeta removido"
+        : "-";
   });
 
   return orderInput;
@@ -355,7 +355,7 @@ router.post(
   "/:supermarketId/products/new",
   requireAuth,
   requireRole(["supermercado"]),
-  upload.single("image"), // Processa a imagem e preenche o req.body
+  upload.single("image"), 
   productController.createProduct,
 );
 

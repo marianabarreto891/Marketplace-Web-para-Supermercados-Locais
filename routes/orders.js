@@ -44,7 +44,7 @@ router.post(
 router.post("/:id/status", requireAuth, orderController.updateOrderStatus);
 
 // --- NOVA ROTA DE AVALIAÇÃO (Ponto 3) ---
-// Cliente submeter a avaliação (requireAuth garante que é o cliente logado)
+// Cliente submeter a avaliação (requireAuth garante que é o cliente que fez login)
 router.post("/:id/rate", requireAuth, orderController.rateOrder);
 
 module.exports = router;

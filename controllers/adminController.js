@@ -13,11 +13,14 @@ exports.getDashboard = async (req, res) => {
     });
     const totalOrders = await Order.countDocuments();
 
+    const allSupermarkets = await Supermarket.find();
+
     res.render("admin/dashboard", {
       pendingSupermarkets,
       totalUsers,
       activeSupermarkets,
       totalOrders,
+      allSupermarkets,
     });
   } catch (error) {
     console.error(error);
@@ -67,8 +70,7 @@ exports.listUsers = async (req, res) => {
   } catch (error) {
     res.status(500).send("Erro ao listar utilizadores!");
   }
-}; 
-
+};
 
 exports.renderCreateAdminForm = (req, res) => {
   res.render("admin/createAdmin");
@@ -88,7 +90,6 @@ exports.createAdmin = async (req, res) => {
       email: email.toLowerCase(),
       password,
       phone,
-      telephone: phone,
       address,
       role: "admin",
       isApproved: true,

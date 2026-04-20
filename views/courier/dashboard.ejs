@@ -176,7 +176,7 @@
                         <span class="small text-muted">Sem disponibilidade agora</span>
                       <% } %>
                     </td>
-                    <td>EUR <%= Number(order.total).toFixed(2) %></td>
+                    <td>€ <%= Number(order.total).toFixed(2) %></td>
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2 flex-wrap">
                         <% if (!order.estafeta && order.estado === "em_preparacao" && !hasActiveDelivery) { %>

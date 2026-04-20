@@ -103,19 +103,19 @@
                     <tr>
                       <td><%= item.nome %></td>
                       <td class="text-center"><%= item.quantidade %></td>
-                      <td class="text-end">EUR <%= Number(item.precoUnitario).toFixed(2) %></td>
-                      <td class="text-end fw-bold">EUR <%= Number(item.subtotal).toFixed(2) %></td>
+                      <td class="text-end">€ <%= Number(item.precoUnitario).toFixed(2) %></td>
+                      <td class="text-end fw-bold">€ <%= Number(item.subtotal).toFixed(2) %></td>
                     </tr>
                   <% }) %>
                 </tbody>
                 <tfoot class="table-group-divider">
                   <tr>
                     <td colspan="3" class="text-end text-muted">Custo de entrega:</td>
-                    <td class="text-end text-muted">EUR <%= Number(order.custoEntrega || 0).toFixed(2) %></td>
+                    <td class="text-end text-muted">€ <%= Number(order.custoEntrega || 0).toFixed(2) %></td>
                   </tr>
                   <tr class="fs-5">
                     <td colspan="3" class="text-end fw-bold">Total:</td>
-                    <td class="text-end fw-bold text-primary">EUR <%= Number(order.total).toFixed(2) %></td>
+                    <td class="text-end fw-bold text-primary">€ <%= Number(order.total).toFixed(2) %></td>
                   </tr>
                 </tfoot>
               </table>

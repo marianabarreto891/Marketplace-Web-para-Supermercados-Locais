@@ -61,7 +61,7 @@
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
             <div class="text-muted small">Total vendido</div>
-            <div class="display-6 fw-bold">EUR <%= Number(summary.totalRevenue).toFixed(2) %></div>
+            <div class="display-6 fw-bold">€ <%= Number(summary.totalRevenue).toFixed(2) %></div>
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@
                         <td class="fw-semibold"><%= product.name %></td>
                         <td><%= product.unitsSold %></td>
                         <td><%= product.ordersCount %></td>
-                        <td>EUR <%= Number(product.revenue).toFixed(2) %></td>
+                        <td>€ <%= Number(product.revenue).toFixed(2) %></td>
                       </tr>
                     <% }) %>
                   </tbody>
@@ -115,7 +115,7 @@
             </div>
 
             <% if (!supermarkets.length) { %>
-              <div class="alert alert-info mb-0">Ainda nao existem supermercados registados.</div>
+              <div class="alert alert-info mb-0">Ainda não existem supermercados registados!</div>
             <% } else { %>
               <div class="table-responsive">
                 <table class="table align-middle mb-0">
@@ -123,7 +123,7 @@
                     <tr>
                       <th>Nome</th>
                       <th>Estado</th>
-                      <th class="text-end">Acoes</th>
+                      <th class="text-end">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -155,12 +155,12 @@
     <div class="card border-0 shadow-sm">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="h4 mb-0">Ultimas encomendas</h2>
+          <h2 class="h4 mb-0">Últimas encomendas</h2>
           <a href="/orders" class="btn btn-outline-primary btn-sm">Abrir listagem</a>
         </div>
 
         <% if (!recentOrders.length) { %>
-          <div class="alert alert-info mb-0">Ainda nao existem registos para mostrar.</div>
+          <div class="alert alert-info mb-0">Ainda não existem registos para mostrar!</div>
         <% } else { %>
           <div class="table-responsive">
             <table class="table align-middle">
@@ -173,7 +173,7 @@
                   <th>Estado</th>
                   <th>Estafeta</th>
                   <th>Total</th>
-                  <th class="text-end">Acoes</th>
+                  <th class="text-end">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,7 +187,7 @@
                       <span class="badge <%= statusClasses[order.estado] %>"><%= statusLabels[order.estado] %></span>
                     </td>
                     <td><%= order.estafetaDisplayName || "-" %></td>
-                    <td>EUR <%= Number(order.total).toFixed(2) %></td>
+                    <td>€ <%= Number(order.total).toFixed(2) %></td>
                     <td class="text-end">
                       <a href="/orders/<%= order._id %>" class="btn btn-sm btn-outline-secondary">Detalhe</a>
                     </td>

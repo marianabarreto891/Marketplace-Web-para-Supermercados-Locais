@@ -110,7 +110,7 @@
                         <%= product.category ? product.category.name : 'Sem categoria' %>
                       </span>
                     </td>
-                    <td class="fw-semibold">EUR <%= Number(product.price).toFixed(2) %></td>
+                    <td class="fw-semibold">€ <%= Number(product.price).toFixed(2) %></td>
                     <td>
                       <span class="badge <%= product.stock > 0 ? 'bg-success' : 'bg-danger' %>">
                         <%= product.stock %>

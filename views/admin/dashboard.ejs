@@ -7,11 +7,18 @@
     <title>Dashboard do Administrador</title>
     <link rel="stylesheet" href="/stylesheets/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="/stylesheets/map.css">
 </head>
 
 <body class="bg-light p-4">
 
     <div class="container bg-white p-4 rounded shadow-sm">
+        
         <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
             <h1 class="mb-0">Administrador</h1>
             <div>
@@ -21,15 +28,13 @@
                 <a href="/users/logout" class="btn btn-danger">Terminar Sessão</a>
             </div>
         </div>
-        
+
         <div class="row text-center mb-5 mt-4">
             <div class="col-md-4">
                 <div class="card bg-primary text-white shadow-sm border-0">
                     <div class="card-body py-4">
                         <h5 class="card-title fw-normal">Utilizadores Registados</h5>
-                        <p class="card-text fs-2 fw-bold mb-0">
-                            <%= totalUsers %>
-                        </p>
+                        <p class="card-text fs-2 fw-bold mb-0"><%= totalUsers %></p>
                     </div>
                 </div>
             </div>
@@ -38,9 +43,7 @@
                 <div class="card bg-success text-white shadow-sm border-0">
                     <div class="card-body py-4">
                         <h5 class="card-title fw-normal">Supermercados Ativos</h5>
-                        <p class="card-text fs-2 fw-bold mb-0">
-                            <%= activeSupermarkets %>
-                        </p>
+                        <p class="card-text fs-2 fw-bold mb-0"><%= activeSupermarkets %></p>
                     </div>
                 </div>
             </div>
@@ -49,18 +52,16 @@
                 <div class="card bg-info text-white shadow-sm border-0">
                     <div class="card-body py-4">
                         <h5 class="card-title fw-normal">Total de Encomendas</h5>
-                        <p class="card-text fs-2 fw-bold mb-0">
-                            <%= totalOrders %>
-                        </p>
+                        <p class="card-text fs-2 fw-bold mb-0"><%= totalOrders %></p>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <h2 class="h4 mb-3">Supermercados a Aguardar Aprovação</h2>
 
         <% if (pendingSupermarkets.length > 0) { %>
-            <div class="table-responsive">
+            <div class="table-responsive mb-5">
                 <table class="table table-bordered table-hover mt-2">
                     <thead class="table-light">
                         <tr>
@@ -75,55 +76,90 @@
                             <tr>
                                 <td class="align-middle"><strong><%= supermarket.name %></strong></td>
                                 <td class="align-middle"><%= supermarket.location %></td>
-                                <td class="align-middle"><%= supermarket.manager.email %></td>
-                                
+                                <td class="align-middle"><%= supermarket.manager ? supermarket.manager.email : 'Sem gestor' %></td>
+
                                 <td class="align-middle" style="min-width: 180px;">
                                     <form action="/admin/supermarket/<%= supermarket._id %>/approve" method="POST" class="m-0 mb-2">
                                         <button type="submit" class="btn btn-success btn-sm w-100">Aprovar Supermercado</button>
                                     </form>
-                                    
-                                    <button type="button" class="btn btn-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#rejectModal<%= supermarket._id %>">
+
+                                    <button type="button" class="btn btn-danger btn-sm w-100" data-bs-toggle="modal"
+                                        data-bs-target="#rejectModal<%= supermarket._id %>">
                                         Rejeitar Supermercado
                                     </button>
 
                                     <div class="modal fade text-start" id="rejectModal<%= supermarket._id %>" tabindex="-1" aria-hidden="true">
-                                      <div class="modal-dialog">
-                                        <div class="modal-content">
-                                          <div class="modal-header">
-                                            <h5 class="modal-title text-danger">Rejeitar Supermercado</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                          </div>
-                                          
-                                          <form action="/admin/supermarket/<%= supermarket._id %>/disapprove" method="POST">
-                                            <div class="modal-body">
-                                              <p>Tem a certeza que pretende rejeitar o supermercado <strong><%= supermarket.name %></strong>?</p>
-                                              <div class="mb-3">
-                                                <label class="form-label fw-bold">Motivo da Rejeição (Obrigatório):</label>
-                                                <textarea name="rejectionReason" class="form-control" rows="3" required placeholder="Ex: A morada não existe, dados falsos..."></textarea>
-                                              </div>
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-danger">Rejeitar Supermercado</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+
+                                                <form action="/admin/supermarket/<%= supermarket._id %>/disapprove" method="POST">
+                                                    <div class="modal-body">
+                                                        <p>Tem a certeza que pretende rejeitar o supermercado <strong><%= supermarket.name %></strong>?</p>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">Motivo da Rejeição (Obrigatório):</label>
+                                                            <textarea name="rejectionReason" class="form-control" rows="3" required placeholder="Ex: A morada não existe..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-danger">Confirmar Rejeição</button>
+                                                    </div>
+                                                </form>
                                             </div>
-                                            <div class="modal-footer">
-                                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                              <button type="submit" class="btn btn-danger">Confirmar Rejeição</button>
-                                            </div>
-                                          </form>
-                                          
                                         </div>
-                                      </div>
                                     </div>
-                                    </td>
+                                </td>
                             </tr>
                         <% }); %>
                     </tbody>
                 </table>
             </div>
         <% } else { %>
-            <p class="text-muted fst-italic mt-3">Não há supermercados a aguardar aprovação neste momento!</p>
+            <p class="text-muted fst-italic mt-3 mb-5">Não há supermercados a aguardar aprovação neste momento!</p>
         <% } %>
+
+        <hr class="my-5">
+        <h2 class="h4 mb-3">Localização dos Supermercados Registados</h2>
+        
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <div class="col-12">
+                    <div id="map" class="rounded"></div>
+                    
+                    <script>
+                        const map = L.map('map').setView([39.3999, -8.2245], 6);
+                        
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; OpenStreetMap contributors'
+                        }).addTo(map);
+
+                        const supermarketsData = <%- JSON.stringify(typeof allSupermarkets !== 'undefined' ? allSupermarkets : []) %>;
+
+                        supermarketsData.forEach(sm => {
+                            if (sm.lat && sm.lon) {
+                                let badgeClass = !sm.toApprove ? 'bg-warning text-dark' : sm.isApproved ? 'bg-success' : 'bg-danger';
+                                let estado = !sm.toApprove ? 'Pendente' : sm.isApproved ? 'Aprovado' : 'Rejeitado';
+
+                                L.marker([sm.lat, sm.lon]).addTo(map)
+                                    .bindPopup(`
+                                        <b>${sm.name}</b><br>
+                                        <span style="color: gray;">${sm.location}</span><br>
+                                        <p><strong>Estado:</strong></p>
+                                        <span class="badge ${badgeClass}">${estado}</span>
+                                    `);
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
 
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

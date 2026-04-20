@@ -76,8 +76,7 @@
             <div class="row mb-4">
               <div class="col-md-5">
                 <label class="form-label fw-semibold text-primary" for="barcodeInput">Leitor de Código de Barras</label>
-                <input type="text" id="barcodeInput" class="form-control border-primary" placeholder="Insira o ID do produto e prima Enter">
-              </div>
+<input type="text" id="barcodeInput" class="form-control border-primary" placeholder="Insira o EAN do produto e prima Enter">              </div>
             </div>
 
             <div class="alert alert-success d-flex justify-content-between align-items-center mb-4">
@@ -111,6 +110,7 @@
                     <tr 
                       data-product-row
                       data-product-id="<%= productId %>"
+                      data-ean="<%= product.EAN %>"  data-price="<%= product.price %>"
                       data-price="<%= product.price %>"
                       data-category="<%= product.category ? product.category.name : '' %>" 
                       data-search="<%= [product.name, product.description || ''].join(' ').toLowerCase() %>"

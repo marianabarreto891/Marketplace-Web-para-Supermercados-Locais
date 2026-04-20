@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     input.addEventListener("keyup", calculateTotal);
   });
 
-  // --- LÓGICA DO LEITOR DE CÓDIGO DE BARRAS ---
+  /// --- LÓGICA DO LEITOR DE CÓDIGO DE BARRAS ---
   const barcodeInput = document.getElementById("barcodeInput");
   if (barcodeInput) {
     barcodeInput.addEventListener("keypress", (e) => {
@@ -118,7 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const code = barcodeInput.value.trim();
         if (!code) return;
 
-        const row = document.querySelector(`tr[data-product-id="${code}"]`);
+        // AQUI ESTÁ A MAGIA: Mudei de data-product-id para data-ean
+        const row = document.querySelector(`tr[data-ean="${code}"]`);
 
         if (row) {
           const checkbox = row.querySelector('input[type="checkbox"]');
@@ -126,7 +127,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (!checkbox.disabled) {
             checkbox.checked = true;
-            qtyInput.value = parseInt(qtyInput.value) + 1;
+            
+            // Só para garantir que se for a primeira vez, mete a 1. Se já tiver visto, soma +1.
+            qtyInput.value = parseInt(qtyInput.value || 0) + 1; 
+            
             calculateTotal();
 
             const originalColor = row.style.backgroundColor;
@@ -136,12 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Produto sem stock!");
           }
         } else {
-          alert("Código de barras (ID) não encontrado!");
+          // Mudei também a mensagem de erro para fazer sentido
+          alert("EAN não encontrado na lista de produtos!"); 
         }
         barcodeInput.value = "";
       }
     });
   }
-
   calculateTotal();
 });

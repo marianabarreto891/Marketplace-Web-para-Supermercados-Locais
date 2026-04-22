@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestao de Cupoes</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+      <div>
+        <h1 class="mb-1">Cupoes de Desconto</h1>
+        <p class="text-muted mb-0">Gestao simples de cupoes globais ou por supermercado.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/admin/dashboard" class="btn btn-outline-secondary">Dashboard</a>
+        <a href="/supermarket/list" class="btn btn-outline-primary">Supermercados</a>
+      </div>
+    </div>
+
+    <% if (errorMessage) { %>
+      <div class="alert alert-danger"><%= errorMessage %></div>
+    <% } %>
+
+    <% if (successMessage) { %>
+      <div class="alert alert-success"><%= successMessage %></div>
+    <% } %>
+
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h2 class="h4 mb-3">Criar Cupao</h2>
+            <form action="/admin/coupons/new" method="POST" class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Codigo</label>
+                <input
+                  type="text"
+                  name="code"
+                  class="form-control text-uppercase"
+                  placeholder="BEMVINDO10"
+                  value="<%= formData.code || '' %>"
+                  required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tipo</label>
+                <select name="type" class="form-select" required>
+                  <option value="percent" <%= formData.type === "percent" ? "selected" : "" %>>Percentagem</option>
+                  <option value="fixed" <%= formData.type === "fixed" ? "selected" : "" %>>Valor fixo</option>
+                  <option value="free_shipping" <%= formData.type === "free_shipping" ? "selected" : "" %>>Portes gratis</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Descricao</label>
+                <input
+                  type="text"
+                  name="description"
+                  class="form-control"
+                  placeholder="Ex: 10% de desconto em compras acima de 20 EUR"
+                  value="<%= formData.description || '' %>">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Valor</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="value"
+                  class="form-control"
+                  value="<%= formData.value || '' %>"
+                  required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Valor minimo da encomenda</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="minOrderValue"
+                  class="form-control"
+                  value="<%= formData.minOrderValue || '0' %>">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Desconto maximo</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="maxDiscount"
+                  class="form-control"
+                  placeholder="Opcional"
+                  value="<%= formData.maxDiscount || '' %>">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Limite de utilizacoes</label>
+                <input
+                  type="number"
+                  step="1"
+                  min="1"
+                  name="usageLimit"
+                  class="form-control"
+                  placeholder="Opcional"
+                  value="<%= formData.usageLimit || '' %>">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Valido a partir de</label>
+                <input
+                  type="datetime-local"
+                  name="validFrom"
+                  class="form-control"
+                  value="<%= formData.validFrom || '' %>">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Valido ate</label>
+                <input
+                  type="datetime-local"
+                  name="validUntil"
+                  class="form-control"
+                  value="<%= formData.validUntil || '' %>">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Supermercado</label>
+                <select name="supermarketId" class="form-select">
+                  <option value="">Global (todos os supermercados)</option>
+                  <% supermarkets.forEach((supermarket) => { %>
+                    <option value="<%= supermarket._id %>" <%= String(formData.supermarketId || "") === String(supermarket._id) ? "selected" : "" %>>
+                      <%= supermarket.name %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="isActive"
+                    id="isActive"
+                    <%= formData.isActive !== false ? "checked" : "" %>>
+                  <label class="form-check-label" for="isActive">
+                    Cupao ativo
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-12 d-grid">
+                <button type="submit" class="btn btn-primary">Criar cupao</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h4 mb-0">Cupoes existentes</h2>
+              <span class="badge bg-secondary"><%= coupons.length %> registados</span>
+            </div>
+
+            <% if (!coupons.length) { %>
+              <div class="alert alert-light border mb-0">
+                Ainda nao existem cupoes registados.
+              </div>
+            <% } else { %>
+              <div class="table-responsive">
+                <table class="table align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Codigo</th>
+                      <th>Tipo</th>
+                      <th>Alcance</th>
+                      <th>Uso</th>
+                      <th>Estado</th>
+                      <th class="text-end">Acao</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% coupons.forEach((coupon) => { %>
+                      <tr>
+                        <td>
+                          <div class="fw-bold"><%= coupon.code %></div>
+                          <% if (coupon.description) { %>
+                            <div class="small text-muted"><%= coupon.description %></div>
+                          <% } %>
+                        </td>
+                        <td>
+                          <div><%= couponTypeLabels[coupon.type] || coupon.type %></div>
+                          <div class="small text-muted">
+                            <% if (coupon.type === "percent") { %>
+                              <%= Number(coupon.value).toFixed(2) %>%
+                            <% } else if (coupon.type === "free_shipping") { %>
+                              Portes gratis
+                            <% } else { %>
+                              EUR <%= Number(coupon.value).toFixed(2) %>
+                            <% } %>
+                          </div>
+                        </td>
+                        <td>
+                          <%= coupon.supermarket ? coupon.supermarket.name : "Global" %>
+                        </td>
+                        <td>
+                          <div><%= coupon.usedCount %><%= coupon.usageLimit ? " / " + coupon.usageLimit : "" %></div>
+                          <div class="small text-muted">Min. EUR <%= Number(coupon.minOrderValue || 0).toFixed(2) %></div>
+                        </td>
+                        <td>
+                          <span class="badge <%= coupon.isActive ? "bg-success" : "bg-secondary" %>">
+                            <%= coupon.isActive ? "Ativo" : "Inativo" %>
+                          </span>
+                        </td>
+                        <td class="text-end">
+                          <form action="/admin/coupons/<%= coupon._id %>/toggle" method="POST">
+                            <button type="submit" class="btn btn-sm <%= coupon.isActive ? "btn-outline-danger" : "btn-outline-success" %>">
+                              <%= coupon.isActive ? "Desativar" : "Ativar" %>
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

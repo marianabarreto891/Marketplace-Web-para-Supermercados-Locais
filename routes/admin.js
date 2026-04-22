@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../middlewares/auth");
 
 const adminController = require("../controllers/adminController");
 const categoryController = require("../controllers/categoryController");
+const couponController = require("../controllers/couponController");
 
 router.use(requireAuth, requireRole(["admin"]));
 
@@ -16,6 +17,9 @@ router.get("/users", adminController.listUsers);
 // Rotas de Categorias
 router.get("/categories", categoryController.listCategories);
 router.post("/categories/new", categoryController.createCategory);
+router.get("/coupons", couponController.listCoupons);
+router.post("/coupons/new", couponController.createCoupon);
+router.post("/coupons/:id/toggle", couponController.toggleCoupon);
 
 // Criar novo Administrador
 router.get("/createAdmin", adminController.renderCreateAdminForm);

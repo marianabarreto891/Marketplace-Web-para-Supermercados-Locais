@@ -57,6 +57,11 @@ const orderSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    subtotalProdutos: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     metodoEntrega: {
       type: String,
       enum: ["levantamento_loja", "estafeta"],
@@ -75,6 +80,30 @@ const orderSchema = new mongoose.Schema(
     nomeEstafeta: {
       type: String,
       default: ""
+    },
+    coupon: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Coupon",
+      default: null
+    },
+    couponCode: {
+      type: String,
+      default: ""
+    },
+    couponType: {
+      type: String,
+      enum: ["percent", "fixed", "free_shipping", ""],
+      default: ""
+    },
+    couponValue: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    discountApplied: {
+      type: Number,
+      default: 0,
+      min: 0
     },
     estado: {
       type: String,

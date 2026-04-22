@@ -37,7 +37,7 @@
 
     <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && !order.estafeta && order.estado === "confirmada") { %>
       <div class="alert alert-info shadow-sm border-0 mb-4">
-        Esta entrega já está visível para si, mas só pode ser aceite quando o supermercado a passar para <strong>Em preparação</strong>.
+        Esta entrega ja esta visivel para si, mas so pode ser aceite quando o supermercado a passar para <strong>Em preparacao</strong>.
       </div>
     <% } %>
 
@@ -46,7 +46,7 @@
         <div class="card shadow-sm border-0 mb-4">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h2 class="h4 mb-0">Resumo da Encomenda</h2>
+              <h2 class="h4 mb-0">Resumo da encomenda</h2>
               <span class="badge <%= statusClasses[order.estado] %> px-3 py-2">
                 <%= statusLabels[order.estado] %>
               </span>
@@ -75,7 +75,11 @@
               </div>
               <div class="col-md-6">
                 <div class="small text-muted">Estafeta</div>
-                <div class="fw-bold"><%= order.estafetaDisplayName && order.estafetaDisplayName !== "-" ? order.estafetaDisplayName : "Não atribuído" %></div>
+                <div class="fw-bold"><%= order.estafetaDisplayName && order.estafetaDisplayName !== "-" ? order.estafetaDisplayName : "Nao atribuido" %></div>
+              </div>
+              <div class="col-md-6">
+                <div class="small text-muted">Cupao</div>
+                <div class="fw-bold"><%= order.couponCode || "Sem cupao" %></div>
               </div>
               <div class="col-12">
                 <div class="small text-muted">Morada de entrega</div>
@@ -94,7 +98,7 @@
                   <tr>
                     <th>Produto</th>
                     <th class="text-center">Qtd</th>
-                    <th class="text-end">Preco Un.</th>
+                    <th class="text-end">Preco un.</th>
                     <th class="text-end">Subtotal</th>
                   </tr>
                 </thead>
@@ -103,19 +107,29 @@
                     <tr>
                       <td><%= item.nome %></td>
                       <td class="text-center"><%= item.quantidade %></td>
-                      <td class="text-end">€ <%= Number(item.precoUnitario).toFixed(2) %></td>
-                      <td class="text-end fw-bold">€ <%= Number(item.subtotal).toFixed(2) %></td>
+                      <td class="text-end">EUR <%= Number(item.precoUnitario).toFixed(2) %></td>
+                      <td class="text-end fw-bold">EUR <%= Number(item.subtotal).toFixed(2) %></td>
                     </tr>
                   <% }) %>
                 </tbody>
                 <tfoot class="table-group-divider">
                   <tr>
-                    <td colspan="3" class="text-end text-muted">Custo de entrega:</td>
-                    <td class="text-end text-muted">€ <%= Number(order.custoEntrega || 0).toFixed(2) %></td>
+                    <td colspan="3" class="text-end text-muted">Subtotal dos produtos:</td>
+                    <td class="text-end text-muted">EUR <%= Number(order.subtotalProdutos || order.total || 0).toFixed(2) %></td>
                   </tr>
+                  <tr>
+                    <td colspan="3" class="text-end text-muted">Custo de entrega:</td>
+                    <td class="text-end text-muted">EUR <%= Number(order.custoEntrega || 0).toFixed(2) %></td>
+                  </tr>
+                  <% if (order.discountApplied && order.discountApplied > 0) { %>
+                    <tr>
+                      <td colspan="3" class="text-end text-success">Desconto (<%= order.couponCode || "cupao" %>):</td>
+                      <td class="text-end text-success">- EUR <%= Number(order.discountApplied || 0).toFixed(2) %></td>
+                    </tr>
+                  <% } %>
                   <tr class="fs-5">
                     <td colspan="3" class="text-end fw-bold">Total:</td>
-                    <td class="text-end fw-bold text-primary">€ <%= Number(order.total).toFixed(2) %></td>
+                    <td class="text-end fw-bold text-primary">EUR <%= Number(order.total).toFixed(2) %></td>
                   </tr>
                 </tfoot>
               </table>
@@ -127,7 +141,7 @@
       <div class="col-lg-4">
         <div class="card shadow-sm border-0 sticky-top" style="top: 2rem;">
           <div class="card-body">
-            <h2 class="h4 mb-3">Operações</h2>
+            <h2 class="h4 mb-3">Operacoes</h2>
 
             <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta && !courierHasDeliveryInProgress) { %>
               <form action="/orders/<%= order._id %>/claim" method="POST" class="mb-3">
@@ -135,7 +149,7 @@
               </form>
             <% } else if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta && courierHasDeliveryInProgress) { %>
               <div class="alert alert-warning">
-                Já tem uma entrega em curso. Termine-a antes de aceitar outra!
+                Ja tem uma entrega em curso. Termine-a antes de aceitar outra.
               </div>
             <% } %>
 
@@ -152,7 +166,7 @@
               </div>
             <% } else { %>
               <div class="alert alert-light border text-center mb-0">
-                Não existem ações disponíveis para esta encomenda no momento.
+                Nao existem acoes disponiveis para esta encomenda no momento.
               </div>
             <% } %>
           </div>
@@ -163,31 +177,31 @@
     <% if (order.estado === "entregue" && role === "cliente" && (!order.avaliacaoSupermercado || !order.avaliacaoSupermercado.rating)) { %>
       <div class="card shadow-sm border-0 mt-4 bg-white border-start border-4 border-success">
         <div class="card-body p-4">
-          <h3 class="h4 mb-4 text-success">Avalie a sua experiência!</h3>
+          <h3 class="h4 mb-4 text-success">Avalie a sua experiencia</h3>
           <form action="/orders/<%= order._id %>/rate" method="POST">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold">Supermercado</label>
                 <select name="ratingSupermarket" class="form-select mb-2" required>
-                  <option value="5">5 Estrelas - Excelente</option>
-                  <option value="4">4 Estrelas - Muito Bom</option>
-                  <option value="3" selected>3 Estrelas - Bom</option>
-                  <option value="2">2 Estrelas - Razoável</option>
-                  <option value="1">1 Estrela - Mau</option>
+                  <option value="5">5 estrelas - Excelente</option>
+                  <option value="4">4 estrelas - Muito bom</option>
+                  <option value="3" selected>3 estrelas - Bom</option>
+                  <option value="2">2 estrelas - Razoavel</option>
+                  <option value="1">1 estrela - Mau</option>
                 </select>
-                <textarea name="commentSupermarket" class="form-control" rows="2" placeholder="Comentário sobre os produtos..."></textarea>
+                <textarea name="commentSupermarket" class="form-control" rows="2" placeholder="Comentario sobre os produtos..."></textarea>
               </div>
               <% if (order.metodoEntrega === "estafeta" && order.estafeta) { %>
                 <div class="col-md-6 mb-3">
                   <label class="form-label fw-bold">Estafeta</label>
                   <select name="ratingCourier" class="form-select mb-2" required>
-                    <option value="5">5 Estrelas - Rápido e gentil</option>
-                    <option value="4">4 Estrelas - Bom serviço</option>
-                    <option value="3" selected>3 Estrelas - Normal</option>
-                    <option value="2">2 Estrelas - Atrasado</option>
-                    <option value="1">1 Estrela - Muito mau</option>
+                    <option value="5">5 estrelas - Rapido e gentil</option>
+                    <option value="4">4 estrelas - Bom servico</option>
+                    <option value="3" selected>3 estrelas - Normal</option>
+                    <option value="2">2 estrelas - Atrasado</option>
+                    <option value="1">1 estrela - Muito mau</option>
                   </select>
-                  <textarea name="commentCourier" class="form-control" rows="2" placeholder="Comentário sobre a entrega..."></textarea>
+                  <textarea name="commentCourier" class="form-control" rows="2" placeholder="Comentario sobre a entrega..."></textarea>
                 </div>
               <% } %>
             </div>
@@ -200,7 +214,7 @@
     <% if (order.avaliacaoSupermercado && order.avaliacaoSupermercado.rating) { %>
       <div class="card shadow-sm border-0 mt-4">
         <div class="card-body p-4">
-          <h3 class="h4 mb-3">A sua avaliação</h3>
+          <h3 class="h4 mb-3">A sua avaliacao</h3>
           <div class="row">
             <div class="col-md-6">
               <p class="mb-1 fw-bold">Supermercado:</p>

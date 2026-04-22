@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 
 const Category = require("../models/Category");
+const Coupon = require("../models/Coupon");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Supermarket = require("../models/Supermarket");
@@ -46,6 +47,10 @@ function normalizeEmail(value) {
 
 function normalizePhone(value) {
   return normalizeText(value);
+}
+
+function normalizeCouponCode(value) {
+  return normalizeText(value).toUpperCase();
 }
 
 function normalizeRawItems(rawItems) {
@@ -130,6 +135,7 @@ function buildFormData(body, rawItems) {
     deliveryMethod: normalizeText(
       firstValue(body.metodoEntrega, body.deliveryMethod, body.metodo),
     ),
+    couponCode: normalizeCouponCode(firstValue(body.couponCode, body.coupon)),
     quantities,
     selectedProductIds,
   };
@@ -152,6 +158,7 @@ function buildCreateViewModel(
     customer: formData.customer || {},
     quantities: formData.quantities || {},
     selectedProductIds: formData.selectedProductIds || [],
+    couponCode: formData.couponCode || "",
     deliveryMethod:
       formData.deliveryMethod ||
       supermarket.deliveryMethods[0] ||
@@ -406,6 +413,125 @@ async function findOrCreateCustomer(customerData) {
     role: "cliente",
     isApproved: true,
   });
+}
+
+async function validateCouponForOrder(
+  couponCode,
+  supermarket,
+  subtotalProdutos,
+  custoEntrega,
+) {
+  const normalizedCode = normalizeCouponCode(couponCode);
+
+  if (!normalizedCode) {
+    return {
+      coupon: null,
+      couponCode: "",
+      couponType: "",
+      couponValue: 0,
+      discountApplied: 0,
+    };
+  }
+
+  const coupon = await Coupon.findOne({ code: normalizedCode });
+
+  if (!coupon) {
+    throw new Error("O cupao indicado nao existe.");
+  }
+
+  if (!coupon.isActive) {
+    throw new Error("O cupao indicado esta inativo.");
+  }
+
+  const now = new Date();
+
+  if (coupon.validFrom && now < coupon.validFrom) {
+    throw new Error("O cupao ainda nao esta valido.");
+  }
+
+  if (coupon.validUntil && now > coupon.validUntil) {
+    throw new Error("O cupao indicado ja expirou.");
+  }
+
+  if (
+    coupon.supermarket &&
+    String(coupon.supermarket) !== String(supermarket._id)
+  ) {
+    throw new Error("O cupao indicado nao e valido para este supermercado.");
+  }
+
+  if (subtotalProdutos < Number(coupon.minOrderValue || 0)) {
+    throw new Error(
+      `O cupao exige um valor minimo de EUR ${Number(
+        coupon.minOrderValue || 0,
+      ).toFixed(2)}.`,
+    );
+  }
+
+  if (
+    coupon.usageLimit !== null &&
+    coupon.usageLimit !== undefined &&
+    coupon.usedCount >= coupon.usageLimit
+  ) {
+    throw new Error("O cupao ja atingiu o limite de utilizacoes.");
+  }
+
+  let discountApplied = 0;
+
+  if (coupon.type === "percent") {
+    discountApplied = subtotalProdutos * (Number(coupon.value) / 100);
+  } else if (coupon.type === "fixed") {
+    discountApplied = Number(coupon.value);
+  } else if (coupon.type === "free_shipping") {
+    discountApplied = custoEntrega;
+  }
+
+  if (
+    coupon.maxDiscount !== null &&
+    coupon.maxDiscount !== undefined &&
+    coupon.maxDiscount !== ""
+  ) {
+    discountApplied = Math.min(discountApplied, Number(coupon.maxDiscount));
+  }
+
+  if (coupon.type === "free_shipping") {
+    discountApplied = Math.min(discountApplied, custoEntrega);
+  } else {
+    discountApplied = Math.min(discountApplied, subtotalProdutos);
+  }
+
+  discountApplied = Number(discountApplied.toFixed(2));
+
+  if (discountApplied <= 0) {
+    throw new Error("O cupao nao produziu qualquer desconto nesta encomenda.");
+  }
+
+  return {
+    coupon,
+    couponCode: coupon.code,
+    couponType: coupon.type,
+    couponValue: Number(coupon.value),
+    discountApplied,
+  };
+}
+
+async function registerCouponUsage(couponId) {
+  if (!couponId) {
+    return;
+  }
+
+  await Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: 1 } });
+}
+
+async function releaseCouponUsage(order) {
+  if (!order || !order.coupon) {
+    return;
+  }
+
+  await Coupon.findOneAndUpdate(
+    { _id: order.coupon, usedCount: { $gt: 0 } },
+    { $inc: { usedCount: -1 } },
+  );
 }
 
 async function rollbackStockReservations(stockReservations) {
@@ -722,20 +848,60 @@ exports.createOrder = async (req, res) => {
       );
     }
 
+    const subtotalProdutos = reservation.totalProdutos;
     const custoEntrega =
       formData.deliveryMethod === "estafeta" ? supermarket.deliveryCost || 0 : 0;
-    const total = reservation.totalProdutos + custoEntrega;
+
+    let couponData;
+
+    try {
+      couponData = await validateCouponForOrder(
+        formData.couponCode,
+        supermarket,
+        subtotalProdutos,
+        custoEntrega,
+      );
+    } catch (couponError) {
+      await rollbackStockReservations(reservation.stockReservations);
+      return renderCreatePage(
+        req,
+        res,
+        supermarket,
+        formData,
+        couponError.message,
+        400,
+      );
+    }
+
+    const total = Number(
+      Math.max(
+        0,
+        subtotalProdutos + custoEntrega - couponData.discountApplied,
+      ).toFixed(2),
+    );
 
     try {
       const order = await Order.create({
         cliente: customer._id,
         supermercado: supermarket._id,
         items: reservation.items,
+        subtotalProdutos,
         total,
         metodoEntrega: formData.deliveryMethod,
         custoEntrega,
+        coupon: couponData.coupon ? couponData.coupon._id : null,
+        couponCode: couponData.couponCode,
+        couponType: couponData.couponType,
+        couponValue: couponData.couponValue,
+        discountApplied: couponData.discountApplied,
         estado: "confirmada",
       });
+
+      try {
+        await registerCouponUsage(couponData.coupon ? couponData.coupon._id : null);
+      } catch (couponUsageError) {
+        console.error("Erro ao registar utilizacao do cupao:", couponUsageError);
+      }
 
       return redirectToOrderDetail(res, order._id);
     } catch (creationError) {
@@ -969,6 +1135,17 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     await order.save();
+
+    if (nextStatus === "cancelada" && previousStatus !== "cancelada") {
+      try {
+        await releaseCouponUsage(order);
+      } catch (couponReleaseError) {
+        console.error(
+          "Erro ao libertar utilizacao do cupao da encomenda cancelada:",
+          couponReleaseError,
+        );
+      }
+    }
 
     return redirectToOrderDetail(res, order._id);
   } catch (error) {

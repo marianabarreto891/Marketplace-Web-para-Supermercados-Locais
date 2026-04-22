@@ -22,6 +22,13 @@ const DELIVERY_METHOD_LABELS = {
   estafeta: "Entrega por estafeta",
 };
 
+const PAYMENT_STATUS_LABELS = {
+  pending: "Por pagar",
+  paid: "Pago",
+  failed: "Falhou",
+  canceled: "Pagamento cancelado",
+};
+
 const COURIER_DELIVERY_METHODS = [
   "estafeta",
   "Entrega por estafeta",
@@ -1029,12 +1036,14 @@ exports.showOrder = async (req, res) => {
           : false,
       statusLabels: ORDER_STATUS_LABELS,
       deliveryLabels: DELIVERY_METHOD_LABELS,
+      paymentStatusLabels: PAYMENT_STATUS_LABELS,
       allowedTransitions: getAllowedTransitions(
         order,
         req.session.role,
         req.session.userId,
       ),
       dashboardPath: getDashboardPathForRole(req.session.role),
+      paymentMessage: normalizeText(req.query.payment),
     });
   } catch (error) {
     console.error("Erro ao carregar encomenda:", error);

@@ -17,6 +17,13 @@
       entregue: "bg-success",
       cancelada: "bg-danger",
     };
+
+    const paymentClasses = {
+      pending: "bg-secondary",
+      paid: "bg-success",
+      failed: "bg-danger",
+      canceled: "bg-warning text-dark",
+    };
   %>
 
   <div class="container py-5">
@@ -38,6 +45,24 @@
     <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && !order.estafeta && order.estado === "confirmada") { %>
       <div class="alert alert-info shadow-sm border-0 mb-4">
         Esta entrega ja esta visivel para si, mas so pode ser aceite quando o supermercado a passar para <strong>Em preparacao</strong>.
+      </div>
+    <% } %>
+
+    <% if (paymentMessage === "success") { %>
+      <div class="alert alert-success shadow-sm border-0 mb-4">
+        Pagamento confirmado com sucesso.
+      </div>
+    <% } else if (paymentMessage === "pending") { %>
+      <div class="alert alert-warning shadow-sm border-0 mb-4">
+        O pagamento ainda esta a ser confirmado pela Stripe.
+      </div>
+    <% } else if (paymentMessage === "canceled") { %>
+      <div class="alert alert-secondary shadow-sm border-0 mb-4">
+        O checkout foi cancelado. Pode tentar novamente quando quiser.
+      </div>
+    <% } else if (paymentMessage === "already_paid") { %>
+      <div class="alert alert-info shadow-sm border-0 mb-4">
+        Esta encomenda ja se encontra paga.
       </div>
     <% } %>
 
@@ -81,6 +106,20 @@
                 <div class="small text-muted">Cupao</div>
                 <div class="fw-bold"><%= order.couponCode || "Sem cupao" %></div>
               </div>
+              <div class="col-md-6">
+                <div class="small text-muted">Pagamento</div>
+                <div>
+                  <span class="badge <%= paymentClasses[order.paymentStatus || "pending"] %> px-3 py-2">
+                    <%= paymentStatusLabels[order.paymentStatus || "pending"] %>
+                  </span>
+                </div>
+              </div>
+              <% if (order.paidAt) { %>
+                <div class="col-md-6">
+                  <div class="small text-muted">Pago em</div>
+                  <div class="fw-bold"><%= new Date(order.paidAt).toLocaleString("pt-PT") %></div>
+                </div>
+              <% } %>
               <div class="col-12">
                 <div class="small text-muted">Morada de entrega</div>
                 <div class="fw-bold"><%= order.cliente ? order.cliente.address : "Levantamento em loja" %></div>
@@ -142,6 +181,14 @@
         <div class="card shadow-sm border-0 sticky-top" style="top: 2rem;">
           <div class="card-body">
             <h2 class="h4 mb-3">Operacoes</h2>
+
+            <% if (["cliente", "supermercado", "admin"].includes(role) && order.paymentStatus !== "paid" && order.estado !== "cancelada") { %>
+              <form action="/payments/checkout/<%= order._id %>" method="POST" class="mb-3">
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+                  Pagar com Stripe
+                </button>
+              </form>
+            <% } %>
 
             <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta && !courierHasDeliveryInProgress) { %>
               <form action="/orders/<%= order._id %>/claim" method="POST" class="mb-3">

@@ -2,10 +2,12 @@ require("dotenv").config();
 require("./models/db");
 var createError = require("http-errors");
 var express = require("express");
+var bodyParser = require("body-parser");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const session = require("express-session");
+const paymentController = require("./controllers/paymentController");
 
 var app = express();
 
@@ -14,6 +16,11 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 app.use(logger("dev"));
+app.post(
+  "/payments/webhook",
+  bodyParser.raw({ type: "application/json" }),
+  paymentController.handleWebhook,
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -35,6 +42,7 @@ var supermarketRouter = require("./routes/supermarket");
 var courierRouter = require("./routes/courier");
 var adminRouter = require("./routes/admin");
 var ordersRouter = require("./routes/orders");
+var paymentsRouter = require("./routes/payments");
 
 // Definição de Rotas
 app.use("/", indexRouter);
@@ -44,6 +52,7 @@ app.use("/courier", courierRouter);
 app.use("/estafeta", courierRouter);
 app.use("/admin", adminRouter);
 app.use("/orders", ordersRouter);
+app.use("/payments", paymentsRouter);
 
 // Erro 404
 app.use(function (req, res, next) {

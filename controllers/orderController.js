@@ -6,6 +6,7 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Supermarket = require("../models/Supermarket");
 const User = require("../models/User");
+const { sendOrderStatusEmail } = require("../services/orderEmailService");
 
 const ORDER_STATUS_LABELS = {
   pendente: "Pendente",
@@ -257,6 +258,23 @@ function getDashboardPathForRole(role) {
 
 function redirectToOrderDetail(res, orderId) {
   return res.redirect(`/orders/${orderId}?updated=${Date.now()}`);
+}
+
+async function notifyOrderStatusChange(orderId, previousStatus, nextStatus) {
+  try {
+    const order = await Order.findById(orderId)
+      .populate("cliente", "name email")
+      .populate("supermercado", "name");
+
+    if (!order) {
+      return;
+    }
+
+    await attachCourierMetadata(order);
+    await sendOrderStatusEmail(order, previousStatus, nextStatus);
+  } catch (error) {
+    console.error("Erro ao enviar notificacao por email da encomenda:", error);
+  }
 }
 
 async function renderCreatePage(
@@ -903,6 +921,8 @@ exports.createOrder = async (req, res) => {
         console.error("Erro ao registar utilizacao do cupao:", couponUsageError);
       }
 
+      await notifyOrderStatusChange(order._id, null, order.estado);
+
       return redirectToOrderDetail(res, order._id);
     } catch (creationError) {
       await rollbackStockReservations(reservation.stockReservations);
@@ -1081,6 +1101,8 @@ exports.claimOrder = async (req, res) => {
         .send("A encomenda foi atualizada por outro utilizador. Tente novamente.");
     }
 
+    await notifyOrderStatusChange(updatedOrder._id, order.estado, updatedOrder.estado);
+
     return redirectToOrderDetail(res, updatedOrder._id);
   } catch (error) {
     console.error("Erro ao aceitar entrega:", error);
@@ -1146,6 +1168,8 @@ exports.updateOrderStatus = async (req, res) => {
         );
       }
     }
+
+    await notifyOrderStatusChange(order._id, previousStatus, nextStatus);
 
     return redirectToOrderDetail(res, order._id);
   } catch (error) {

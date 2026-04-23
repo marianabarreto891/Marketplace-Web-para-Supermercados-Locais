@@ -98,7 +98,7 @@ exports.createCheckoutSession = async (req, res) => {
     if (!stripe) {
       return res
         .status(500)
-        .send("Stripe nao esta configurado. Defina STRIPE_SECRET_KEY no .env.");
+        .send("Stripe não está configurado. Defina STRIPE_SECRET_KEY no .env.");
     }
 
     const order = await Order.findById(req.params.orderId)
@@ -106,15 +106,15 @@ exports.createCheckoutSession = async (req, res) => {
       .populate("supermercado", "name");
 
     if (!order) {
-      return res.status(404).send("Encomenda nao encontrada.");
+      return res.status(404).send("Encomenda não encontrada.");
     }
 
     if (!(await canAccessOrder(req, order))) {
-      return res.status(403).send("Nao pode pagar esta encomenda.");
+      return res.status(403).send("Não pode pagar esta encomenda.");
     }
 
     if (order.estado === "cancelada") {
-      return res.status(400).send("Nao pode pagar uma encomenda cancelada.");
+      return res.status(400).send("Não pode pagar uma encomenda cancelada.");
     }
 
     if (order.paymentStatus === "paid") {
@@ -126,7 +126,7 @@ exports.createCheckoutSession = async (req, res) => {
     if (amount <= 0) {
       return res
         .status(400)
-        .send("O valor da encomenda nao e valido para pagamento.");
+        .send("O valor da encomenda não é válido para pagamento.");
     }
 
     const orderCode = formatOrderCode(order._id);
@@ -184,24 +184,24 @@ exports.handleCheckoutSuccess = async (req, res) => {
     if (!stripe) {
       return res
         .status(500)
-        .send("Stripe nao esta configurado. Defina STRIPE_SECRET_KEY no .env.");
+        .send("Stripe não está configurado. Defina STRIPE_SECRET_KEY no .env.");
     }
 
     const sessionId = String(req.query.session_id || "").trim();
 
     if (!sessionId) {
-      return res.status(400).send("Sessao de pagamento invalida.");
+      return res.status(400).send("Sessao de pagamento inválida.");
     }
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     const order = await findOrderForSession(session);
 
     if (!order) {
-      return res.status(404).send("Encomenda associada ao pagamento nao encontrada.");
+      return res.status(404).send("Encomenda associada ao pagamento não encontrada.");
     }
 
     if (!(await canAccessOrder(req, order))) {
-      return res.status(403).send("Nao pode consultar esta encomenda.");
+      return res.status(403).send("Não pode consultar esta encomenda.");
     }
 
     if (session.payment_status === "paid") {
@@ -231,7 +231,7 @@ exports.handleCheckoutCancel = async (req, res) => {
     }
 
     if (!(await canAccessOrder(req, order))) {
-      return res.status(403).send("Nao pode consultar esta encomenda.");
+      return res.status(403).send("Não pode consultar esta encomenda.");
     }
 
     if (order.paymentStatus !== "paid") {
@@ -250,7 +250,7 @@ exports.handleWebhook = async (req, res) => {
   const stripe = getStripeClient();
 
   if (!stripe) {
-    return res.status(500).send("Stripe nao esta configurado.");
+    return res.status(500).send("Stripe não está configurado.");
   }
 
   const signature = req.headers["stripe-signature"];

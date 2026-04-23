@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- LÓGICA DO MODAL (CLIENTE NOVO VS EXISTENTE) ---
+
   const radioNovo = document.getElementById("btnNew");
   const radioExistente = document.getElementById("btnExisting");
   const zoneNovo = document.getElementById("newCustomerZone");
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleCustomerZones();
   }
 
-  // --- LÓGICA DO TOTAL EM TEMPO REAL ---
+  
   function calculateTotal() {
     let total = 0;
     const rows = document.querySelectorAll("tr[data-product-row]");
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     input.addEventListener("keyup", calculateTotal);
   });
 
-  /// --- LÓGICA DO LEITOR DE CÓDIGO DE BARRAS ---
+  
   const barcodeInput = document.getElementById("barcodeInput");
   if (barcodeInput) {
     barcodeInput.addEventListener("keypress", (e) => {
@@ -118,7 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const code = barcodeInput.value.trim();
         if (!code) return;
 
-        // AQUI ESTÁ A MAGIA: Mudei de data-product-id para data-ean
         const row = document.querySelector(`tr[data-ean="${code}"]`);
 
         if (row) {
@@ -127,8 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (!checkbox.disabled) {
             checkbox.checked = true;
-            
-            // Só para garantir que se for a primeira vez, mete a 1. Se já tiver visto, soma +1.
+          
             qtyInput.value = parseInt(qtyInput.value || 0) + 1; 
             
             calculateTotal();
@@ -140,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Produto sem stock!");
           }
         } else {
-          // Mudei também a mensagem de erro para fazer sentido
           alert("EAN não encontrado na lista de produtos!"); 
         }
         barcodeInput.value = "";

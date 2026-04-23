@@ -136,7 +136,7 @@ async function sendOrderStatusEmail(order, previousStatus, nextStatus) {
 
   if (!isMailerConfigured()) {
     console.warn(
-      "Email nao enviado: faltam variaveis MAIL_* no .env para o transporte SMTP.",
+      "Email não enviado: faltam variaveis MAIL_* no .env para o transporte SMTP.",
     );
     return false;
   }

@@ -11,7 +11,7 @@ const { requireAuth, requireRole } = require("../middlewares/auth");
 
 const supermarketController = require("../controllers/supermarketController");
 const productController = require("../controllers/productController");
-const upload = require("../middlewares/upload"); // Importação do middleware do Multer
+const upload = require("../middlewares/upload"); 
 
 const ORDER_STATUS_LABELS = {
   pendente: "Pendente",
@@ -29,7 +29,7 @@ const DELIVERY_METHOD_LABELS = {
 
 const ACTIVE_ORDER_STATES = ["confirmada", "em_preparacao", "em_entrega"];
 
-// Funções Auxiliares
+
 function getManagedSupermarketFilter(supermarketIds) {
   return supermarketIds.length
     ? { supermercado: { $in: supermarketIds } }
@@ -165,7 +165,7 @@ async function attachCourierMetadata(orderInput) {
   return orderInput;
 }
 
-// --- ROTAS DE NAVEGAÇÃO GERAL ---
+
 router.get("/", (req, res) => {
   res.redirect("/supermarket/list");
 });

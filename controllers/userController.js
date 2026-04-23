@@ -18,26 +18,24 @@ exports.renderRegisterForm = (req, res) => {
 
 exports.registerUser = async (req, res) => {
   try {
-    const baseAddress = normalizeText(req.body.address || req.body.morada);
+    const baseAddress = normalizeText(req.body.address);
     const postalCode = normalizeText(
-      req.body.postalCode || req.body.codigoPostal,
-    );
-    const city = normalizeText(req.body.city || req.body.localidade);
+      req.body.postalCode);
+
+    const city = normalizeText(req.body.city);
     const phone = normalizeText(
-      req.body.phone || req.body.telephone || req.body.telefone,
-    );
+      req.body.phone);
 
     const address = [baseAddress, [postalCode, city].filter(Boolean).join(" ")]
       .filter(Boolean)
       .join(", ");
 
     const newUser = new User({
-      name: normalizeText(req.body.name || req.body.nome),
+      name: normalizeText(req.body.name),
       email: normalizeEmail(req.body.email),
       password: req.body.password,
       address,
       phone,
-      telephone: phone,
       role: req.body.role,
     });
 

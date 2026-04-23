@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestao de Cupoes</title>
+  <title>Gestão de Cupões</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -11,8 +11,8 @@
   <div class="container py-5">
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
       <div>
-        <h1 class="mb-1">Cupoes de Desconto</h1>
-        <p class="text-muted mb-0">Gestao simples de cupoes globais ou por supermercado.</p>
+        <h1 class="mb-1">Cupões de Desconto</h1>
+        <p class="text-muted mb-0">Gestão simples de cupões globais ou por supermercado.</p>
       </div>
       <div class="d-flex gap-2">
         <a href="/admin/dashboard" class="btn btn-outline-secondary">Dashboard</a>
@@ -32,10 +32,10 @@
       <div class="col-lg-5">
         <div class="card shadow-sm border-0">
           <div class="card-body">
-            <h2 class="h4 mb-3">Criar Cupao</h2>
+            <h2 class="h4 mb-3">Criar Cupão</h2>
             <form action="/admin/coupons/new" method="POST" class="row g-3">
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Codigo</label>
+                <label class="form-label fw-semibold">Código</label>
                 <input
                   type="text"
                   name="code"
@@ -49,17 +49,17 @@
                 <select name="type" class="form-select" required>
                   <option value="percent" <%= formData.type === "percent" ? "selected" : "" %>>Percentagem</option>
                   <option value="fixed" <%= formData.type === "fixed" ? "selected" : "" %>>Valor fixo</option>
-                  <option value="free_shipping" <%= formData.type === "free_shipping" ? "selected" : "" %>>Portes gratis</option>
+                  <option value="free_shipping" <%= formData.type === "free_shipping" ? "selected" : "" %>>Portes grátis</option>
                 </select>
               </div>
 
               <div class="col-12">
-                <label class="form-label fw-semibold">Descricao</label>
+                <label class="form-label fw-semibold">Descrição</label>
                 <input
                   type="text"
                   name="description"
                   class="form-control"
-                  placeholder="Ex: 10% de desconto em compras acima de 20 EUR"
+                  placeholder="Ex: 10% de desconto em compras acima de 20 €"
                   value="<%= formData.description || '' %>">
               </div>
 
@@ -75,7 +75,7 @@
                   required>
               </div>
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Valor minimo da encomenda</label>
+                <label class="form-label fw-semibold">Valor mínimo da encomenda</label>
                 <input
                   type="number"
                   step="0.01"
@@ -86,7 +86,7 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Desconto maximo</label>
+                <label class="form-label fw-semibold">Desconto máximo</label>
                 <input
                   type="number"
                   step="0.01"
@@ -97,7 +97,7 @@
                   value="<%= formData.maxDiscount || '' %>">
               </div>
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Limite de utilizacoes</label>
+                <label class="form-label fw-semibold">Limite de utilizações</label>
                 <input
                   type="number"
                   step="1"
@@ -109,7 +109,7 @@
               </div>
 
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Valido a partir de</label>
+                <label class="form-label fw-semibold">Válido a partir de</label>
                 <input
                   type="datetime-local"
                   name="validFrom"
@@ -117,7 +117,7 @@
                   value="<%= formData.validFrom || '' %>">
               </div>
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Valido ate</label>
+                <label class="form-label fw-semibold">Válido até</label>
                 <input
                   type="datetime-local"
                   name="validUntil"
@@ -128,7 +128,7 @@
               <div class="col-12">
                 <label class="form-label fw-semibold">Supermercado</label>
                 <select name="supermarketId" class="form-select">
-                  <option value="">Global (todos os supermercados)</option>
+                  <option value="">Todos (todos os supermercados)</option>
                   <% supermarkets.forEach((supermarket) => { %>
                     <option value="<%= supermarket._id %>" <%= String(formData.supermarketId || "") === String(supermarket._id) ? "selected" : "" %>>
                       <%= supermarket.name %>
@@ -146,13 +146,13 @@
                     id="isActive"
                     <%= formData.isActive !== false ? "checked" : "" %>>
                   <label class="form-check-label" for="isActive">
-                    Cupao ativo
+                    Cupão ativo
                   </label>
                 </div>
               </div>
 
               <div class="col-12 d-grid">
-                <button type="submit" class="btn btn-primary">Criar cupao</button>
+                <button type="submit" class="btn btn-primary">Criar cupão</button>
               </div>
             </form>
           </div>
@@ -163,25 +163,25 @@
         <div class="card shadow-sm border-0">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h2 class="h4 mb-0">Cupoes existentes</h2>
+              <h2 class="h4 mb-0">Cupões existentes</h2>
               <span class="badge bg-secondary"><%= coupons.length %> registados</span>
             </div>
 
             <% if (!coupons.length) { %>
               <div class="alert alert-light border mb-0">
-                Ainda nao existem cupoes registados.
+                Ainda não existem cupões registados.
               </div>
             <% } else { %>
               <div class="table-responsive">
                 <table class="table align-middle">
                   <thead class="table-light">
                     <tr>
-                      <th>Codigo</th>
+                      <th> Código</th>
                       <th>Tipo</th>
                       <th>Alcance</th>
                       <th>Uso</th>
                       <th>Estado</th>
-                      <th class="text-end">Acao</th>
+                      <th class="text-end">Ação</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -199,7 +199,7 @@
                             <% if (coupon.type === "percent") { %>
                               <%= Number(coupon.value).toFixed(2) %>%
                             <% } else if (coupon.type === "free_shipping") { %>
-                              Portes gratis
+                              Portes grátis
                             <% } else { %>
                               EUR <%= Number(coupon.value).toFixed(2) %>
                             <% } %>
@@ -210,7 +210,7 @@
                         </td>
                         <td>
                           <div><%= coupon.usedCount %><%= coupon.usageLimit ? " / " + coupon.usageLimit : "" %></div>
-                          <div class="small text-muted">Min. EUR <%= Number(coupon.minOrderValue || 0).toFixed(2) %></div>
+                          <div class="small text-muted">Min. € <%= Number(coupon.minOrderValue || 0).toFixed(2) %></div>
                         </td>
                         <td>
                           <span class="badge <%= coupon.isActive ? "bg-success" : "bg-secondary" %>">

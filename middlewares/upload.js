@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 
-// Configuração de onde e como o ficheiro será guardado
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/uploads/products'); 

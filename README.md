@@ -166,6 +166,40 @@ Fluxo de login:
 | `estafeta` | `/courier/dashboard` |
 | `cliente` | `/supermarket/list` |
 
+## Contas De Teste
+
+Estas contas existem na base de dados usada pelo grupo e podem ser utilizadas para demonstracao.
+
+### Admin
+
+| Email | Password | Observacao |
+|---|---|---|
+| `admin@ad.pt` | `admin` | Conta admin mais utilizada |
+| `administrador@admin.pt` | `administrador` | Conta admin alternativa |
+| `admin1@admin.en` | `admin1` | Conta admin alternativa |
+
+### Supermercado
+
+| Email | Password | Observacao |
+|---|---|---|
+| `supemercado@super.pt` | `supermercado` | Conta principal de supermercado |
+| `super1@supermercado.pt` | `super` | Conta com dois supermercados associados |
+
+### Estafeta
+
+| Email | Password | Observacao |
+|---|---|---|
+| `estafeta@est.pt` | `estafeta` | Conta de estafeta |
+
+### Cliente
+
+| Email | Password | Observacao |
+|---|---|---|
+| `manuel@gmail.com` | `manuel` | Cliente utilizado |
+| `cliente@cli.pt` | `cliente` | Conta cliente mais utilizada |
+| `dias@gmail.com` | `dias` | Cliente alternativo |
+| `josecarlosdias0009@gmail.com` | `jose` | Cliente alternativo |
+
 ## Rotas Desenvolvidas
 
 ### Rotas Publicas E Autenticacao

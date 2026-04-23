@@ -30,7 +30,7 @@
                     <tr>
                         <td class="align-middle"><%= user.name %></td>
                         <td class="align-middle"><%= user.email %></td>
-                        <td class="align-middle"><%= user.phone || user.telephone || '-' %></td>
+                        <td class="align-middle"><%= user.phone ||'-' %></td>
                         <td class="align-middle">
                             <% if(user.role === 'admin') { %>
                                 <span class="badge bg-danger">Admin</span>

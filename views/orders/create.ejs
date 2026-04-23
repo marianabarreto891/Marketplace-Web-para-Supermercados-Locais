@@ -26,7 +26,7 @@
 
     <% if (!products.length) { %>
       <div class="alert alert-warning">
-        Ainda nao existem produtos neste supermercado. Crie primeiro os produtos para poder registar vendas.
+        Ainda não existem produtos neste supermercado! Crie primeiro os produtos para poder registar vendas.
       </div>
     <% } else { %>
       <form action="/orders/create/<%= supermarket._id %>" method="POST">
@@ -38,8 +38,8 @@
                 <p class="text-muted mb-0">Pesquise para filtrar a lista e registar a venda mais depressa.</p>
               </div>
               <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-secondary" id="visibleProductsCounter"><%= products.length %> visiveis</span>
-                <span class="badge bg-dark"><%= products.length %> disponiveis</span>
+                <span class="badge bg-secondary" id="visibleProductsCounter"><%= products.length %> visíveis</span>
+                <span class="badge bg-dark"><%= products.length %> disponíveis</span>
               </div>
             </div>
 
@@ -74,22 +74,22 @@
 
             <div class="row mb-4">
               <div class="col-md-5">
-                <label class="form-label fw-semibold text-primary" for="barcodeInput">Leitor de codigo de barras</label>
+                <label class="form-label fw-semibold text-primary" for="barcodeInput">Leitor de código de barras</label>
                 <input type="text" id="barcodeInput" class="form-control border-primary" placeholder="Insira o EAN do produto e prima Enter">
               </div>
             </div>
 
             <div class="alert alert-success d-flex justify-content-between align-items-center mb-3">
               <span class="fs-5">Total da venda em tempo real:</span>
-              <strong class="fs-4" id="liveTotal">EUR 0.00</strong>
+              <strong class="fs-4" id="liveTotal">€ 0.00</strong>
             </div>
 
             <div class="alert alert-light border mb-4">
-              O total em tempo real mostra apenas os produtos selecionados. O custo de entrega e o cupao sao validados ao confirmar a venda.
+              O total em tempo real mostra apenas os produtos selecionados. O custo de entrega e o cupão são validados ao confirmar a venda.
             </div>
 
             <div class="alert alert-info d-none" id="noProductsMatch">
-              Nao existem produtos a corresponder a esta pesquisa.
+              Não existem produtos a corresponder a esta pesquisa.
             </div>
 
             <div class="table-responsive">
@@ -99,7 +99,7 @@
                     <th>Selecionar</th>
                     <th style="width: 70px;">Foto</th>
                     <th>Produto</th>
-                    <th>Preco</th>
+                    <th>Preço</th>
                     <th>Stock</th>
                     <th>Quantidade</th>
                   </tr>
@@ -173,7 +173,7 @@
               <div class="modal-body">
                 <div class="row g-4">
                   <div class="col-md-6">
-                    <h6 class="mb-3 text-primary">Informacao do cliente</h6>
+                    <h6 class="mb-3 text-primary">Informação do Cliente</h6>
                     <div class="mb-4 d-flex justify-content-center">
                       <div class="btn-group" role="group">
                         <input type="radio" class="btn-check customer-type-radio" name="customerType" id="btnNew" value="novo" checked>
@@ -220,7 +220,7 @@
                   <div class="col-md-6">
                     <h6 class="mb-3 text-primary">Detalhes da entrega</h6>
                     <div class="mb-3">
-                      <label class="form-label fw-semibold">Metodo de entrega</label>
+                      <label class="form-label fw-semibold">Método de entrega</label>
                       <select name="metodoEntrega" class="form-select" required>
                         <% supermarket.deliveryMethods.forEach((method) => { %>
                           <option value="<%= method %>" <%= (typeof deliveryMethod !== "undefined" && deliveryMethod === method) ? "selected" : "" %>><%= deliveryLabels[method] %></option>
@@ -229,9 +229,9 @@
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label fw-semibold">Codigo do cupao</label>
+                      <label class="form-label fw-semibold">Código do cupão</label>
                       <input type="text" name="couponCode" class="form-control text-uppercase" placeholder="Opcional. Ex: BEMVINDO10" value="<%= couponCode || '' %>">
-                      <div class="form-text">Se indicar um cupao, o desconto sera validado quando confirmar a venda.</div>
+                      <div class="form-text">Se indicar um cupão, o desconto será validado quando confirmar a venda.</div>
                     </div>
 
                     <div class="alert alert-info small">

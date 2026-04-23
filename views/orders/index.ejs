@@ -109,7 +109,7 @@
                     <th>Estafeta</th>
                   <% } %>
                   <th>Total</th>
-                  <th class="text-end">Acoes</th>
+                  <th class="text-end">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,7 +143,7 @@
                         <% if (order.estafetaDisplayName && order.estafetaDisplayName !== "-") { %>
                           <%= order.estafetaDisplayName %>
                         <% } else if (role === "estafeta" && order.estado === "em_preparacao") { %>
-                          Disponivel
+                          Disponível
                         <% } else if (order.estado === "confirmada" && role === "estafeta") { %>
                           A aguardar preparação
                         <% } else { %>

@@ -77,21 +77,21 @@ exports.createCoupon = async (req, res) => {
 
   try {
     if (!formData.code) {
-      throw new Error("Indique um codigo de cupao.");
+      throw new Error("Indique um código de cupão.");
     }
 
     if (!["percent", "fixed", "free_shipping"].includes(formData.type)) {
-      throw new Error("Selecione um tipo de cupao valido.");
+      throw new Error("Selecione um tipo de cupão válido.");
     }
 
     const value = parseNumber(formData.value);
 
     if (value < 0) {
-      throw new Error("O valor do cupao nao pode ser negativo.");
+      throw new Error("O valor do cupão não pode ser negativo.");
     }
 
     if (formData.type !== "free_shipping" && value <= 0) {
-      throw new Error("O valor do cupao tem de ser superior a zero.");
+      throw new Error("O valor do cupão tem de ser superior a zero!");
     }
 
     const validFrom = formData.validFrom ? new Date(formData.validFrom) : null;
@@ -100,11 +100,11 @@ exports.createCoupon = async (req, res) => {
       : null;
 
     if (validFrom && !Number.isFinite(validFrom.getTime())) {
-      throw new Error("A data inicial do cupao nao e valida.");
+      throw new Error("A data inicial do cupão não é válida!");
     }
 
     if (validUntil && !Number.isFinite(validUntil.getTime())) {
-      throw new Error("A data final do cupao nao e valida.");
+      throw new Error("A data final do cupão não é válida!");
     }
 
     if (
@@ -114,13 +114,13 @@ exports.createCoupon = async (req, res) => {
       Number.isFinite(validUntil.getTime()) &&
       validUntil < validFrom
     ) {
-      throw new Error("A data final nao pode ser anterior a data inicial.");
+      throw new Error("A data final não pode ser anterior a data inicial!");
     }
 
     const existingCoupon = await Coupon.findOne({ code: formData.code });
 
     if (existingCoupon) {
-      throw new Error("Ja existe um cupao com esse codigo.");
+      throw new Error("Ja existe um cupão com esse código!");
     }
 
     await Coupon.create({
@@ -137,7 +137,7 @@ exports.createCoupon = async (req, res) => {
       isActive: formData.isActive,
     });
 
-    return res.redirect("/admin/coupons?success=Cupao criado com sucesso.");
+    return res.redirect("/admin/coupons?success=Cupão criado com sucesso.");
   } catch (error) {
     try {
       const coupons = await Coupon.find()
@@ -151,14 +151,14 @@ exports.createCoupon = async (req, res) => {
         coupons,
         supermarkets,
         couponTypeLabels: COUPON_TYPE_LABELS,
-        errorMessage: error.message || "Erro ao criar cupao.",
+        errorMessage: error.message || "Erro ao criar cupão.",
         successMessage: null,
         formData,
       });
     } catch (renderError) {
-      console.error("Erro ao criar cupao:", error);
-      console.error("Erro adicional ao renderizar a pagina de cupoes:", renderError);
-      return res.status(500).send("Erro ao criar cupao.");
+      console.error("Erro ao criar cupão:", error);
+      console.error("Erro adicional ao renderizar a pagina de cupões:", renderError);
+      return res.status(500).send("Erro ao criar cupão!");
     }
   }
 };
@@ -168,15 +168,15 @@ exports.toggleCoupon = async (req, res) => {
     const coupon = await Coupon.findById(req.params.id);
 
     if (!coupon) {
-      return res.status(404).send("Cupao nao encontrado.");
+      return res.status(404).send("Cupão não encontrado!");
     }
 
     coupon.isActive = !coupon.isActive;
     await coupon.save();
 
-    return res.redirect("/admin/coupons?success=Estado do cupao atualizado.");
+    return res.redirect("/admin/coupons?success=Estado do cupão atualizado.");
   } catch (error) {
-    console.error("Erro ao atualizar cupao:", error);
-    return res.status(500).send("Erro ao atualizar cupao.");
+    console.error("Erro ao atualizar cupão:", error);
+    return res.status(500).send("Erro ao atualizar cupão!");
   }
 };

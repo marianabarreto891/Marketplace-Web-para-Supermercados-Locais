@@ -30,7 +30,7 @@ router.post(
 
 
 
-// Estafeta aceitar/reivindicar uma entrega
+// Estafeta aceita uma entrega
 router.post(
   "/:id/claim",
   requireAuth,

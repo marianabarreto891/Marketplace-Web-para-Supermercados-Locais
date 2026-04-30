@@ -24,7 +24,7 @@ const supermarketSchema = new mongoose.Schema(
 
     isApproved: { type: Boolean, default: false },
     toApprove: { type: Boolean, default: false },
-    rejectionReason: { type: String, default: "" } // <-- ADICIONAR ESTA LINHA
+    rejectionReason: { type: String, default: "" } 
   },
   { timestamps: true },
   { timestamps: true },

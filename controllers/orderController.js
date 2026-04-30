@@ -134,7 +134,6 @@ function buildFormData(body, rawItems) {
       phone: normalizePhone(
         firstValue(
           body.phone,
-          body.telephone,
           body.telefone,
           body.customerPhone,
         ),
@@ -280,7 +279,7 @@ async function notifyOrderStatusChange(orderId, previousStatus, nextStatus) {
     await attachCourierMetadata(order);
     await sendOrderStatusEmail(order, previousStatus, nextStatus);
   } catch (error) {
-    console.error("Erro ao enviar notificacao por email da encomenda:", error);
+    console.error("Erro ao enviar notificação por email da encomenda:", error);
   }
 }
 
@@ -332,7 +331,7 @@ async function getCreateSupermarket(req, supermarketId) {
   const supermarket = await Supermarket.findById(supermarketId);
 
   if (!supermarket) {
-    return { error: { status: 404, message: "Supermercado nao encontrado." } };
+    return { error: { status: 404, message: "Supermercado não encontrado!" } };
   }
 
   if (
@@ -342,7 +341,7 @@ async function getCreateSupermarket(req, supermarketId) {
     return {
       error: {
         status: 403,
-        message: "Nao pode registar vendas para este supermercado.",
+        message: "Não pode registar vendas para este supermercado.",
       },
     };
   }
@@ -351,7 +350,7 @@ async function getCreateSupermarket(req, supermarketId) {
     return {
       error: {
         status: 403,
-        message: "O supermercado ainda nao esta aprovado para operar.",
+        message: "O supermercado ainda não está aprovado para operar.",
       },
     };
   }
@@ -370,9 +369,7 @@ async function findOrCreateCustomer(customerData) {
   }
 
   const userByEmail = await User.findOne({ email });
-  const userByPhone = await User.findOne({
-    $or: [{ phone }, { telephone: phone }],
-  });
+  const userByPhone = await User.findOne({ phone });
 
   if (
     userByEmail &&
@@ -380,7 +377,7 @@ async function findOrCreateCustomer(customerData) {
     String(userByEmail._id) !== String(userByPhone._id)
   ) {
     throw new Error(
-      "Ja existe um utilizador com este email e outro com este telefone.",
+      "Já existe um utilizador com este email e outro com este telefone.",
     );
   }
 
@@ -389,7 +386,7 @@ async function findOrCreateCustomer(customerData) {
   if (customer) {
     if (customer.role !== "cliente") {
       throw new Error(
-        "Os dados inseridos pertencem a um utilizador que nao e cliente.",
+        "Os dados inseridos pertencem a um utilizador que não é cliente.",
       );
     }
 
@@ -410,9 +407,8 @@ async function findOrCreateCustomer(customerData) {
       hasChanges = true;
     }
 
-    if (customer.phone !== phone || customer.telephone !== phone) {
+    if (customer.phone !== phone) {
       customer.phone = phone;
-      customer.telephone = phone;
       hasChanges = true;
     }
 
@@ -434,7 +430,6 @@ async function findOrCreateCustomer(customerData) {
     password: crypto.randomBytes(16).toString("hex"),
     address,
     phone,
-    telephone: phone,
     role: "cliente",
     isApproved: true,
   });
@@ -596,7 +591,7 @@ async function reserveStock(supermarketId, selections) {
     stockReservations.push({
       productId: updatedProduct._id,
       quantity: selection.quantity,
-    });
+      });
 
     items.push({
       product: updatedProduct._id,
@@ -978,7 +973,7 @@ exports.listOrders = async (req, res) => {
     }
 
     const orders = await Order.find(query)
-      .populate("cliente", "name email phone telephone")
+      .populate("cliente", "name email phone")
       .populate("supermercado", "name")
       .sort({ createdAt: -1 });
 
@@ -1012,7 +1007,7 @@ exports.listOrders = async (req, res) => {
 exports.showOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
-      .populate("cliente", "name email address phone telephone")
+      .populate("cliente", "name email address phone")
       .populate("supermercado", "name location")
       .populate("items.product");
 

@@ -24,11 +24,11 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    // 1º: GUARDAR OS DADOS NA SESSÃO
+    
     req.session.userId = userFound._id;
     req.session.role = userFound.role;
 
-    // 2º: FORÇAR A GRAVAÇÃO ANTES DE REDIRECIONAR
+
     req.session.save((err) => {
       if (err) {
         console.error("Erro ao gravar sessão:", err);

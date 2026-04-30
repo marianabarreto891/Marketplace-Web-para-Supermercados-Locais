@@ -7,20 +7,16 @@ exports.listProducts = async (req, res) => {
     const supermarket = await Supermarket.findById(req.params.supermarketId);
     let query = { supermarket: req.params.supermarketId };
 
-    // 1. Filtro de Pesquisa por Nome
     if (req.query.search) {
       query.name = { $regex: req.query.search, $options: "i" };
     }
 
-    // 2. Filtro por Categoria
+    
     if (req.query.category && req.query.category !== "all") {
       query.category = req.query.category;
     }
 
-    // Vai buscar os produtos filtrados
     const products = await Product.find(query).populate("category");
-
-    // Vai buscar todas as categorias para construir os botões no EJS
     const categories = await Category.find();
 
     res.render("products/list", {

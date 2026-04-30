@@ -1,0 +1,47 @@
+<div class="compare-container">
+  <h2>Comparar preços</h2>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="searchName"
+      placeholder="Nome do produto (ex: Leite)"
+      (keyup.enter)="compare()"
+    />
+    <button (click)="compare()">Comparar</button>
+  </div>
+
+  <div *ngIf="loading">A carregar...</div>
+
+  <div *ngIf="searched && !loading">
+    <div *ngIf="results.length === 0">
+      Nenhum produto encontrado com esse nome.
+    </div>
+
+    <div *ngIf="results.length > 0">
+      <p class="tip">
+        Mais barato: <strong>{{ cheapest()?.supermarket?.name }}</strong>
+        — {{ cheapest()?.price | currency:'EUR' }}
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Supermercado</th>
+            <th>Preço</th>
+            <th>Stock</th>
+            <th>Localização</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of results" [class.cheapest]="p === cheapest()">
+            <td>{{ p.supermarket?.name }}</td>
+            <td>{{ p.price | currency:'EUR' }}</td>
+            <td>{{ p.stock > 0 ? 'Disponível' : 'Esgotado' }}</td>
+            <td>{{ p.supermarket?.location }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

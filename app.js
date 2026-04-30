@@ -1,3 +1,4 @@
+const cors = require('cors');
 require("dotenv").config();
 require("./models/db");
 var createError = require("http-errors");
@@ -35,6 +36,7 @@ app.use(
   }),
 );
 
+
 // Importação de Rotas
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -43,6 +45,7 @@ var courierRouter = require("./routes/courier");
 var adminRouter = require("./routes/admin");
 var ordersRouter = require("./routes/orders");
 var paymentsRouter = require("./routes/payments");
+var apiRouter = require('./routes/api');
 
 // Definição de Rotas
 app.use("/", indexRouter);
@@ -53,6 +56,16 @@ app.use("/estafeta", courierRouter);
 app.use("/admin", adminRouter);
 app.use("/orders", ordersRouter);
 app.use("/payments", paymentsRouter);
+
+
+app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
+app.use('/api', apiRouter);
+
+
+
+
+
+
 
 // Erro 404
 app.use(function (req, res, next) {

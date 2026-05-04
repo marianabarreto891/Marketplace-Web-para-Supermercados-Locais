@@ -1,4 +1,4 @@
-const cors = require('cors');
+const cors = require("cors");
 require("dotenv").config();
 require("./models/db");
 var createError = require("http-errors");
@@ -9,9 +9,29 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const session = require("express-session");
 const paymentController = require("./controllers/paymentController");
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
 
 var app = express();
 
+app.use(cors({ origin: "http://localhost:4200", credentials: true }));
+
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Marketplace API",
+      version: "1.0.0",
+      description:
+        "API para o FrontOffice em Angular do Marketplace de Supermercados",
+    },
+    servers: [{ url: "http://localhost:3000" }],
+  },
+  apis: ["./routes/*.js"],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -36,7 +56,6 @@ app.use(
   }),
 );
 
-
 // Importação de Rotas
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -45,7 +64,7 @@ var courierRouter = require("./routes/courier");
 var adminRouter = require("./routes/admin");
 var ordersRouter = require("./routes/orders");
 var paymentsRouter = require("./routes/payments");
-var apiRouter = require('./routes/api');
+var apiRouter = require("./routes/api");
 
 // Definição de Rotas
 app.use("/", indexRouter);
@@ -56,16 +75,7 @@ app.use("/estafeta", courierRouter);
 app.use("/admin", adminRouter);
 app.use("/orders", ordersRouter);
 app.use("/payments", paymentsRouter);
-
-
-app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
-app.use('/api', apiRouter);
-
-
-
-
-
-
+app.use("/api", apiRouter);
 
 // Erro 404
 app.use(function (req, res, next) {

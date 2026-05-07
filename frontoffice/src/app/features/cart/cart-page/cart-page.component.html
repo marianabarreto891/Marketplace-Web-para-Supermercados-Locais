@@ -1,0 +1,112 @@
+<section class="container py-4">
+  <header class="mb-4">
+    <h1 class="mb-2">Carrinho</h1>
+    <p class="text-muted mb-0">
+      Carrinho funcional com armazenamento local, edicao de quantidades e total parcial.
+    </p>
+  </header>
+
+  <div *ngIf="cartService.items().length === 0" class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h2 class="h5 mb-3">O carrinho esta vazio</h2>
+      <p class="text-muted mb-4">
+        Adiciona produtos a partir do catalogo para simulares o fluxo de compra do cliente.
+      </p>
+
+      <div class="d-flex gap-2 flex-wrap">
+        <a routerLink="/products" class="btn btn-primary">Ir para produtos</a>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="cartService.items().length > 0" class="row g-4">
+    <div class="col-12 col-xl-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h2 class="h5 mb-1">Produtos no carrinho</h2>
+              <p class="text-muted mb-0">
+                Supermercado: <strong>{{ cartService.supermarketName() }}</strong>
+              </p>
+            </div>
+            <button class="btn btn-outline-danger btn-sm" (click)="cartService.clearCart()">
+              Limpar carrinho
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th class="text-center">Quantidade</th>
+                  <th class="text-end">Preco</th>
+                  <th class="text-end">Subtotal</th>
+                  <th class="text-end">Acao</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of cartService.items()">
+                  <td>
+                    <div class="fw-semibold">{{ item.name }}</div>
+                    <small class="text-muted">Stock maximo: {{ item.stock }}</small>
+                  </td>
+                  <td class="text-center">
+                    <div class="d-inline-flex align-items-center gap-2">
+                      <button class="btn btn-outline-secondary btn-sm" (click)="cartService.decreaseQuantity(item.productId)">
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        class="form-control form-control-sm text-center"
+                        style="width: 80px;"
+                        [value]="item.quantity"
+                        min="1"
+                        [max]="item.stock"
+                        (change)="updateQuantity(item.productId, $any($event.target).value)"
+                      />
+                      <button class="btn btn-outline-secondary btn-sm" (click)="cartService.increaseQuantity(item.productId)">
+                        +
+                      </button>
+                    </div>
+                  </td>
+                  <td class="text-end">EUR {{ item.price.toFixed(2) }}</td>
+                  <td class="text-end fw-semibold">
+                    EUR {{ (item.price * item.quantity).toFixed(2) }}
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-outline-danger btn-sm" (click)="cartService.removeProduct(item.productId)">
+                      Remover
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Resumo</h2>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Itens</span>
+            <strong>{{ cartService.itemCount() }}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-4">
+            <span>Total parcial</span>
+            <strong>EUR {{ cartService.subtotal().toFixed(2) }}</strong>
+          </div>
+
+          <div class="d-grid gap-2">
+            <a routerLink="/checkout" class="btn btn-success">Continuar para checkout</a>
+            <a routerLink="/products" class="btn btn-outline-primary">Continuar a comprar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

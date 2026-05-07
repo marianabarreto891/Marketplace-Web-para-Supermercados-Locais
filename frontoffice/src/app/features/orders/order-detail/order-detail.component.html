@@ -1,0 +1,113 @@
+<section class="container py-4">
+  <header class="mb-4">
+    <h1 class="mb-2">Detalhe da encomenda</h1>
+    <p class="text-muted mb-0">
+      Consulta completa da encomenda
+      <strong>#{{ order()?.displayId || orderId }}</strong>.
+    </p>
+  </header>
+
+  <div *ngIf="paymentMessage()" class="success mb-4">{{ paymentMessage() }}</div>
+  <div *ngIf="errorMessage()" class="error mb-4">{{ errorMessage() }}</div>
+
+  <div *ngIf="loading()" class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <p class="mb-0">A carregar detalhe da encomenda...</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading() && !order()" class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <p class="mb-3">Nao foi encontrada nenhuma encomenda com este identificador.</p>
+      <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao historico</a>
+    </div>
+  </div>
+
+  <div *ngIf="!loading() && order() as order" class="row g-4">
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Resumo</h2>
+          <p class="mb-2"><strong>ID da encomenda:</strong> {{ order.displayId || order.id }}</p>
+          <p class="mb-2"><strong>Supermercado:</strong> {{ order.supermarketName }}</p>
+          <p class="mb-2"><strong>Estado:</strong> {{ statusLabel }}</p>
+          <p class="mb-2"><strong>Pagamento:</strong> {{ paymentStatusLabel }}</p>
+          <p class="mb-2"><strong>Entrega:</strong> {{ deliveryLabel }}</p>
+          <p class="mb-2"><strong>Cupao:</strong> {{ order.couponCode || 'Sem cupao' }}</p>
+          <p class="mb-2"><strong>Criada em:</strong> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          <p class="mb-0" *ngIf="order.paidAt">
+            <strong>Paga em:</strong> {{ order.paidAt | date:'dd/MM/yyyy HH:mm' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Produtos</h2>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th class="text-center">Qtd</th>
+                  <th class="text-end">Preco</th>
+                  <th class="text-end">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of order.items">
+                  <td>{{ item.name }}</td>
+                  <td class="text-center">{{ item.quantity }}</td>
+                  <td class="text-end">EUR {{ item.unitPrice.toFixed(2) }}</td>
+                  <td class="text-end">EUR {{ item.subtotal.toFixed(2) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <hr />
+
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <strong>EUR {{ order.subtotal.toFixed(2) }}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Entrega</span>
+            <strong>EUR {{ order.deliveryCost.toFixed(2) }}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Desconto</span>
+            <strong>- EUR {{ order.discountApplied.toFixed(2) }}</strong>
+          </div>
+          <div class="d-flex justify-content-between fs-5">
+            <span>Total</span>
+            <strong>EUR {{ order.total.toFixed(2) }}</strong>
+          </div>
+
+          <div class="mt-4 d-flex gap-2 flex-wrap">
+            <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao historico</a>
+            <a routerLink="/products" class="btn btn-outline-primary">Continuar a comprar</a>
+            <button
+              *ngIf="canPay"
+              class="btn btn-primary"
+              type="button"
+              [disabled]="paymentLoading()"
+              (click)="startStripePayment()"
+            >
+              {{ paymentLoading() ? 'A abrir Stripe...' : 'Pagar com Stripe' }}
+            </button>
+            <button *ngIf="canReview" class="btn btn-success" type="button" disabled>
+              Avaliar encomenda
+            </button>
+          </div>
+
+          <small *ngIf="canReview" class="text-muted d-block mt-2">
+            Botao preparado para a futura funcionalidade de avaliacao apos entrega.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

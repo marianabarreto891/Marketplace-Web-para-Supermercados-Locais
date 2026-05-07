@@ -1,18 +1,22 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <a routerLink="/products"> Marketplace</a>
+    <a routerLink="/products">Marketplace</a>
   </div>
 
   <div class="navbar-links">
     <a routerLink="/products" routerLinkActive="active">Produtos</a>
-    <a routerLink="/compare" routerLinkActive="active">Comparar preços</a>
+    <a routerLink="/compare" routerLinkActive="active">Comparar precos</a>
+    <a *ngIf="auth.isLoggedIn()" routerLink="/cart" routerLinkActive="active">
+      Carrinho
+      <span *ngIf="cart.itemCount() > 0">({{ cart.itemCount() }})</span>
+    </a>
+    <a *ngIf="auth.isLoggedIn()" routerLink="/orders" routerLinkActive="active">Encomendas</a>
+    <a *ngIf="auth.isLoggedIn()" routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
   </div>
 
   <div class="navbar-user">
-    <span *ngIf="auth.currentUser() as u">Olá, {{ u.name }}</span>
+    <span *ngIf="auth.currentUser() as u">Ola, {{ u.name }}</span>
     <button *ngIf="auth.isLoggedIn()" (click)="auth.logout()">Sair</button>
     <a *ngIf="!auth.isLoggedIn()" routerLink="/login">Entrar</a>
   </div>
 </nav>
-
-<router-outlet></router-outlet>

@@ -1,5 +1,5 @@
 <div class="compare-container">
-  <h2>Comparar preços</h2>
+  <h2>Comparar precos</h2>
 
   <div class="search-bar">
     <input
@@ -11,34 +11,38 @@
     <button (click)="compare()">Comparar</button>
   </div>
 
-  <div *ngIf="loading">A carregar...</div>
+  <div *ngIf="loading()">A carregar...</div>
 
-  <div *ngIf="searched && !loading">
-    <div *ngIf="results.length === 0">
+  <div *ngIf="!loading() && errorMessage()">
+    {{ errorMessage() }}
+  </div>
+
+  <div *ngIf="searched() && !loading() && !errorMessage()">
+    <div *ngIf="results().length === 0">
       Nenhum produto encontrado com esse nome.
     </div>
 
-    <div *ngIf="results.length > 0">
-      <p class="tip">
-        Mais barato: <strong>{{ cheapest()?.supermarket?.name }}</strong>
-        — {{ cheapest()?.price | currency:'EUR' }}
+    <div *ngIf="results().length > 0">
+      <p class="tip" *ngIf="cheapest() as cheapestProduct">
+        Mais barato: <strong>{{ cheapestProduct.supermarket.name }}</strong>
+        - {{ cheapestProduct.price | currency:'EUR' }}
       </p>
 
       <table>
         <thead>
           <tr>
             <th>Supermercado</th>
-            <th>Preço</th>
+            <th>Preco</th>
             <th>Stock</th>
-            <th>Localização</th>
+            <th>Localizacao</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of results" [class.cheapest]="p === cheapest()">
-            <td>{{ p.supermarket?.name }}</td>
+          <tr *ngFor="let p of results()" [class.cheapest]="p === cheapest()">
+            <td>{{ p.supermarket.name }}</td>
             <td>{{ p.price | currency:'EUR' }}</td>
-            <td>{{ p.stock > 0 ? 'Disponível' : 'Esgotado' }}</td>
-            <td>{{ p.supermarket?.location }}</td>
+            <td>{{ p.stock > 0 ? 'Disponivel' : 'Esgotado' }}</td>
+            <td>{{ p.supermarket.location }}</td>
           </tr>
         </tbody>
       </table>

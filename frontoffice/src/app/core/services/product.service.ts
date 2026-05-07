@@ -5,7 +5,13 @@ export interface Product {
   _id: string; name: string; description: string;
   price: number; stock: number; image: string;
   category: { _id: string; name: string };
-  supermarket: { _id: string; name: string; location: string };
+  supermarket: {
+    _id: string;
+    name: string;
+    location: string;
+    deliveryMethods?: Array<'levantamento_loja' | 'estafeta'>;
+    deliveryCost?: number;
+  };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -19,16 +25,20 @@ export class ProductService {
     if (filters.search) params = params.set('search', filters.search);
     if (filters.category && filters.category !== 'all') params = params.set('category', filters.category);
     if (filters.sort) params = params.set('sort', filters.sort);
+    params = params.set('_t', Date.now().toString());
     return this.http.get<Product[]>(`${this.apiUrl}/products`, { params });
   }
 
   getCategories() {
-    return this.http.get<{ _id: string; name: string }[]>(`${this.apiUrl}/categories`);
+    const params = new HttpParams().set('_t', Date.now().toString());
+    return this.http.get<{ _id: string; name: string }[]>(`${this.apiUrl}/categories`, { params });
   }
 
   compareByName(name: string) {
     return this.http.get<Product[]>(`${this.apiUrl}/products/compare`, {
-      params: new HttpParams().set('name', name)
+      params: new HttpParams()
+        .set('name', name)
+        .set('_t', Date.now().toString())
     });
   }
 }

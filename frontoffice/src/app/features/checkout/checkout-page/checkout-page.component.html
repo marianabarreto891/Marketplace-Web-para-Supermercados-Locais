@@ -1,0 +1,120 @@
+<section class="container py-4">
+  <header class="mb-4">
+    <h1 class="mb-2">Checkout</h1>
+    <p class="text-muted mb-0">
+      Revise os produtos, escolha a entrega e crie a encomenda real no sistema.
+    </p>
+  </header>
+
+  <div *ngIf="errorMessage()" class="error mb-4">{{ errorMessage() }}</div>
+
+  <div *ngIf="cartService.items().length === 0" class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h2 class="h5 mb-3">Nao ha produtos para checkout</h2>
+      <p class="text-muted mb-4">
+        Volta ao catalogo e adiciona produtos antes de tentares criar uma encomenda.
+      </p>
+      <a routerLink="/products" class="btn btn-primary">Voltar aos produtos</a>
+    </div>
+  </div>
+
+  <div *ngIf="cartService.items().length > 0" class="row g-4">
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Produtos da encomenda</h2>
+          <div class="table-responsive mb-4">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th class="text-center">Qtd</th>
+                  <th class="text-end">Preco</th>
+                  <th class="text-end">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of cartService.items()">
+                  <td>{{ item.name }}</td>
+                  <td class="text-center">{{ item.quantity }}</td>
+                  <td class="text-end">EUR {{ item.price.toFixed(2) }}</td>
+                  <td class="text-end">EUR {{ (item.price * item.quantity).toFixed(2) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 class="h5 mb-3">Metodo de entrega</h2>
+          <div class="vstack gap-3 mb-4">
+            <article *ngFor="let method of deliveryMethods()" class="border rounded-3 p-3">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="deliveryMethod"
+                    [id]="method.code"
+                    [value]="method.code"
+                    [(ngModel)]="selectedDeliveryMethod"
+                  />
+                  <label class="form-check-label" [for]="method.code">
+                    <h3 class="h6 mb-1">{{ method.label }}</h3>
+                    <p class="text-muted mb-0">{{ method.description }}</p>
+                  </label>
+                </div>
+                <strong>EUR {{ method.deliveryCost.toFixed(2) }}</strong>
+              </div>
+            </article>
+          </div>
+
+          <div>
+            <label for="couponCode" class="form-label fw-semibold">Cupao</label>
+            <input
+              id="couponCode"
+              name="couponCode"
+              type="text"
+              class="form-control"
+              [(ngModel)]="couponCode"
+              placeholder="Introduz um cupao ativo, se existir"
+            />
+            <small class="text-muted d-block mt-2">
+              O desconto final sera validado pelo backend com os cupoes ativos do supermercado.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Resumo da compra</h2>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <strong>EUR {{ subtotal.toFixed(2) }}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Entrega</span>
+            <strong>EUR {{ deliveryCost.toFixed(2) }}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Desconto</span>
+            <strong>- EUR {{ discountApplied.toFixed(2) }}</strong>
+          </div>
+          <hr />
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <span class="fw-semibold">Total final</span>
+            <strong class="fs-5">EUR {{ total.toFixed(2) }}</strong>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button class="btn btn-success" (click)="finalizeOrder()" [disabled]="submitting()">
+              {{ submitting() ? 'A criar encomenda...' : 'Finalizar encomenda' }}
+            </button>
+            <a routerLink="/cart" class="btn btn-outline-secondary">Voltar ao carrinho</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

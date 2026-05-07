@@ -1,6 +1,14 @@
 <div class="product-list-container">
   <h2>Produtos</h2>
 
+  <div
+    *ngIf="cartMessage"
+    [class.success]="cartMessageType === 'success'"
+    [class.error]="cartMessageType === 'error'"
+  >
+    {{ cartMessage }}
+  </div>
+
   <div class="filters">
     <input
       type="text"
@@ -11,32 +19,44 @@
 
     <select [(ngModel)]="selectedCategory" (ngModelChange)="loadProducts()">
       <option value="all">Todas as categorias</option>
-      <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.name }}</option>
+      <option *ngFor="let cat of categories()" [value]="cat._id">{{ cat.name }}</option>
     </select>
 
     <select [(ngModel)]="sort" (ngModelChange)="loadProducts()">
-      <option value="asc">Preço: menor para maior</option>
-      <option value="desc">Preço: maior para menor</option>
+      <option value="asc">Preco: menor para maior</option>
+      <option value="desc">Preco: maior para menor</option>
     </select>
 
-    <a routerLink="/compare">Comparar preços</a>
+    <a routerLink="/compare">Comparar precos</a>
   </div>
 
-  <div *ngIf="loading">A carregar...</div>
+  <div *ngIf="loading()">A carregar...</div>
 
-  <div *ngIf="!loading && products.length === 0">
+  <div *ngIf="!loading() && errorMessage()" class="error">
+    {{ errorMessage() }}
+  </div>
+
+  <div *ngIf="!loading() && !errorMessage() && products().length === 0">
     Nenhum produto encontrado.
   </div>
 
-  <div class="products-grid" *ngIf="!loading && products.length > 0">
-    <div class="product-card" *ngFor="let p of products">
+  <div class="products-grid" *ngIf="!loading() && !errorMessage() && products().length > 0">
+    <div class="product-card" *ngFor="let p of products()">
       <img [src]="getImageUrl(p.image)" [alt]="p.name" />
       <div class="product-info">
         <h3>{{ p.name }}</h3>
-        <p class="category">{{ p.category?.name }}</p>
-        <p class="supermarket">{{ p.supermarket?.name }}</p>
+        <p class="category">{{ p.category.name }}</p>
+        <p class="supermarket">{{ p.supermarket.name }}</p>
         <p class="price">{{ p.price | currency:'EUR' }}</p>
         <p class="stock" *ngIf="p.stock === 0">Esgotado</p>
+        <p class="stock" *ngIf="p.stock > 0">Stock: {{ p.stock }}</p>
+        <button
+          class="btn btn-success btn-sm mt-2 w-100"
+          [disabled]="p.stock === 0"
+          (click)="addToCart(p)"
+        >
+          Adicionar ao carrinho
+        </button>
       </div>
     </div>
   </div>

@@ -1,0 +1,123 @@
+<section class="container py-4">
+  <header class="mb-4">
+    <h1 class="mb-2">Dashboard do cliente</h1>
+    <p class="text-muted mb-0">
+      Resumo da tua atividade, com estatisticas de compra, produtos mais comprados e ultimas encomendas.
+    </p>
+  </header>
+
+  <div *ngIf="errorMessage()" class="error mb-4">{{ errorMessage() }}</div>
+
+  <div *ngIf="loading()" class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+      <p class="mb-0">A carregar dashboard...</p>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <p class="text-muted mb-2">Numero de encomendas</p>
+          <h2 class="mb-0">{{ stats().totalOrders }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <p class="text-muted mb-2">Total gasto</p>
+          <h2 class="mb-0">EUR {{ stats().totalSpent.toFixed(2) }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <p class="text-muted mb-2">Produtos mais comprados</p>
+          <h2 class="mb-0">{{ stats().mostPurchasedProducts.length }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12 col-xl-5">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">Produtos mais comprados</h2>
+            <a routerLink="/products" class="btn btn-outline-primary btn-sm">Explorar produtos</a>
+          </div>
+
+          <div *ngIf="stats().mostPurchasedProducts.length === 0" class="text-muted">
+            Ainda nao existem dados suficientes para produtos mais comprados.
+          </div>
+
+          <div *ngIf="stats().mostPurchasedProducts.length > 0" class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th class="text-end">Unidades</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let product of stats().mostPurchasedProducts">
+                  <td>{{ product.name }}</td>
+                  <td class="text-end fw-semibold">{{ product.quantity }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-7">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">Ultimas encomendas</h2>
+            <a routerLink="/orders" class="btn btn-outline-primary btn-sm">Ver historico completo</a>
+          </div>
+
+          <div *ngIf="stats().recentOrders.length === 0" class="text-muted">
+            Ainda nao existem encomendas para apresentar.
+          </div>
+
+          <div *ngIf="stats().recentOrders.length > 0" class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Supermercado</th>
+                  <th>Estado</th>
+                  <th class="text-end">Total</th>
+                  <th class="text-end">Acao</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let order of stats().recentOrders">
+                  <td>{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ order.supermarketName }}</td>
+                  <td>{{ getStatusLabel(order.status) }}</td>
+                  <td class="text-end">EUR {{ order.total.toFixed(2) }}</td>
+                  <td class="text-end">
+                    <a [routerLink]="['/orders', order.orderId]" class="btn btn-outline-secondary btn-sm">
+                      Detalhe
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </ng-container>
+</section>

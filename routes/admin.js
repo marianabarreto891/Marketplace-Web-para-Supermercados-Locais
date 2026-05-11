@@ -5,6 +5,7 @@ const { requireAuth, requireRole } = require("../middlewares/auth");
 const adminController = require("../controllers/adminController");
 const categoryController = require("../controllers/categoryController");
 const couponController = require("../controllers/couponController");
+const Product = require("../models/Product");
 
 router.use(requireAuth, requireRole(["admin"]));
 
@@ -17,9 +18,25 @@ router.get("/users", adminController.listUsers);
 // Rotas de Categorias
 router.get("/categories", categoryController.listCategories);
 router.post("/categories/new", categoryController.createCategory);
+router.get("/categories/:id/edit", categoryController.renderEditCategory);
+router.post("/categories/:id/edit", categoryController.updateCategory);
+router.post("/categories/:id/delete", categoryController.deleteCategory);
+
+// Rotas de Coupons
 router.get("/coupons", couponController.listCoupons);
 router.post("/coupons/new", couponController.createCoupon);
 router.post("/coupons/:id/toggle", couponController.toggleCoupon);
+
+// Eliminar produto (admin)
+router.post("/products/:productId/delete", async (req, res) => {
+  try {
+    await Product.findByIdAndDelete(req.params.productId);
+    const referer = req.headers.referer || "/admin/dashboard";
+    res.redirect(referer);
+  } catch (error) {
+    res.status(500).send("Erro ao apagar produto");
+  }
+});
 
 // Criar novo Administrador
 router.get("/createAdmin", adminController.renderCreateAdminForm);

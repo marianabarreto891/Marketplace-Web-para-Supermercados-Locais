@@ -12,10 +12,32 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class LoginComponent {
   email = ''; password = ''; error = '';
+  fieldErrors: { email?: string; password?: string } = {};
 
   constructor(private auth: AuthService, private router: Router) {}
 
+  private validate(): boolean {
+    this.fieldErrors = {};
+
+    if (!this.email.trim()) {
+      this.fieldErrors.email = 'O email é obrigatório.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
+      this.fieldErrors.email = 'Introduz um email válido (ex: nome@dominio.com).';
+    }
+
+    if (!this.password) {
+      this.fieldErrors.password = 'A password é obrigatória.';
+    } else if (this.password.length < 6) {
+      this.fieldErrors.password = 'A password deve ter pelo menos 6 caracteres.';
+    }
+
+    return Object.keys(this.fieldErrors).length === 0;
+  }
+
   onSubmit() {
+    this.error = '';
+    if (!this.validate()) return;
+
     this.auth.login(this.email, this.password).subscribe({
       next: () => this.router.navigate(['/products']),
       error: err => this.error = err.error?.error || 'Erro ao fazer login'

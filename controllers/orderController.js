@@ -291,7 +291,10 @@ async function renderCreatePage(
   errorMessage = null,
   statusCode = 200,
 ) {
-  const query = { supermarket: supermarket._id };
+  const query = {
+    supermarket: supermarket._id,
+    isActive: { $ne: false },
+  };
 
   if (req.query.search) {
     query.name = { $regex: req.query.search, $options: "i" };
@@ -572,6 +575,7 @@ async function reserveStock(supermarketId, selections) {
       {
         _id: selection.productId,
         supermarket: supermarketId,
+        isActive: { $ne: false },
         stock: { $gte: selection.quantity },
       },
       { $inc: { stock: -selection.quantity } },

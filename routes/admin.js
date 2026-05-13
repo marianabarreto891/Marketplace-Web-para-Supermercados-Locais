@@ -15,6 +15,8 @@ router.post("/supermarket/:id/approve", adminController.approveSupermarket);
 router.post("/supermarket/:id/disapprove", adminController.disapproveSupermarket);
 router.get("/users", adminController.listUsers);
 router.get("/reviews", adminController.listReviews);
+router.get("/products", adminController.listProducts);
+router.post("/products/:productId/toggle", adminController.toggleProductStatus);
 
 // Rotas de Categorias
 router.get("/categories", categoryController.listCategories);

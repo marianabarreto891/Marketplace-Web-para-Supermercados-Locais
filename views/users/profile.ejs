@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil do utilizador</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+      <div>
+        <h1 class="mb-1">Perfil do utilizador</h1>
+        <p class="text-muted mb-0">Consulta dos dados da conta autenticada.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="<%= dashboardPath %>" class="btn btn-outline-primary">Voltar ao dashboard</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar sessao</a>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12 col-xl-8">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body p-4">
+            <h2 class="h4 mb-4">Dados principais</h2>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="border rounded p-3 h-100">
+                  <div class="text-muted small mb-1">Nome</div>
+                  <div class="fw-semibold"><%= currentUser.name || "-" %></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="border rounded p-3 h-100">
+                  <div class="text-muted small mb-1">Email</div>
+                  <div class="fw-semibold"><%= currentUser.email || "-" %></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="border rounded p-3 h-100">
+                  <div class="text-muted small mb-1">Telefone</div>
+                  <div class="fw-semibold"><%= currentUser.phone || "-" %></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="border rounded p-3 h-100">
+                  <div class="text-muted small mb-1">Perfil</div>
+                  <div class="fw-semibold text-capitalize"><%= currentUser.role || "-" %></div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="border rounded p-3 h-100">
+                  <div class="text-muted small mb-1">Morada</div>
+                  <div class="fw-semibold"><%= currentUser.address || "-" %></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-4">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body p-4">
+            <h2 class="h4 mb-4">Estado da conta</h2>
+
+            <div class="border rounded p-3 mb-3">
+              <div class="text-muted small mb-1">Criada em</div>
+              <div class="fw-semibold">
+                <%= currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleString("pt-PT") : "-" %>
+              </div>
+            </div>
+
+            <div class="border rounded p-3">
+              <div class="text-muted small mb-1">Aprovacao</div>
+              <% if (currentUser.role === "supermercado") { %>
+                <span class="badge <%= currentUser.isApproved ? "bg-success" : "bg-warning text-dark" %>">
+                  <%= currentUser.isApproved ? "Aprovado" : "Pendente de aprovacao" %>
+                </span>
+              <% } else { %>
+                <span class="badge bg-success">Conta ativa</span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

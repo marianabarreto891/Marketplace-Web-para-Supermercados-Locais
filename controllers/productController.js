@@ -6,6 +6,12 @@ exports.listProducts = async (req, res) => {
   try {
     const supermarket = await Supermarket.findById(req.params.supermarketId);
     let query = { supermarket: req.params.supermarketId };
+    const canManageProducts =
+      req.session.role === "admin" || req.session.role === "supermercado";
+
+    if (!canManageProducts) {
+      query.isActive = { $ne: false };
+    }
 
     if (req.query.search) {
       query.name = { $regex: req.query.search, $options: "i" };
@@ -26,6 +32,7 @@ exports.listProducts = async (req, res) => {
       searchQuery: req.query.search || "",
       selectedCategory: req.query.category || "all",
       userRole: req.session.role,
+      canManageProducts,
     });
   } catch (error) {
     res.status(500).send("Erro ao listar produtos!");

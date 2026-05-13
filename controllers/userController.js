@@ -16,6 +16,33 @@ exports.renderRegisterForm = (req, res) => {
   res.render("users/register");
 };
 
+exports.renderProfile = async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.session.userId).select("-password");
+
+    if (!currentUser) {
+      return res.status(404).send("Utilizador nao encontrado.");
+    }
+
+    const dashboardPath =
+      currentUser.role === "admin"
+        ? "/admin/dashboard"
+        : currentUser.role === "supermercado"
+          ? "/supermarket/dashboard"
+          : currentUser.role === "estafeta"
+            ? "/courier/dashboard"
+            : "/supermarket/list";
+
+    res.render("users/profile", {
+      currentUser,
+      dashboardPath,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro ao carregar perfil.");
+  }
+};
+
 exports.registerUser = async (req, res) => {
   try {
     const baseAddress = normalizeText(req.body.address);

@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const Supermarket = require("../models/Supermarket");
 const Order = require("../models/Order");
+const Product = require("../models/Product");
+const Category = require("../models/Category");
 
 exports.getDashboard = async (req, res) => {
   try {
@@ -88,6 +90,73 @@ exports.listReviews = async (req, res) => {
   } catch (error) {
     console.error("Erro ao listar reviews:", error);
     res.status(500).send("Erro ao listar reviews!");
+  }
+};
+
+exports.listProducts = async (req, res) => {
+  try {
+    const query = {};
+
+    if (req.query.search) {
+      query.name = { $regex: String(req.query.search).trim(), $options: "i" };
+    }
+
+    if (req.query.supermarketId) {
+      query.supermarket = req.query.supermarketId;
+    }
+
+    if (req.query.categoryId) {
+      query.category = req.query.categoryId;
+    }
+
+    if (req.query.status === "active") {
+      query.isActive = { $ne: false };
+    } else if (req.query.status === "inactive") {
+      query.isActive = false;
+    }
+
+    const [products, supermarkets, categories] = await Promise.all([
+      Product.find(query)
+        .populate("supermarket", "name location")
+        .populate("category", "name")
+        .sort({ createdAt: -1, name: 1 }),
+      Supermarket.find().sort({ name: 1 }),
+      Category.find().sort({ name: 1 }),
+    ]);
+
+    res.render("admin/products", {
+      products,
+      supermarkets,
+      categories,
+      filters: {
+        search: req.query.search || "",
+        supermarketId: req.query.supermarketId || "",
+        categoryId: req.query.categoryId || "",
+        status: req.query.status || "",
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao listar produtos no admin:", error);
+    res.status(500).send("Erro ao listar produtos.");
+  }
+};
+
+exports.toggleProductStatus = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+
+    if (!product) {
+      return res.status(404).send("Produto nao encontrado.");
+    }
+
+    product.isActive = product.isActive === false ? true : false;
+    await product.save();
+
+    const referer = req.headers.referer || "/admin/products";
+    return res.redirect(referer);
+  } catch (error) {
+    console.error("Erro ao alterar estado do produto:", error);
+    return res.status(500).send("Erro ao alterar estado do produto.");
   }
 };
 

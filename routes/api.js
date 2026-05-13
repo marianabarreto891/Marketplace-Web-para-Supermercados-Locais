@@ -498,7 +498,7 @@ router.get("/auth/me", requireJWT, async (req, res) => {
  */
 router.get("/products", async (req, res) => {
   try {
-    const query = {};
+    const query = { isActive: { $ne: false } };
 
     if (req.query.search) {
       query.name = { $regex: req.query.search, $options: "i" };
@@ -557,6 +557,7 @@ router.get("/products/compare", async (req, res) => {
 
     const products = await Product.find({
       name: { $regex: name, $options: "i" },
+      isActive: { $ne: false },
       stock: { $gt: 0 },
     })
       .populate("supermarket", "name location isApproved deliveryMethods deliveryCost")
@@ -904,7 +905,10 @@ router.post("/orders", requireJWT, requireClientJWT, async (req, res) => {
     }));
 
     const productIds = selections.map((selection) => selection.productId);
-    const products = await Product.find({ _id: { $in: productIds } }).populate(
+    const products = await Product.find({
+      _id: { $in: productIds },
+      isActive: { $ne: false },
+    }).populate(
       "supermarket",
       "name location isApproved deliveryMethods deliveryCost",
     );

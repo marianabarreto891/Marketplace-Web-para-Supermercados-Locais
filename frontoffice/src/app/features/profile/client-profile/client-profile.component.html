@@ -1,0 +1,83 @@
+<section class="container py-4">
+  <header class="mb-4">
+    <h1 class="mb-2">Perfil do cliente</h1>
+    <p class="text-muted mb-0">
+      Consulta dos dados da conta autenticada.
+    </p>
+  </header>
+
+  <div *ngIf="errorMessage()" class="error mb-4">{{ errorMessage() }}</div>
+
+  <div *ngIf="loading()" class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <p class="mb-0 text-muted">A carregar perfil...</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading() && profile() as user" class="row g-4">
+    <div class="col-12 col-xl-8">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-4">Dados principais</h2>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="border rounded p-3 h-100">
+                <div class="text-muted small mb-1">Nome</div>
+                <div class="fw-semibold">{{ user.name || '-' }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="border rounded p-3 h-100">
+                <div class="text-muted small mb-1">Email</div>
+                <div class="fw-semibold">{{ user.email || '-' }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="border rounded p-3 h-100">
+                <div class="text-muted small mb-1">Telefone</div>
+                <div class="fw-semibold">{{ user.phone || '-' }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="border rounded p-3 h-100">
+                <div class="text-muted small mb-1">Perfil</div>
+                <div class="fw-semibold text-capitalize">{{ user.role || '-' }}</div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="border rounded p-3 h-100">
+                <div class="text-muted small mb-1">Morada</div>
+                <div class="fw-semibold">{{ user.address || '-' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-4">Conta</h2>
+
+          <div class="border rounded p-3 mb-3">
+            <div class="text-muted small mb-1">Criada em</div>
+            <div class="fw-semibold">
+              {{ user.createdAt ? (user.createdAt | date:'dd/MM/yyyy HH:mm') : '-' }}
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <a routerLink="/dashboard" class="btn btn-outline-primary">Voltar ao dashboard</a>
+            <a routerLink="/orders" class="btn btn-outline-secondary">Ver encomendas</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

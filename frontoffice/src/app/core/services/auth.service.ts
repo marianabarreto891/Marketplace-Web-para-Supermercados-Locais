@@ -1,10 +1,27 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { map, tap } from 'rxjs';
 
 export interface User {
-  id: string; name: string; email: string; role: string;
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  phone?: string;
+  address?: string;
+  createdAt?: string;
+}
+
+interface UserProfileResponse {
+  _id?: string;
+  id?: string;
+  name: string;
+  email: string;
+  role: string;
+  phone?: string;
+  address?: string;
+  createdAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +46,29 @@ export class AuthService {
 
   register(data: { name: string; email: string; password: string; address: string; phone: string }) {
     return this.http.post(`${this.apiUrl}/register`, data);
+  }
+
+  getProfile() {
+    return this.http.get<UserProfileResponse>(`${this.apiUrl}/me`).pipe(
+      map((user) => ({
+        id: user.id || user._id || this.currentUser()?.id || '',
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        address: user.address,
+        createdAt: user.createdAt,
+      })),
+      tap((normalizedUser) => {
+        const mergedUser = {
+          ...(this.currentUser() || {}),
+          ...normalizedUser,
+        };
+
+        localStorage.setItem('user', JSON.stringify(mergedUser));
+        this.currentUser.set(mergedUser);
+      })
+    );
   }
 
   logout() {

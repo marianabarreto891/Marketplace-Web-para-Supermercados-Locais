@@ -81,5 +81,13 @@ export const routes: Routes = [
         './features/dashboard/client-dashboard/client-dashboard.component'
       ).then((m) => m.ClientDashboardComponent),
   },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/profile/client-profile/client-profile.component').then(
+        (m) => m.ClientProfileComponent
+      ),
+  },
   { path: '**', redirectTo: 'products' },
 ];

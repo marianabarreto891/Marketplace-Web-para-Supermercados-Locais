@@ -34,6 +34,7 @@
         
         <% if (userRole) { %>
           <% if (userRole === "cliente") { %>
+            <a href="/users/profile" class="btn btn-outline-secondary">Ver perfil</a>
             <a href="/orders" class="btn btn-outline-primary">As minhas encomendas</a>
           <% } %>
           <a href="/users/logout" class="btn btn-danger">Terminar sessão</a>

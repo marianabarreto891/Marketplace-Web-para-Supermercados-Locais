@@ -12,6 +12,7 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   image: { type: String },
   stock: { type: Number, required: true, min: 0 },
+  isActive: { type: Boolean, default: true },
   supermarket: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Supermarket",

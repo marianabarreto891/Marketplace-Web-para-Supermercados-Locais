@@ -2,7 +2,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ProductService, Product } from '../../../core/services/product.service';
+import {
+  ProductService,
+  Product,
+  SupermarketSummary,
+} from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, finalize, timeout } from 'rxjs/operators';
@@ -16,8 +20,10 @@ import { debounceTime, distinctUntilChanged, finalize, timeout } from 'rxjs/oper
 export class ProductListComponent implements OnInit {
   products = signal<Product[]>([]);
   categories = signal<{ _id: string; name: string }[]>([]);
+  supermarkets = signal<SupermarketSummary[]>([]);
   search = '';
   selectedCategory = 'all';
+  selectedSupermarket = 'all';
   sort = 'asc';
   loading = signal(false);
   errorMessage = signal('');
@@ -42,6 +48,18 @@ export class ProductListComponent implements OnInit {
         },
       });
 
+    this.productService
+      .getSupermarkets()
+      .pipe(timeout(10000))
+      .subscribe({
+        next: (supermarkets) =>
+          this.supermarkets.set(Array.isArray(supermarkets) ? supermarkets : []),
+        error: () => {
+          this.errorMessage.set('Nao foi possivel carregar os supermercados.');
+          this.supermarkets.set([]);
+        },
+      });
+
     this.loadProducts();
     this.searchSubject
       .pipe(debounceTime(400), distinctUntilChanged())
@@ -59,6 +77,7 @@ export class ProductListComponent implements OnInit {
       .getProducts({
         search: this.search,
         category: this.selectedCategory,
+        supermarket: this.selectedSupermarket,
         sort: this.sort,
       })
       .pipe(
@@ -88,5 +107,9 @@ export class ProductListComponent implements OnInit {
     const result = this.cartService.addProduct(product);
     this.cartMessage = result.message;
     this.cartMessageType = result.success ? 'success' : 'error';
+  }
+
+  getSelectedSupermarketRoute(): string[] {
+    return ['/supermarkets', this.selectedSupermarket, 'reviews'];
   }
 }

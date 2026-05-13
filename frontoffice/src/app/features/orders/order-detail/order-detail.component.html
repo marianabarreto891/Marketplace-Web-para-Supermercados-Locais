@@ -33,6 +33,9 @@
           <p class="mb-2"><strong>Estado:</strong> {{ statusLabel }}</p>
           <p class="mb-2"><strong>Pagamento:</strong> {{ paymentStatusLabel }}</p>
           <p class="mb-2"><strong>Entrega:</strong> {{ deliveryLabel }}</p>
+          <p class="mb-2" *ngIf="order.supermarketLocation">
+            <strong>Filial:</strong> {{ order.supermarketLocation }}
+          </p>
           <p class="mb-2"><strong>Cupao:</strong> {{ order.couponCode || 'Sem cupao' }}</p>
           <p class="mb-2"><strong>Criada em:</strong> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
           <p class="mb-0" *ngIf="order.paidAt">
@@ -98,14 +101,108 @@
             >
               {{ paymentLoading() ? 'A abrir Stripe...' : 'Pagar com Stripe' }}
             </button>
-            <button *ngIf="canReview" class="btn btn-success" type="button" disabled>
-              Avaliar encomenda
+            <button
+              *ngIf="canCancel"
+              class="btn btn-outline-danger"
+              type="button"
+              [disabled]="actionLoading()"
+              (click)="cancelOrder()"
+            >
+              {{ actionLoading() ? 'A processar...' : 'Cancelar encomenda' }}
             </button>
           </div>
 
-          <small *ngIf="canReview" class="text-muted d-block mt-2">
-            Botao preparado para a futura funcionalidade de avaliacao apos entrega.
+          <small *ngIf="canCancel" class="text-muted d-block mt-2">
+            Podes cancelar esta encomenda ate as {{ cancelDeadlineLabel }}.
           </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading() && order() as order" class="row g-4 mt-1">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Reviews</h2>
+
+          <form *ngIf="canReview" class="row g-3" (ngSubmit)="submitReview()">
+            <div class="col-12 col-lg-6">
+              <label class="form-label">Avaliar supermercado</label>
+              <select
+                class="form-select mb-2"
+                [(ngModel)]="ratingSupermarket"
+                name="ratingSupermarket"
+              >
+                <option [ngValue]="5">5 estrelas</option>
+                <option [ngValue]="4">4 estrelas</option>
+                <option [ngValue]="3">3 estrelas</option>
+                <option [ngValue]="2">2 estrelas</option>
+                <option [ngValue]="1">1 estrela</option>
+              </select>
+              <textarea
+                class="form-control"
+                rows="3"
+                [(ngModel)]="commentSupermarket"
+                name="commentSupermarket"
+                placeholder="Comentário sobre o supermercado e os produtos"
+              ></textarea>
+            </div>
+
+            <div class="col-12 col-lg-6" *ngIf="hasCourierReview">
+              <label class="form-label">Avaliar estafeta</label>
+              <select
+                class="form-select mb-2"
+                [(ngModel)]="ratingCourier"
+                name="ratingCourier"
+              >
+                <option [ngValue]="5">5 estrelas</option>
+                <option [ngValue]="4">4 estrelas</option>
+                <option [ngValue]="3">3 estrelas</option>
+                <option [ngValue]="2">2 estrelas</option>
+                <option [ngValue]="1">1 estrela</option>
+              </select>
+              <textarea
+                class="form-control"
+                rows="3"
+                [(ngModel)]="commentCourier"
+                name="commentCourier"
+                placeholder="Comentário sobre a entrega"
+              ></textarea>
+            </div>
+
+            <div class="col-12">
+              <button class="btn btn-success" type="submit" [disabled]="actionLoading()">
+                {{ actionLoading() ? 'A guardar...' : 'Submeter review' }}
+              </button>
+            </div>
+          </form>
+
+          <div *ngIf="order.supermarketReview || order.courierReview" class="row g-3">
+            <div class="col-12 col-lg-6" *ngIf="order.supermarketReview">
+              <div class="border rounded p-3 h-100">
+                <h3 class="h6 mb-2">Review do supermercado</h3>
+                <div class="fw-semibold mb-1">{{ order.supermarketReview.rating }}/5</div>
+                <p class="text-muted mb-0">
+                  {{ order.supermarketReview.comment || 'Sem comentario.' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-6" *ngIf="order.courierReview">
+              <div class="border rounded p-3 h-100">
+                <h3 class="h6 mb-2">Review do estafeta</h3>
+                <div class="fw-semibold mb-1">{{ order.courierReview.rating }}/5</div>
+                <p class="text-muted mb-0">
+                  {{ order.courierReview.comment || 'Sem comentario.' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!canReview && !order.supermarketReview && !order.courierReview" class="text-muted">
+            A review fica disponível quando a encomenda estiver entregue.
+          </div>
         </div>
       </div>
     </div>

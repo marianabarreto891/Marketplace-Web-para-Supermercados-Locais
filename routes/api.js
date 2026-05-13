@@ -24,6 +24,7 @@ const router = express.Router();
  */
 
 let stripeClient = null;
+const CLIENT_CANCEL_WINDOW_MS = 5 * 60 * 1000;
 
 function getStripeClient() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -63,6 +64,37 @@ function getFrontendBaseUrl() {
     .replace(/\/+$/, "");
 }
 
+function getClientCancelDeadline(order) {
+  if (!order || !order.createdAt) {
+    return null;
+  }
+
+  return new Date(new Date(order.createdAt).getTime() + CLIENT_CANCEL_WINDOW_MS);
+}
+
+function canClientCancelOrder(order) {
+  const cancelDeadline = getClientCancelDeadline(order);
+
+  return Boolean(
+    order &&
+      order.estado === "confirmada" &&
+      order.paymentStatus !== "paid" &&
+      cancelDeadline &&
+      Date.now() <= cancelDeadline.getTime(),
+  );
+}
+
+function mapReviewForClient(review) {
+  if (!review || !review.rating) {
+    return null;
+  }
+
+  return {
+    rating: Number(review.rating),
+    comment: review.comentario || "",
+  };
+}
+
 function requireJWT(req, res, next) {
   const auth = req.headers.authorization;
 
@@ -100,6 +132,8 @@ function mapOrderItemForClient(item) {
 }
 
 function mapOrderForClient(order) {
+  const cancelDeadline = getClientCancelDeadline(order);
+
   return {
     id: String(order._id),
     displayId: formatOrderDisplayId(order._id),
@@ -109,6 +143,9 @@ function mapOrderForClient(order) {
       : "",
     supermarketName: order.supermercado
       ? order.supermercado.name || order.supermercado.nome || "-"
+      : "-",
+    supermarketLocation: order.supermercado
+      ? order.supermercado.location || "-"
       : "-",
     items: Array.isArray(order.items)
       ? order.items.map(mapOrderItemForClient)
@@ -123,6 +160,10 @@ function mapOrderForClient(order) {
     couponCode: order.couponCode || "",
     createdAt: order.createdAt,
     paidAt: order.paidAt || null,
+    canCancel: canClientCancelOrder(order),
+    cancelDeadline: cancelDeadline ? cancelDeadline.toISOString() : null,
+    supermarketReview: mapReviewForClient(order.avaliacaoSupermercado),
+    courierReview: mapReviewForClient(order.avaliacaoEstafeta),
   };
 }
 
@@ -339,6 +380,20 @@ async function sendCreationEmail(orderId) {
   }
 }
 
+async function sendStatusEmail(orderId, previousStatus, nextStatus) {
+  try {
+    const order = await Order.findById(orderId)
+      .populate("cliente", "name email")
+      .populate("supermercado", "name");
+
+    if (order) {
+      await sendOrderStatusEmail(order, previousStatus, nextStatus);
+    }
+  } catch (error) {
+    console.error("Erro ao enviar email de alteracao de estado:", error);
+  }
+}
+
 /**
  * @swagger
  * /api/auth/register:
@@ -453,6 +508,10 @@ router.get("/products", async (req, res) => {
       query.category = req.query.category;
     }
 
+    if (req.query.supermarket && req.query.supermarket !== "all") {
+      query.supermarket = req.query.supermarket;
+    }
+
     const sortOrder = req.query.sort === "desc" ? -1 : 1;
     const products = await Product.find(query)
       .populate("category", "name")
@@ -532,6 +591,71 @@ router.get("/supermarkets", async (req, res) => {
 
 /**
  * @swagger
+ * /api/supermarkets/{id}/reviews:
+ *   get:
+ *     summary: Lista as reviews de um supermercado
+ *     tags: [Supermercados]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get(
+  "/supermarkets/:id/reviews",
+  requireJWT,
+  requireClientJWT,
+  async (req, res) => {
+    try {
+      const supermarket = await Supermarket.findOne({
+        _id: req.params.id,
+        isApproved: true,
+      }).select("name location");
+
+      if (!supermarket) {
+        return res.status(404).json({ error: "Supermercado nao encontrado." });
+      }
+
+      const reviewedOrders = await Order.find({
+        supermercado: supermarket._id,
+        "avaliacaoSupermercado.rating": { $exists: true },
+      })
+        .populate("cliente", "name")
+        .sort({ updatedAt: -1, createdAt: -1 });
+
+      const reviews = reviewedOrders.map((order) => ({
+        orderId: String(order._id),
+        displayId: formatOrderDisplayId(order._id),
+        customerName: order.cliente ? order.cliente.name : "Cliente",
+        rating: Number(order.avaliacaoSupermercado.rating || 0),
+        comment: order.avaliacaoSupermercado.comentario || "",
+        createdAt: order.updatedAt || order.createdAt,
+      }));
+
+      const averageRating = reviews.length
+        ? Number(
+            (
+              reviews.reduce((sum, review) => sum + review.rating, 0) /
+              reviews.length
+            ).toFixed(1),
+          )
+        : 0;
+
+      return res.json({
+        supermarket: {
+          id: String(supermarket._id),
+          name: supermarket.name,
+          location: supermarket.location || "-",
+        },
+        averageRating,
+        totalReviews: reviews.length,
+        reviews,
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
+);
+
+/**
+ * @swagger
  * /api/orders/my:
  *   get:
  *     summary: Lista as encomendas do cliente autenticado
@@ -579,6 +703,160 @@ router.get("/orders/:id", requireJWT, requireClientJWT, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 });
+
+/**
+ * @swagger
+ * /api/orders/{id}/cancel:
+ *   post:
+ *     summary: Cancela uma encomenda confirmada nos primeiros 5 minutos
+ *     tags: [Encomendas]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post(
+  "/orders/:id/cancel",
+  requireJWT,
+  requireClientJWT,
+  async (req, res) => {
+    try {
+      const order = await Order.findOne({
+        _id: req.params.id,
+        cliente: req.user.userId,
+      })
+        .populate("supermercado", "name location")
+        .populate("items.product", "image");
+
+      if (!order) {
+        return res.status(404).json({ error: "Encomenda nao encontrada." });
+      }
+
+      if (order.estado !== "confirmada") {
+        return res.status(400).json({
+          error: "So podes cancelar encomendas que ainda estejam confirmadas.",
+        });
+      }
+
+      if (order.paymentStatus === "paid") {
+        return res.status(400).json({
+          error: "Nao podes cancelar uma encomenda que ja esteja paga.",
+        });
+      }
+
+      if (!canClientCancelOrder(order)) {
+        return res.status(400).json({
+          error:
+            "O prazo de 5 minutos para cancelar a encomenda ja terminou.",
+        });
+      }
+
+      await rollbackStockReservations(
+        order.items.map((item) => ({
+          productId: item.product && item.product._id ? item.product._id : item.product,
+          quantity: Number(item.quantidade || 0),
+        })),
+      );
+
+      const previousStatus = order.estado;
+      order.estado = "cancelada";
+      order.paymentStatus =
+        order.paymentStatus === "pending" ? "canceled" : order.paymentStatus;
+      await order.save();
+
+      await releaseCouponUsage(order);
+      await sendStatusEmail(order._id, previousStatus, order.estado);
+
+      const updatedOrder = await Order.findById(order._id)
+        .populate("supermercado", "name location")
+        .populate("items.product", "image");
+
+      return res.json(mapOrderForClient(updatedOrder));
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
+);
+
+/**
+ * @swagger
+ * /api/orders/{id}/rate:
+ *   post:
+ *     summary: Submete a review de uma encomenda entregue
+ *     tags: [Encomendas]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post(
+  "/orders/:id/rate",
+  requireJWT,
+  requireClientJWT,
+  async (req, res) => {
+    try {
+      const order = await Order.findOne({
+        _id: req.params.id,
+        cliente: req.user.userId,
+      })
+        .populate("supermercado", "name location")
+        .populate("items.product", "image");
+
+      if (!order) {
+        return res.status(404).json({ error: "Encomenda nao encontrada." });
+      }
+
+      if (order.estado !== "entregue") {
+        return res.status(400).json({
+          error: "So podes avaliar encomendas que ja foram entregues.",
+        });
+      }
+
+      if (order.avaliacaoSupermercado && order.avaliacaoSupermercado.rating) {
+        return res.status(400).json({
+          error: "Esta encomenda ja foi avaliada.",
+        });
+      }
+
+      const ratingSupermarket = Number(req.body.ratingSupermarket);
+      const ratingCourier = Number(req.body.ratingCourier);
+      const hasCourierReview =
+        order.metodoEntrega === "estafeta" &&
+        order.estafeta &&
+        Number.isFinite(ratingCourier) &&
+        ratingCourier >= 1 &&
+        ratingCourier <= 5;
+
+      if (
+        !Number.isFinite(ratingSupermarket) ||
+        ratingSupermarket < 1 ||
+        ratingSupermarket > 5
+      ) {
+        return res.status(400).json({
+          error: "A avaliacao do supermercado tem de estar entre 1 e 5.",
+        });
+      }
+
+      order.avaliacaoSupermercado = {
+        rating: ratingSupermarket,
+        comentario: normalizeText(req.body.commentSupermarket),
+      };
+
+      if (hasCourierReview) {
+        order.avaliacaoEstafeta = {
+          rating: ratingCourier,
+          comentario: normalizeText(req.body.commentCourier),
+        };
+      }
+
+      await order.save();
+
+      const updatedOrder = await Order.findById(order._id)
+        .populate("supermercado", "name location")
+        .populate("items.product", "image");
+
+      return res.json(mapOrderForClient(updatedOrder));
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
+);
 
 /**
  * @swagger

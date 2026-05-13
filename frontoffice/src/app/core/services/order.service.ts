@@ -15,6 +15,13 @@ export interface CheckoutSessionResponse {
   checkoutUrl: string;
 }
 
+export interface SubmitOrderReviewInput {
+  ratingSupermarket: number;
+  commentSupermarket?: string;
+  ratingCourier?: number | null;
+  commentCourier?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private readonly apiUrl = 'http://localhost:3000/api';
@@ -59,6 +66,19 @@ export class OrderService {
       })),
       deliveryMethod: input.deliveryMethod,
       couponCode: input.couponCode || '',
+    });
+  }
+
+  cancelOrder(orderId: string): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/orders/${orderId}/cancel`, {});
+  }
+
+  submitReview(orderId: string, input: SubmitOrderReviewInput): Observable<Order> {
+    return this.http.post<Order>(`${this.apiUrl}/orders/${orderId}/rate`, {
+      ratingSupermarket: input.ratingSupermarket,
+      commentSupermarket: input.commentSupermarket || '',
+      ratingCourier: input.ratingCourier ?? null,
+      commentCourier: input.commentCourier || '',
     });
   }
 

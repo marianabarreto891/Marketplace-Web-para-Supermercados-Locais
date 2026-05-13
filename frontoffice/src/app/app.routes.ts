@@ -34,6 +34,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'supermarkets/:id/reviews',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import(
+        './features/supermarkets/supermarket-reviews/supermarket-reviews.component'
+      ).then((m) => m.SupermarketReviewsComponent),
+  },
+  {
     path: 'cart',
     canActivate: [authGuard],
     loadComponent: () =>

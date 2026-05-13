@@ -25,6 +25,7 @@ export class OrderHistoryComponent implements OnInit {
   readonly orders = signal<Order[]>([]);
   readonly loading = signal(true);
   readonly errorMessage = signal('');
+  readonly actionOrderId = signal('');
   selectedStatus = 'all';
 
   constructor(private orderService: OrderService) {}
@@ -66,5 +67,29 @@ export class OrderHistoryComponent implements OnInit {
 
   getDeliveryLabel(method: Order['deliveryMethod']): string {
     return this.orderService.getDeliveryLabel(method);
+  }
+
+  cancelOrder(orderId: string): void {
+    this.actionOrderId.set(orderId);
+    this.errorMessage.set('');
+
+    this.orderService.cancelOrder(orderId).subscribe({
+      next: (updatedOrder) => {
+        this.orders.update((orders) =>
+          orders.map((order) => (order.id === updatedOrder.id ? updatedOrder : order))
+        );
+      },
+      error: (error) => {
+        this.errorMessage.set(
+          error?.error?.error ||
+            error?.error?.message ||
+            'Nao foi possivel cancelar a encomenda.'
+        );
+        this.actionOrderId.set('');
+      },
+      complete: () => {
+        this.actionOrderId.set('');
+      },
+    });
   }
 }

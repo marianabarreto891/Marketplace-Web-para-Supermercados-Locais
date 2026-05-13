@@ -56,7 +56,18 @@
               <td>{{ getPaymentStatusLabel(order.paymentStatus) }}</td>
               <td>{{ getDeliveryLabel(order.deliveryMethod) }}</td>
               <td class="text-end">
-                <a [routerLink]="['/orders', order.id]" class="btn btn-outline-primary btn-sm">Detalhe</a>
+                <div class="d-flex justify-content-end gap-2 flex-wrap">
+                  <button
+                    *ngIf="order.canCancel"
+                    class="btn btn-outline-danger btn-sm"
+                    type="button"
+                    [disabled]="actionOrderId() === order.id"
+                    (click)="cancelOrder(order.id)"
+                  >
+                    {{ actionOrderId() === order.id ? 'A cancelar...' : 'Cancelar' }}
+                  </button>
+                  <a [routerLink]="['/orders', order.id]" class="btn btn-outline-primary btn-sm">Detalhe</a>
+                </div>
               </td>
             </tr>
           </tbody>

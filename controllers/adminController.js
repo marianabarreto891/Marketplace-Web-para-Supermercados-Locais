@@ -71,6 +71,26 @@ exports.listUsers = async (req, res) => {
   }
 };
 
+exports.listReviews = async (req, res) => {
+  try {
+    const reviewedOrders = await Order.find({
+      $or: [
+        { "avaliacaoSupermercado.rating": { $exists: true } },
+        { "avaliacaoEstafeta.rating": { $exists: true } },
+      ],
+    })
+      .populate("cliente", "name email")
+      .populate("supermercado", "name")
+      .populate("estafeta", "name")
+      .sort({ updatedAt: -1, createdAt: -1 });
+
+    res.render("admin/reviews", { reviewedOrders });
+  } catch (error) {
+    console.error("Erro ao listar reviews:", error);
+    res.status(500).send("Erro ao listar reviews!");
+  }
+};
+
 exports.renderCreateAdminForm = (req, res) => {
   res.render("admin/createAdmin");
 };

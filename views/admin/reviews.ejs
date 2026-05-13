@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviews</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+  <div class="container bg-white p-4 rounded shadow-sm">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+      <div>
+        <h1 class="mb-1">Reviews do sistema</h1>
+        <p class="text-muted mb-0">Consulta todas as avaliacoes submetidas pelos clientes.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/admin/dashboard" class="btn btn-outline-secondary">Dashboard</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar sessao</a>
+      </div>
+    </div>
+
+    <% if (!reviewedOrders.length) { %>
+      <div class="alert alert-info mb-0">
+        Ainda nao existem reviews submetidas.
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Encomenda</th>
+              <th>Cliente</th>
+              <th>Supermercado</th>
+              <th>Review supermercado</th>
+              <th>Review estafeta</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% reviewedOrders.forEach((order) => { %>
+              <tr>
+                <td>
+                  <div class="fw-semibold">#<%= order._id.toString().slice(-6).toUpperCase() %></div>
+                  <div class="small text-muted"><%= order.estado %></div>
+                </td>
+                <td>
+                  <div><%= order.cliente ? order.cliente.name : "-" %></div>
+                  <div class="small text-muted"><%= order.cliente ? order.cliente.email : "-" %></div>
+                </td>
+                <td><%= order.supermercado ? order.supermercado.name : "-" %></td>
+                <td>
+                  <% if (order.avaliacaoSupermercado && order.avaliacaoSupermercado.rating) { %>
+                    <div class="fw-semibold"><%= order.avaliacaoSupermercado.rating %>/5</div>
+                    <div class="small text-muted"><%= order.avaliacaoSupermercado.comentario || "Sem comentario." %></div>
+                  <% } else { %>
+                    <span class="text-muted">Sem review</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (order.avaliacaoEstafeta && order.avaliacaoEstafeta.rating) { %>
+                    <div class="fw-semibold"><%= order.avaliacaoEstafeta.rating %>/5</div>
+                    <div class="small text-muted">
+                      <%= order.estafeta ? order.estafeta.name : "Estafeta" %>:
+                      <%= order.avaliacaoEstafeta.comentario || "Sem comentario." %>
+                    </div>
+                  <% } else { %>
+                    <span class="text-muted">Sem review</span>
+                  <% } %>
+                </td>
+                <td><%= new Date(order.updatedAt || order.createdAt).toLocaleString("pt-PT") %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

@@ -14,6 +14,7 @@ router.get("/dashboard", adminController.getDashboard);
 router.post("/supermarket/:id/approve", adminController.approveSupermarket);
 router.post("/supermarket/:id/disapprove", adminController.disapproveSupermarket);
 router.get("/users", adminController.listUsers);
+router.get("/reviews", adminController.listReviews);
 
 // Rotas de Categorias
 router.get("/categories", categoryController.listCategories);

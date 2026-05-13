@@ -35,6 +35,7 @@
             <th>Preco</th>
             <th>Stock</th>
             <th>Localizacao</th>
+            <th>Reviews</th>
           </tr>
         </thead>
         <tbody>
@@ -43,6 +44,14 @@
             <td>{{ p.price | currency:'EUR' }}</td>
             <td>{{ p.stock > 0 ? 'Disponivel' : 'Esgotado' }}</td>
             <td>{{ p.supermarket.location }}</td>
+            <td>
+              <a
+                [routerLink]="['/supermarkets', p.supermarket._id, 'reviews']"
+                class="btn btn-outline-primary btn-sm"
+              >
+                Ver reviews
+              </a>
+            </td>
           </tr>
         </tbody>
       </table>

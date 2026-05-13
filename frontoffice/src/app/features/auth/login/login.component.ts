@@ -11,7 +11,9 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './login.component.html'
 })
 export class LoginComponent {
-  email = ''; password = ''; error = '';
+  email = '';
+  password = '';
+  error = '';
   fieldErrors: { email?: string; password?: string } = {};
 
   constructor(private auth: AuthService, private router: Router) {}
@@ -27,8 +29,6 @@ export class LoginComponent {
 
     if (!this.password) {
       this.fieldErrors.password = 'A password é obrigatória.';
-    } else if (this.password.length < 6) {
-      this.fieldErrors.password = 'A password deve ter pelo menos 6 caracteres.';
     }
 
     return Object.keys(this.fieldErrors).length === 0;

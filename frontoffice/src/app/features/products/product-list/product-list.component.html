@@ -22,10 +22,24 @@
       <option *ngFor="let cat of categories()" [value]="cat._id">{{ cat.name }}</option>
     </select>
 
+    <select [(ngModel)]="selectedSupermarket" (ngModelChange)="loadProducts()">
+      <option value="all">Todos os supermercados</option>
+      <option *ngFor="let supermarket of supermarkets()" [value]="supermarket._id">
+        {{ supermarket.name }} - {{ supermarket.location }}
+      </option>
+    </select>
+
     <select [(ngModel)]="sort" (ngModelChange)="loadProducts()">
       <option value="asc">Preco: menor para maior</option>
       <option value="desc">Preco: maior para menor</option>
     </select>
+
+    <a
+      *ngIf="selectedSupermarket !== 'all'"
+      [routerLink]="getSelectedSupermarketRoute()"
+    >
+      Ver reviews
+    </a>
 
     <a routerLink="/compare">Comparar precos</a>
   </div>
@@ -47,6 +61,7 @@
         <h3>{{ p.name }}</h3>
         <p class="category">{{ p.category.name }}</p>
         <p class="supermarket">{{ p.supermarket.name }}</p>
+        <p class="category">{{ p.supermarket.location }}</p>
         <p class="price">{{ p.price | currency:'EUR' }}</p>
         <p class="stock" *ngIf="p.stock === 0">Esgotado</p>
         <p class="stock" *ngIf="p.stock > 0">Stock: {{ p.stock }}</p>

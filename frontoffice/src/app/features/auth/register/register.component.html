@@ -9,7 +9,7 @@
     <input
       type="text"
       [(ngModel)]="name"
-      placeholder="O teu nome"
+      placeholder="O seu nome"
       [class.input-error]="fieldErrors.name"
     />
     <span class="field-error" *ngIf="fieldErrors.name">{{ fieldErrors.name }}</span>
@@ -20,7 +20,7 @@
     <input
       type="email"
       [(ngModel)]="email"
-      placeholder="O teu email"
+      placeholder="O seu email"
       [class.input-error]="fieldErrors.email"
     />
     <span class="field-error" *ngIf="fieldErrors.email">{{ fieldErrors.email }}</span>
@@ -31,7 +31,7 @@
     <input
       type="password"
       [(ngModel)]="password"
-      placeholder="A tua password (mín. 6 caracteres)"
+      placeholder="A sua password (mín. 6 caracteres)"
       [class.input-error]="fieldErrors.password"
     />
     <span class="field-error" *ngIf="fieldErrors.password">{{ fieldErrors.password }}</span>
@@ -42,7 +42,7 @@
     <input
       type="text"
       [(ngModel)]="address"
-      placeholder="A tua morada"
+      placeholder="A sua morada"
       [class.input-error]="fieldErrors.address"
     />
     <span class="field-error" *ngIf="fieldErrors.address">{{ fieldErrors.address }}</span>
@@ -53,7 +53,7 @@
     <input
       type="text"
       [(ngModel)]="phone"
-      placeholder="9 dígitos (ex: 912345678)"
+      placeholder="Insira o seu número de telefone (9 dígitos)"
       maxlength="9"
       [class.input-error]="fieldErrors.phone"
     />

@@ -12,17 +12,17 @@
     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
       <div>
         <h1 class="mb-1">Reviews do sistema</h1>
-        <p class="text-muted mb-0">Consulta todas as avaliacoes submetidas pelos clientes.</p>
+        <p class="text-muted mb-0">Consulte todas as avaliações submetidas pelos clientes!</p>
       </div>
       <div class="d-flex gap-2">
         <a href="/admin/dashboard" class="btn btn-outline-secondary">Dashboard</a>
-        <a href="/users/logout" class="btn btn-danger">Terminar sessao</a>
+        <a href="/users/logout" class="btn btn-danger">Terminar sessão</a>
       </div>
     </div>
 
     <% if (!reviewedOrders.length) { %>
       <div class="alert alert-info mb-0">
-        Ainda nao existem reviews submetidas.
+        Ainda não existem reviews submetidas.
       </div>
     <% } else { %>
       <div class="table-responsive">
@@ -52,7 +52,7 @@
                 <td>
                   <% if (order.avaliacaoSupermercado && order.avaliacaoSupermercado.rating) { %>
                     <div class="fw-semibold"><%= order.avaliacaoSupermercado.rating %>/5</div>
-                    <div class="small text-muted"><%= order.avaliacaoSupermercado.comentario || "Sem comentario." %></div>
+                    <div class="small text-muted"><%= order.avaliacaoSupermercado.comentario || "Sem comentário." %></div>
                   <% } else { %>
                     <span class="text-muted">Sem review</span>
                   <% } %>
@@ -62,7 +62,7 @@
                     <div class="fw-semibold"><%= order.avaliacaoEstafeta.rating %>/5</div>
                     <div class="small text-muted">
                       <%= order.estafeta ? order.estafeta.name : "Estafeta" %>:
-                      <%= order.avaliacaoEstafeta.comentario || "Sem comentario." %>
+                      <%= order.avaliacaoEstafeta.comentario || "Sem comentário." %>
                     </div>
                   <% } else { %>
                     <span class="text-muted">Sem review</span>

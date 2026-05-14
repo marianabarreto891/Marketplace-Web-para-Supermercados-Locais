@@ -18,8 +18,8 @@
 
   <div *ngIf="!loading() && !order()" class="card shadow-sm border-0">
     <div class="card-body p-4">
-      <p class="mb-3">Nao foi encontrada nenhuma encomenda com este identificador.</p>
-      <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao historico</a>
+      <p class="mb-3">Não foi encontrada nenhuma encomenda com este identificador.</p>
+      <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao histórico</a>
     </div>
   </div>
 
@@ -90,7 +90,7 @@
           </div>
 
           <div class="mt-4 d-flex gap-2 flex-wrap">
-            <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao historico</a>
+            <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao histórico</a>
             <a routerLink="/products" class="btn btn-outline-primary">Continuar a comprar</a>
             <button
               *ngIf="canPay"
@@ -113,7 +113,7 @@
           </div>
 
           <small *ngIf="canCancel" class="text-muted d-block mt-2">
-            Podes cancelar esta encomenda ate as {{ cancelDeadlineLabel }}.
+            Pode cancelar esta encomenda até às {{ cancelDeadlineLabel }}.
           </small>
         </div>
       </div>
@@ -184,7 +184,7 @@
                 <h3 class="h6 mb-2">Review do supermercado</h3>
                 <div class="fw-semibold mb-1">{{ order.supermarketReview.rating }}/5</div>
                 <p class="text-muted mb-0">
-                  {{ order.supermarketReview.comment || 'Sem comentario.' }}
+                  {{ order.supermarketReview.comment || 'Sem comentário.' }}
                 </p>
               </div>
             </div>
@@ -194,14 +194,14 @@
                 <h3 class="h6 mb-2">Review do estafeta</h3>
                 <div class="fw-semibold mb-1">{{ order.courierReview.rating }}/5</div>
                 <p class="text-muted mb-0">
-                  {{ order.courierReview.comment || 'Sem comentario.' }}
+                  {{ order.courierReview.comment || 'Sem comentário.' }}
                 </p>
               </div>
             </div>
           </div>
 
           <div *ngIf="!canReview && !order.supermarketReview && !order.courierReview" class="text-muted">
-            A review fica disponível quando a encomenda estiver entregue.
+            A review fica disponível quando a encomenda estiver entregue!
           </div>
         </div>
       </div>

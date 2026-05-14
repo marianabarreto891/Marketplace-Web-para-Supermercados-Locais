@@ -5,7 +5,7 @@
 
   <div class="navbar-links">
     <a routerLink="/products" routerLinkActive="active">Produtos</a>
-    <a routerLink="/compare" routerLinkActive="active">Comparar precos</a>
+    <a routerLink="/compare" routerLinkActive="active">Comparar preços</a>
     <a *ngIf="auth.isLoggedIn()" routerLink="/cart" routerLinkActive="active">
       Carrinho
       <span *ngIf="cart.itemCount() > 0">({{ cart.itemCount() }})</span>
@@ -16,7 +16,7 @@
   </div>
 
   <div class="navbar-user">
-    <span *ngIf="auth.currentUser() as u">Ola, {{ u.name }}</span>
+    <span *ngIf="auth.currentUser() as u">Olá, {{ u.name }}</span>
     <button *ngIf="auth.isLoggedIn()" (click)="auth.logout()">Sair</button>
     <a *ngIf="!auth.isLoggedIn()" routerLink="/login">Entrar</a>
   </div>

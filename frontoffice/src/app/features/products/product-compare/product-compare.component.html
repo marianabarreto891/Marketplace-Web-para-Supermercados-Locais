@@ -1,5 +1,5 @@
 <div class="compare-container">
-  <h2>Comparar precos</h2>
+  <h2>Comparar preços</h2>
 
   <div class="search-bar">
     <input
@@ -19,7 +19,7 @@
 
   <div *ngIf="searched() && !loading() && !errorMessage()">
     <div *ngIf="results().length === 0">
-      Nenhum produto encontrado com esse nome.
+      Nenhum produto encontrado com esse nome!
     </div>
 
     <div *ngIf="results().length > 0">
@@ -33,9 +33,9 @@
           <thead>
             <tr>
               <th>Supermercado</th>
-              <th>Preco</th>
+              <th>Preço</th>
               <th>Stock</th>
-              <th>Localizacao</th>
+              <th>Localização</th>
               <th>Reviews</th>
             </tr>
           </thead>

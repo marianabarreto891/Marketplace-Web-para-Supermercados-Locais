@@ -13,7 +13,6 @@
     <form action="/admin/categories/new" method="POST" class="mb-4 p-3 border rounded">
         <h4>Nova Categoria</h4>
         <input type="text" name="name" class="form-control mb-2" placeholder="Nome (Ex: Frutas)" required>
-        <input type="text" name="description" class="form-control mb-2" placeholder="Descrição (opcional)">
         <button type="submit" class="btn btn-primary">Adicionar</button>
     </form>
 
@@ -23,9 +22,6 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>
                     <strong><%= cat.name %></strong>
-                    <% if (cat.description) { %>
-                        <small class="text-muted ms-2"><%= cat.description %></small>
-                    <% } %>
                 </span>
                 <div class="d-flex gap-2">
                     <a href="/admin/categories/<%= cat._id %>/edit" class="btn btn-sm btn-warning">Editar</a>

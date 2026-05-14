@@ -8,7 +8,7 @@
     <input
       type="email"
       [(ngModel)]="email"
-      placeholder="O teu email"
+      placeholder="O seu email"
       [class.input-error]="fieldErrors.email"
     />
     <span class="field-error" *ngIf="fieldErrors.email">{{ fieldErrors.email }}</span>
@@ -19,12 +19,12 @@
     <input
       type="password"
       [(ngModel)]="password"
-      placeholder="A tua password"
+      placeholder="A sua password"
       [class.input-error]="fieldErrors.password"
     />
     <span class="field-error" *ngIf="fieldErrors.password">{{ fieldErrors.password }}</span>
   </div>
 
   <button (click)="onSubmit()">Entrar</button>
-  <p>Não tens conta? <a routerLink="/register">Registar</a></p>
+  <p>Não tem conta? <a routerLink="/register">Registar</a></p>
 </div>

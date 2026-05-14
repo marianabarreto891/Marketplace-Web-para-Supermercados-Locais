@@ -2,7 +2,7 @@
   <header class="mb-4">
     <h1 class="mb-2">Checkout</h1>
     <p class="text-muted mb-0">
-      Revise os produtos, escolha a entrega e crie a encomenda real no sistema.
+      Reveja os produtos, escolha a entrega e crie a encomenda no sistema!
     </p>
   </header>
 
@@ -10,9 +10,9 @@
 
   <div *ngIf="cartService.items().length === 0" class="card shadow-sm border-0">
     <div class="card-body p-4">
-      <h2 class="h5 mb-3">Nao ha produtos para checkout</h2>
+      <h2 class="h5 mb-3">Não há produtos para checkout</h2>
       <p class="text-muted mb-4">
-        Volta ao catalogo e adiciona produtos antes de tentares criar uma encomenda.
+        Volte ao catálogo e adicione produtos antes de tentar criar uma encomenda!
       </p>
       <a routerLink="/products" class="btn btn-primary">Voltar aos produtos</a>
     </div>
@@ -29,7 +29,7 @@
                 <tr>
                   <th>Produto</th>
                   <th class="text-center">Qtd</th>
-                  <th class="text-end">Preco</th>
+                  <th class="text-end">Preço</th>
                   <th class="text-end">Subtotal</th>
                 </tr>
               </thead>
@@ -44,7 +44,7 @@
             </table>
           </div>
 
-          <h2 class="h5 mb-3">Metodo de entrega</h2>
+          <h2 class="h5 mb-3">Método de entrega</h2>
           <div class="vstack gap-3 mb-4">
             <article *ngFor="let method of deliveryMethods()" class="border rounded-3 p-3">
               <div class="d-flex justify-content-between align-items-start gap-3">
@@ -68,17 +68,17 @@
           </div>
 
           <div>
-            <label for="couponCode" class="form-label fw-semibold">Cupao</label>
+            <label for="couponCode" class="form-label fw-semibold">Cupão</label>
             <input
               id="couponCode"
               name="couponCode"
               type="text"
               class="form-control"
               [(ngModel)]="couponCode"
-              placeholder="Introduz um cupao ativo, se existir"
+              placeholder="Introduza um cupão ativo, se existir"
             />
             <small class="text-muted d-block mt-2">
-              O desconto final sera validado pelo backend com os cupoes ativos do supermercado.
+              O desconto final será validado com os cupões ativos do supermercado!
             </small>
           </div>
         </div>

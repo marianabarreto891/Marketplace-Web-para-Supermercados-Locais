@@ -1,5 +1,6 @@
 <div class="product-list-container">
   <h2>Produtos</h2>
+  <p>Escolha o supermercado que deseja comprar os seus produtos!</p>
 
   <div
     *ngIf="cartMessage"
@@ -30,8 +31,8 @@
     </select>
 
     <select [(ngModel)]="sort" (ngModelChange)="loadProducts()">
-      <option value="asc">Preco: menor para maior</option>
-      <option value="desc">Preco: maior para menor</option>
+      <option value="asc">Preço: menor para maior</option>
+      <option value="desc">Preço: maior para menor</option>
     </select>
 
     <a
@@ -41,7 +42,7 @@
       Ver reviews
     </a>
 
-    <a routerLink="/compare">Comparar precos</a>
+    <a routerLink="/compare">Comparar preços</a>
   </div>
 
   <div *ngIf="loading()">A carregar...</div>
@@ -51,7 +52,7 @@
   </div>
 
   <div *ngIf="!loading() && !errorMessage() && products().length === 0">
-    Nenhum produto encontrado.
+    Nenhum produto encontrado!
   </div>
 
   <div class="products-grid" *ngIf="!loading() && !errorMessage() && products().length > 0">

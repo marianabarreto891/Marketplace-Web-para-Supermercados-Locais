@@ -1,8 +1,8 @@
 <section class="container py-4">
   <header class="mb-4">
-    <h1 class="mb-2">Dashboard do cliente</h1>
+    <h1 class="mb-2">Cliente</h1>
     <p class="text-muted mb-0">
-      Resumo da tua atividade, com estatisticas de compra, produtos mais comprados e ultimas encomendas.
+      Resumo da sua atividade, com estatísticas de compra, produtos mais comprados e últimas encomendas.
     </p>
   </header>
 
@@ -19,7 +19,7 @@
     <div class="col-12 col-md-6 col-xl-4">
       <div class="card shadow-sm border-0">
         <div class="card-body">
-          <p class="text-muted mb-2">Numero de encomendas</p>
+          <p class="text-muted mb-2">Número de encomendas</p>
           <h2 class="mb-0">{{ stats().totalOrders }}</h2>
         </div>
       </div>
@@ -54,7 +54,7 @@
           </div>
 
           <div *ngIf="stats().mostPurchasedProducts.length === 0" class="text-muted">
-            Ainda nao existem dados suficientes para produtos mais comprados.
+            Ainda não existem dados suficientes para produtos mais comprados!
           </div>
 
           <div *ngIf="stats().mostPurchasedProducts.length > 0" class="table-responsive">
@@ -81,12 +81,12 @@
       <div class="card shadow-sm border-0 h-100">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h5 mb-0">Ultimas encomendas</h2>
-            <a routerLink="/orders" class="btn btn-outline-primary btn-sm">Ver historico completo</a>
+            <h2 class="h5 mb-0">Últimas encomendas</h2>
+            <a routerLink="/orders" class="btn btn-outline-primary btn-sm">Ver histórico completo</a>
           </div>
 
           <div *ngIf="stats().recentOrders.length === 0" class="text-muted">
-            Ainda nao existem encomendas para apresentar.
+            Ainda não existem encomendas para apresentar.
           </div>
 
           <div *ngIf="stats().recentOrders.length > 0" class="table-responsive">
@@ -97,7 +97,7 @@
                   <th>Supermercado</th>
                   <th>Estado</th>
                   <th class="text-end">Total</th>
-                  <th class="text-end">Acao</th>
+                  <th class="text-end">Ação</th>
                 </tr>
               </thead>
               <tbody>

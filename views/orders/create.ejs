@@ -20,7 +20,7 @@
       </div>
     </div>
 
-    <% if (errorMessage) { %>
+    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
       <div class="alert alert-danger"><%= errorMessage %></div>
     <% } %>
 
@@ -39,43 +39,47 @@
               </div>
               <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-secondary" id="visibleProductsCounter"><%= products.length %> visíveis</span>
-                <span class="badge bg-dark"><%= products.length %> disponíveis</span>
               </div>
             </div>
 
             <div class="row g-3 align-items-end mb-4">
               <div class="col-md-5">
                 <label class="form-label fw-semibold">Categoria</label>
-                <select id="categorySelect" class="form-select">
+                <select id="categorySelect" name="category" class="form-select">
                   <option value="all">Todas</option>
                   <%
-                    const categories = [...new Set(
+                    const categoriesUnique = [...new Set(
                       products
                         .filter((product) => product.category && product.category.name)
                         .map((product) => product.category.name)
                     )];
-                    categories.forEach((category) => {
+                    categoriesUnique.forEach((category) => {
                   %>
-                    <option value="<%= category %>"><%= category %></option>
+                    <option value="<%= category %>" <%= (typeof selectedCategory !== 'undefined' && selectedCategory === category) ? 'selected' : '' %>><%= category %></option>
                   <% }) %>
                 </select>
               </div>
 
               <div class="col-md-4">
                 <label class="form-label fw-semibold" for="productSearch">Pesquisar produto</label>
-                <input type="text" id="productSearch" class="form-control" placeholder="Nome ou descricao">
+                <input type="text" id="productSearch" name="search" class="form-control" placeholder="Nome ou descricao" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
               </div>
 
               <div class="col-md-3 d-flex gap-2">
-                <button type="button" id="btnApplyFilter" class="btn btn-primary flex-fill">Filtrar</button>
-                <button type="button" id="clearProductSearch" class="btn btn-outline-secondary flex-fill">Limpar</button>
+                <button type="submit" formaction="/supermarket/<%= supermarket._id %>/products" formmethod="GET" id="btnApplyFilter" class="btn btn-primary flex-fill">Filtrar</button>
+                <a href="/supermarket/<%= supermarket._id %>/products" id="clearProductSearch" class="btn btn-outline-secondary flex-fill">Limpar</a>
               </div>
             </div>
 
-            <div class="row mb-4">
+            <div class="row align-items-end mb-4">
               <div class="col-md-5">
                 <label class="form-label fw-semibold text-primary" for="barcodeInput">Leitor de código de barras</label>
                 <input type="text" id="barcodeInput" class="form-control border-primary" placeholder="Insira o EAN do produto e prima Enter">
+              </div>
+              
+              <div class="col-md-7 d-flex justify-content-end gap-2">
+                <a href="/supermarket/<%= supermarket._id %>" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerModal">Continuar para cliente</button>
               </div>
             </div>
 
@@ -107,8 +111,8 @@
                 <tbody>
                   <% products.forEach((product, index) => { %>
                     <% const productId = product._id.toString(); %>
-                    <% const selected = selectedProductIds && selectedProductIds.includes(productId); %>
-                    <% const quantity = (quantities && quantities[productId]) || 1; %>
+                    <% const selected = typeof selectedProductIds !== 'undefined' && selectedProductIds.includes(productId); %>
+                    <% const quantity = (typeof quantities !== 'undefined' && quantities[productId]) || 1; %>
                     <% const outOfStock = product.stock <= 0; %>
 
                     <tr
@@ -155,21 +159,52 @@
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
+            
+            <% if (typeof totalPages !== 'undefined') { %>
+            <div class="d-flex justify-content-center align-items-center mt-4 mb-2">
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>&search=<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>&category=<%= typeof selectedCategory !== 'undefined' ? selectedCategory : 'all' %>" class="btn btn-outline-secondary me-3">
+                        &laquo; Página Anterior
+                    </a>
+                <% } else { %>
+                    <button class="btn btn-outline-secondary me-3" disabled>
+                        &laquo; Página Anterior
+                    </button>
+                <% } %>
 
-        <div class="d-flex justify-content-end gap-2 mt-4">
-          <a href="/supermarket/<%= supermarket._id %>" class="btn btn-outline-secondary">Cancelar</a>
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerModal">Continuar para cliente</button>
+                <span class="text-muted fw-bold">
+                    Página <%= currentPage %> de <%= totalPages %>
+                </span>
+
+                <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>&search=<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>&category=<%= typeof selectedCategory !== 'undefined' ? selectedCategory : 'all' %>" class="btn btn-outline-primary ms-3">
+                        Próxima Página &raquo;
+                    </a>
+                <% } else { %>
+                    <button class="btn btn-outline-primary ms-3" disabled>
+                        Próxima Página &raquo;
+                    </button>
+                <% } %>
+            </div>
+            <% } %>
+            </div>
         </div>
 
         <div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg">
             <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="customerModalLabel">Detalhes do cliente e entrega</h5>
+              
+              <div class="modal-header d-flex align-items-center">
+                <h5 class="modal-title me-auto" id="customerModalLabel">Detalhes do cliente e entrega</h5>
+                
+                <div class="d-flex gap-2 me-3">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar aos produtos</button>
+                  <button type="submit" class="btn btn-success">Confirmar e registar venda</button>
+                </div>
+                
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
+
               <div class="modal-body">
                 <div class="row g-4">
                   <div class="col-md-6">
@@ -230,7 +265,7 @@
 
                     <div class="mb-3">
                       <label class="form-label fw-semibold">Código do cupão</label>
-                      <input type="text" name="couponCode" class="form-control text-uppercase" placeholder="Opcional. Ex: BEMVINDO10" value="<%= couponCode || '' %>">
+                      <input type="text" name="couponCode" class="form-control text-uppercase" placeholder="Opcional. Ex: BEMVINDO10" value="<%= typeof couponCode !== 'undefined' ? couponCode : '' %>">
                       <div class="form-text">Se indicar um cupão, o desconto será validado quando confirmar a venda.</div>
                     </div>
 
@@ -241,10 +276,7 @@
                   </div>
                 </div>
               </div>
-              <div class="modal-footer d-flex justify-content-between">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar aos produtos</button>
-                <button type="submit" class="btn btn-success">Confirmar e registar venda</button>
-              </div>
+              
             </div>
           </div>
         </div>

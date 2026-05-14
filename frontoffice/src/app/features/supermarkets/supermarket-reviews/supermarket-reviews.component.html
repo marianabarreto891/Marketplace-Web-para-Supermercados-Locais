@@ -2,7 +2,7 @@
   <header class="mb-4">
     <h1 class="mb-2">Reviews do supermercado</h1>
     <p class="text-muted mb-0">
-      Consulta o que outros clientes disseram sobre esta loja antes de comprares.
+      Consulte o que outros clientes disseram sobre esta loja antes de comprar!
     </p>
   </header>
 
@@ -36,7 +36,7 @@
       <div class="card shadow-sm border-0">
         <div class="card-body p-4">
           <div *ngIf="data.reviews.length === 0" class="text-muted">
-            Este supermercado ainda nao tem reviews.
+            Este supermercado ainda não tem reviews!
           </div>
 
           <div *ngIf="data.reviews.length > 0" class="d-grid gap-3">
@@ -54,7 +54,7 @@
                 </div>
               </div>
               <p class="mb-0 text-muted">
-                {{ review.comment || 'Sem comentario.' }}
+                {{ review.comment || 'Sem comentário.' }}
               </p>
             </article>
           </div>

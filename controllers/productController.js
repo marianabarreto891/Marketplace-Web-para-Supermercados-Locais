@@ -17,12 +17,22 @@ exports.listProducts = async (req, res) => {
       query.name = { $regex: req.query.search, $options: "i" };
     }
 
-    
     if (req.query.category && req.query.category !== "all") {
       query.category = req.query.category;
     }
 
-    const products = await Product.find(query).populate("category");
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find(query)
+      .populate("category")
+      .skip(skip)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments(query);
+    const totalPages = Math.ceil(totalProducts / limit);
+
     const categories = await Category.find();
 
     res.render("products/list", {
@@ -33,12 +43,13 @@ exports.listProducts = async (req, res) => {
       selectedCategory: req.query.category || "all",
       userRole: req.session.role,
       canManageProducts,
+      currentPage: page,
+      totalPages: totalPages > 0 ? totalPages : 1,
     });
   } catch (error) {
     res.status(500).send("Erro ao listar produtos!");
   }
 };
-
 exports.renderCreateForm = async (req, res) => {
   try {
     const supermarket = await Supermarket.findById(req.params.supermarketId);

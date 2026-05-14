@@ -1,8 +1,8 @@
 <section class="container py-4">
   <header class="mb-4">
-    <h1 class="mb-2">Historico de encomendas</h1>
+    <h1 class="mb-2">Histórico de encomendas</h1>
     <p class="text-muted mb-0">
-      Consulta as tuas encomendas reais, o respetivo estado e o detalhe de cada compra.
+      Consulte as suas encomendas, o respetivo estado e o detalhe de cada compra.
     </p>
   </header>
 
@@ -35,7 +35,7 @@
       </div>
 
       <div *ngIf="!loading() && filteredOrders.length === 0" class="text-muted py-3">
-        Ainda nao existem encomendas para este cliente.
+        Ainda não existem encomendas para este cliente!
       </div>
 
       <div *ngIf="!loading() && filteredOrders.length > 0" class="table-responsive">
@@ -44,7 +44,7 @@
             <tr>
               <th *ngFor="let column of columns">{{ column }}</th>
               <th>Entrega</th>
-              <th class="text-end">Acao</th>
+              <th class="text-end">Ação</th>
             </tr>
           </thead>
           <tbody>

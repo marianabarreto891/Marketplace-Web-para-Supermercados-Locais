@@ -307,7 +307,23 @@ async function renderCreatePage(
     }
   }
 
-  const products = await Product.find(query).populate("category").sort({ name: 1 });
+ 
+  const page = parseInt(req.query.page) || 1;
+  const limit = 5; 
+  const skip = (page - 1) * limit;
+
+  
+  const products = await Product.find(query)
+    .populate("category")
+    .sort({ name: 1 })
+    .skip(skip)
+    .limit(limit);
+
+  
+  const totalProducts = await Product.countDocuments(query);
+  const totalPages = Math.ceil(totalProducts / limit);
+  
+
   const customers = await User.find({ role: "cliente" }).sort({ name: 1 });
   const categories = await Category.find().sort({ name: 1 });
 
@@ -322,6 +338,9 @@ async function renderCreatePage(
   viewModel.categories = categories;
   viewModel.selectedCategory = req.query.category || "all";
   viewModel.searchQuery = req.query.search || "";
+  
+  viewModel.currentPage = page;
+  viewModel.totalPages = totalPages > 0 ? totalPages : 1;
 
   return res.status(statusCode).render("orders/create", viewModel);
 }

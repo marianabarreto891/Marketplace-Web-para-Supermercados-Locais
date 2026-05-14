@@ -2,15 +2,15 @@
   <header class="mb-4">
     <h1 class="mb-2">Carrinho</h1>
     <p class="text-muted mb-0">
-      Carrinho funcional com armazenamento local, edicao de quantidades e total parcial.
+      Carrinho funcional com armazenamento local, edição de quantidades e total parcial.
     </p>
   </header>
 
   <div *ngIf="cartService.items().length === 0" class="card shadow-sm border-0">
     <div class="card-body p-4">
-      <h2 class="h5 mb-3">O carrinho esta vazio</h2>
+      <h2 class="h5 mb-3">O carrinho está vazio</h2>
       <p class="text-muted mb-4">
-        Adiciona produtos a partir do catalogo para simulares o fluxo de compra do cliente.
+        Adicione produtos a partir do catálogo e comece a comprar!
       </p>
 
       <div class="d-flex gap-2 flex-wrap">
@@ -41,9 +41,9 @@
                 <tr>
                   <th>Produto</th>
                   <th class="text-center">Quantidade</th>
-                  <th class="text-end">Preco</th>
+                  <th class="text-end">Preço</th>
                   <th class="text-end">Subtotal</th>
-                  <th class="text-end">Acao</th>
+                  <th class="text-end">Ação</th>
                 </tr>
               </thead>
               <tbody>

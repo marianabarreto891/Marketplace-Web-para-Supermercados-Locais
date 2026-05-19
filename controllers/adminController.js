@@ -191,3 +191,56 @@ exports.createAdmin = async (req, res) => {
     res.status(500).send("Erro ao criar novo administrador.");
   }
 };
+
+
+
+  exports.listRefundRequests = async (req, res) => {
+  try {
+    const orders = await Order.find({ refundRequested: true })
+      .populate("cliente", "name email")
+      .populate("supermercado", "name location")
+      .sort({ refundRequestedAt: -1 });
+
+    res.render("admin/refunds", { orders });
+  } catch (error) {
+    console.error("Erro ao listar pedidos de reembolso:", error);
+    res.status(500).send("Erro ao listar pedidos de reembolso.");
+  }
+};
+
+exports.approveRefund = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (!order) return res.status(404).send("Encomenda não encontrada.");
+
+    order.refundApproved = true;
+    order.refundProcessedAt = new Date();
+    order.estado = "cancelada";
+    order.paymentStatus = "canceled";
+    await order.save();
+
+    res.redirect("/admin/refunds");
+  } catch (error) {
+    console.error("Erro ao aprovar reembolso:", error);
+    res.status(500).send("Erro ao aprovar reembolso.");
+  }
+};
+
+exports.rejectRefund = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (!order) return res.status(404).send("Encomenda não encontrada.");
+
+    order.refundRequested = false;
+    order.refundRejected = true;
+    order.refundProcessedAt = new Date();
+    await order.save();
+
+    res.redirect("/admin/refunds");
+  } catch (error) {
+    console.error("Erro ao rejeitar reembolso:", error);
+    res.status(500).send("Erro ao rejeitar reembolso.");
+  }
+};
+
+

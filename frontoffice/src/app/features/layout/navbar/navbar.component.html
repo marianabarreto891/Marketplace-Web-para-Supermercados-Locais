@@ -6,6 +6,7 @@
   <div class="navbar-links">
     <a routerLink="/products" routerLinkActive="active">Produtos</a>
     <a routerLink="/compare" routerLinkActive="active">Comparar preços</a>
+    <a routerLink="/supermarkets" routerLinkActive="active">Supermercados</a>
     <a *ngIf="auth.isLoggedIn()" routerLink="/cart" routerLinkActive="active">
       Carrinho
       <span *ngIf="cart.itemCount() > 0">({{ cart.itemCount() }})</span>

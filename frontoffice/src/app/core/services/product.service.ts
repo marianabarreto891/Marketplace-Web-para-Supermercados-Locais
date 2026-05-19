@@ -46,22 +46,27 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  getProducts(filters: {
-    search?: string;
-    category?: string;
-    sort?: string;
-    supermarket?: string;
-  }) {
-    let params = new HttpParams();
-    if (filters.search) params = params.set('search', filters.search);
-    if (filters.category && filters.category !== 'all') params = params.set('category', filters.category);
-    if (filters.supermarket && filters.supermarket !== 'all') {
-      params = params.set('supermarket', filters.supermarket);
-    }
-    if (filters.sort) params = params.set('sort', filters.sort);
-    params = params.set('_t', Date.now().toString());
-    return this.http.get<Product[]>(`${this.apiUrl}/products`, { params });
-  }
+
+getProducts(filters: {
+  search?: string;
+  category?: string;
+  sort?: string;
+  supermarket?: string;
+  page?: number;
+  limit?: number;
+}) {
+  let params = new HttpParams();
+  if (filters.search) params = params.set('search', filters.search);
+  if (filters.category && filters.category !== 'all') params = params.set('category', filters.category);
+  if (filters.supermarket && filters.supermarket !== 'all') params = params.set('supermarket', filters.supermarket);
+  if (filters.sort) params = params.set('sort', filters.sort);
+  if (filters.page) params = params.set('page', filters.page.toString());
+  if (filters.limit) params = params.set('limit', filters.limit.toString());
+  params = params.set('_t', Date.now().toString());
+  return this.http.get<{ products: Product[]; total: number; totalPages: number; currentPage: number }>(
+    `${this.apiUrl}/products`, { params }
+  );
+}
 
   getCategories() {
     const params = new HttpParams().set('_t', Date.now().toString());

@@ -183,6 +183,36 @@ export class OrderDetailComponent implements OnInit {
         },
       });
   }
+get canRequestRefund(): boolean {
+  const order = this.order();
+  return !!order &&
+    order.paymentStatus === 'paid' &&
+    !['cancelada', 'entregue'].includes(order.status) &&
+    !order.refundRequested;
+}
+
+requestRefund(): void {
+  this.actionLoading.set(true);
+  this.errorMessage.set('');
+  this.paymentMessage.set('');
+
+  this.orderService.requestRefund(this.orderId).subscribe({
+    next: (res) => {
+      this.paymentMessage.set(res.message);
+      this.loadOrder();
+    },
+    error: (error) => {
+      this.errorMessage.set(
+        error?.error?.error || error?.error?.message || 'Nao foi possivel submeter o pedido.'
+      );
+      this.actionLoading.set(false);
+    },
+    complete: () => {
+      this.actionLoading.set(false);
+    },
+  });
+}
+
 
   private loadOrder(): void {
     this.loading.set(true);
@@ -225,6 +255,7 @@ export class OrderDetailComponent implements OnInit {
         this.loading.set(false);
         this.paymentLoading.set(false);
       },
+      
     });
   }
 }

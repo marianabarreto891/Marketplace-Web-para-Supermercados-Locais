@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { ProductService, SupermarketSummary } from '../../../core/services/product.service';
 
 @Component({
   selector: 'app-supermarket-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PageHeaderComponent],
   templateUrl: './supermarket-list.component.html',
 })
 export class SupermarketListComponent implements OnInit {

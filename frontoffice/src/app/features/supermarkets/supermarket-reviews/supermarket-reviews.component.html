@@ -1,10 +1,8 @@
 <section class="container py-4">
-  <header class="mb-4">
-    <h1 class="mb-2">Reviews do supermercado</h1>
-    <p class="text-muted mb-0">
-      Consulte o que outros clientes disseram sobre esta loja antes de comprar!
-    </p>
-  </header>
+  <app-page-header
+    title="Reviews do supermercado"
+    subtitle="Consulte o que outros clientes disseram sobre esta loja antes de comprar!">
+  </app-page-header>
 
   <div *ngIf="errorMessage()" class="error mb-4">{{ errorMessage() }}</div>
 

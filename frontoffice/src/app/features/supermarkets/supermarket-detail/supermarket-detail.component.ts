@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductService, SupermarketReviewsResponse, Product } from '../../../core/services/product.service';
@@ -19,6 +19,18 @@ export class SupermarketDetailComponent implements OnInit {
   loadingReviews = signal(true);
   loadingProducts = signal(true);
   activeTab = signal<'reviews' | 'products'>('reviews');
+
+  supermarketName = computed(() =>
+    this.reviews()?.supermarket?.name ||
+    this.products()[0]?.supermarket?.name ||
+    'Supermercado'
+  );
+
+  supermarketLocation = computed(() =>
+    this.reviews()?.supermarket?.location ||
+    this.products()[0]?.supermarket?.location ||
+    ''
+  );
 
   constructor(
     private route: ActivatedRoute,

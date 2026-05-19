@@ -70,6 +70,21 @@ body {
   background: rgba(255,255,255,0.35);
 }
 
+.navbar-login-btn {
+  background: white;
+  color: #2c7a4b !important;
+  padding: 6px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none !important;
+  transition: background 0.2s;
+}
+
+.navbar-login-btn:hover {
+  background: #f0fdf4;
+}
+
 /* AUTH */
 .auth-container {
   max-width: 420px;
@@ -163,8 +178,8 @@ body {
 /* PRODUTOS */
 .product-list-container {
   max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 20px;
+  margin: 0 auto;
+  padding: 2rem 20px;
 }
 
 .product-list-container h2 {
@@ -405,6 +420,25 @@ tbody tr.cheapest td {
 .input-error {
   border-color: #dc3545 !important;
   box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+}
+
+/* PAGE HEADER */
+.page-header {
+  border-left: 4px solid #2c7a4b;
+  padding-left: 16px;
+}
+
+.page-header__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a2e1a;
+  margin-bottom: 4px;
+}
+
+.page-header__subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
 }
 
 @media (max-width: 992px) {

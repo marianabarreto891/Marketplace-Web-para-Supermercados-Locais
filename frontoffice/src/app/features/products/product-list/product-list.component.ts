@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { ProductService, Product, SupermarketSummary } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
 import { Subject } from 'rxjs';
@@ -12,7 +13,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './product-list.component.html',
 })
 export class ProductListComponent implements OnInit {

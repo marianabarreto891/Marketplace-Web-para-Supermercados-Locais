@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -16,7 +16,7 @@ export class LoginComponent {
   error = '';
   fieldErrors: { email?: string; password?: string } = {};
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, private route: ActivatedRoute) {}
 
   private validate(): boolean {
     this.fieldErrors = {};
@@ -39,7 +39,10 @@ export class LoginComponent {
     if (!this.validate()) return;
 
     this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/products']),
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
+        this.router.navigateByUrl(returnUrl);
+      },
       error: err => this.error = err.error?.error || 'Erro ao fazer login'
     });
   }

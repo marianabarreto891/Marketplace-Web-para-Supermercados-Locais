@@ -19,6 +19,6 @@
   <div class="navbar-user">
     <span *ngIf="auth.currentUser() as u">Olá, {{ u.name }}</span>
     <button *ngIf="auth.isLoggedIn()" (click)="auth.logout()">Sair</button>
-    <a *ngIf="!auth.isLoggedIn()" routerLink="/login">Entrar</a>
+    <a *ngIf="!auth.isLoggedIn()" routerLink="/login" class="navbar-login-btn">Entrar</a>
   </div>
 </nav>

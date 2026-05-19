@@ -3,13 +3,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { combineLatest } from 'rxjs';
+import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { Order } from '../../../core/models/order.model';
 import { OrderService } from '../../../core/services/order.service';
 
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './order-detail.component.html',
 })
 export class OrderDetailComponent implements OnInit {

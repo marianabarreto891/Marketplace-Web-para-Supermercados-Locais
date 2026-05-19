@@ -3,28 +3,34 @@
 
   <div class="error" *ngIf="error">{{ error }}</div>
 
-  <div class="form-group">
-    <label>Email</label>
-    <input
-      type="email"
-      [(ngModel)]="email"
-      placeholder="O seu email"
-      [class.input-error]="fieldErrors.email"
-    />
-    <span class="field-error" *ngIf="fieldErrors.email">{{ fieldErrors.email }}</span>
-  </div>
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label>Email</label>
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        placeholder="O seu email"
+        [class.input-error]="fieldErrors.email"
+        autocomplete="email"
+      />
+      <span class="field-error" *ngIf="fieldErrors.email">{{ fieldErrors.email }}</span>
+    </div>
 
-  <div class="form-group">
-    <label>Password</label>
-    <input
-      type="password"
-      [(ngModel)]="password"
-      placeholder="A sua password"
-      [class.input-error]="fieldErrors.password"
-    />
-    <span class="field-error" *ngIf="fieldErrors.password">{{ fieldErrors.password }}</span>
-  </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        placeholder="A sua password"
+        [class.input-error]="fieldErrors.password"
+        autocomplete="current-password"
+      />
+      <span class="field-error" *ngIf="fieldErrors.password">{{ fieldErrors.password }}</span>
+    </div>
 
-  <button (click)="onSubmit()">Entrar</button>
+    <button type="submit">Entrar</button>
+  </form>
   <p>Não tem conta? <a routerLink="/register">Registar</a></p>
 </div>

@@ -1,6 +1,8 @@
 <section class="container py-4">
-  <h1 class="mb-2">Supermercados</h1>
-  <p class="text-muted mb-4">Escolha um supermercado para ver os seus produtos e reviews.</p>
+  <app-page-header
+    title="Supermercados"
+    subtitle="Escolha um supermercado para ver os seus produtos e reviews.">
+  </app-page-header>
 
   <div *ngIf="loading()">A carregar...</div>
   <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>

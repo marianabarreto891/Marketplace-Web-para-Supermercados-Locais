@@ -1,11 +1,8 @@
 <section class="container py-4">
-  <header class="mb-4">
-    <h1 class="mb-2">Detalhe da encomenda</h1>
-    <p class="text-muted mb-0">
-      Consulta completa da encomenda
-      <strong>#{{ order()?.displayId || orderId }}</strong>.
-    </p>
-  </header>
+  <app-page-header
+    title="Detalhe da encomenda"
+    [subtitle]="'Encomenda #' + (order()?.displayId || orderId)">
+  </app-page-header>
 
   <div *ngIf="paymentMessage()" class="success mb-4">{{ paymentMessage() }}</div>
   <div *ngIf="errorMessage()" class="error mb-4">{{ errorMessage() }}</div>

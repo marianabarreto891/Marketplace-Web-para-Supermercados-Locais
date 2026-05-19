@@ -1,23 +1,24 @@
 <section class="container py-4">
   <a routerLink="/supermarkets" class="btn btn-outline-secondary btn-sm mb-4">← Voltar à lista</a>
 
-  <div *ngIf="reviews() as data">
+  <div *ngIf="loadingReviews()" class="text-muted py-3">A carregar supermercado...</div>
+
+  <ng-container *ngIf="!loadingReviews()">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
       <div>
-        <h1 class="mb-1">{{ data.supermarket.name }}</h1>
-        <p class="text-muted mb-0">📍 {{ data.supermarket.location }}</p>
+        <h1 class="mb-1">{{ supermarketName() }}</h1>
+        <p *ngIf="supermarketLocation()" class="text-muted mb-0">📍 {{ supermarketLocation() }}</p>
       </div>
-      <div class="text-end">
-        <div class="fs-3 fw-bold">{{ data.averageRating.toFixed(1) }}/5 ⭐</div>
-        <div class="text-muted">{{ data.totalReviews }} reviews</div>
+      <div *ngIf="reviews()" class="text-end">
+        <div class="fs-3 fw-bold">{{ reviews()!.averageRating.toFixed(1) }}/5 ⭐</div>
+        <div class="text-muted">{{ reviews()!.totalReviews }} reviews</div>
       </div>
     </div>
 
-    <!-- TABS -->
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
         <button class="nav-link" [class.active]="activeTab() === 'reviews'" (click)="activeTab.set('reviews')">
-          Reviews ({{ data.totalReviews }})
+          Reviews ({{ reviews()?.totalReviews || 0 }})
         </button>
       </li>
       <li class="nav-item">
@@ -27,29 +28,36 @@
       </li>
     </ul>
 
-    <!-- TAB REVIEWS -->
     <div *ngIf="activeTab() === 'reviews'">
-      <div *ngIf="loadingReviews()">A carregar reviews...</div>
-      <div *ngIf="!loadingReviews() && data.reviews.length === 0" class="text-muted">
-        Este supermercado ainda não tem reviews.
+      <div *ngIf="!reviews()" class="card shadow-sm border-0">
+        <div class="card-body p-4 text-muted">
+          Não foi possível carregar as reviews.
+          <a routerLink="/login">Inicia sessão</a> para as ver.
+        </div>
       </div>
-      <div class="d-grid gap-3">
-        <article *ngFor="let review of data.reviews" class="card shadow-sm border-0">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-              <div>
-                <div class="fw-semibold">{{ review.customerName }}</div>
-                <div class="small text-muted">Encomenda #{{ review.displayId }}</div>
+
+      <ng-container *ngIf="reviews() as data">
+        <div *ngIf="data.reviews.length === 0" class="text-muted">
+          Este supermercado ainda não tem reviews.
+        </div>
+        <div class="d-grid gap-3">
+          <article *ngFor="let review of data.reviews" class="card shadow-sm border-0">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                <div>
+                  <div class="fw-semibold">{{ review.customerName }}</div>
+                  <div class="small text-muted">Encomenda #{{ review.displayId }}</div>
+                </div>
+                <div class="text-end">
+                  <div class="fw-semibold">{{ review.rating }}/5</div>
+                  <div class="small text-muted">{{ review.createdAt | date:'dd/MM/yyyy' }}</div>
+                </div>
               </div>
-              <div class="text-end">
-                <div class="fw-semibold">{{ review.rating }}/5</div>
-                <div class="small text-muted">{{ review.createdAt | date:'dd/MM/yyyy' }}</div>
-              </div>
+              <p class="mb-0 text-muted">{{ review.comment || 'Sem comentário.' }}</p>
             </div>
-            <p class="mb-0 text-muted">{{ review.comment || 'Sem comentário.' }}</p>
-          </div>
-        </article>
-      </div>
+          </article>
+        </div>
+      </ng-container>
     </div>
 
     <div *ngIf="activeTab() === 'products'">
@@ -74,5 +82,5 @@
         Sem produtos disponíveis.
       </div>
     </div>
-  </div>
+  </ng-container>
 </section>

@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { DashboardStats } from '../../../core/models/dashboard-stats.model';
 import { OrderService } from '../../../core/services/order.service';
 
 @Component({
   selector: 'app-client-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, PageHeaderComponent],
   templateUrl: './client-dashboard.component.html',
 })
 export class ClientDashboardComponent implements OnInit {

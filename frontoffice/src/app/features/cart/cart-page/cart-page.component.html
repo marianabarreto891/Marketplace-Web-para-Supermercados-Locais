@@ -1,10 +1,8 @@
 <section class="container py-4">
-  <header class="mb-4">
-    <h1 class="mb-2">Carrinho</h1>
-    <p class="text-muted mb-0">
-      Carrinho funcional com armazenamento local, edição de quantidades e total parcial.
-    </p>
-  </header>
+  <app-page-header
+    title="Carrinho"
+    subtitle="Reveja os produtos no carrinho e finalize a sua compra.">
+  </app-page-header>
 
   <div *ngIf="cartService.items().length === 0" class="card shadow-sm border-0">
     <div class="card-body p-4">

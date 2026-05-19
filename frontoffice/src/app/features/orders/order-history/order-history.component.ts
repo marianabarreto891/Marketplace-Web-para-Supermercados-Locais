@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { Order } from '../../../core/models/order.model';
 import { OrderService } from '../../../core/services/order.service';
 
 @Component({
   selector: 'app-order-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './order-history.component.html',
 })
 export class OrderHistoryComponent implements OnInit {

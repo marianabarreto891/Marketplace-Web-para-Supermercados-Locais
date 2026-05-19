@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { CartService } from '../../../core/services/cart.service';
 import { OrderService } from '../../../core/services/order.service';
 import { DeliveryMethod } from '../../../core/models/delivery-method.model';
@@ -9,7 +10,7 @@ import { DeliveryMethod } from '../../../core/models/delivery-method.model';
 @Component({
   selector: 'app-checkout-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent],
   templateUrl: './checkout-page.component.html',
 })
 export class CheckoutPageComponent {

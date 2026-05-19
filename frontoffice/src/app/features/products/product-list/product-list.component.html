@@ -1,6 +1,8 @@
 <div class="product-list-container">
-  <h2>Produtos</h2>
-  <p>Escolha o supermercado que deseja comprar os seus produtos!</p>
+  <app-page-header
+    title="Produtos"
+    subtitle="Escolha o supermercado que deseja comprar os seus produtos!">
+  </app-page-header>
 
   <div *ngIf="cartMessage"
     [class.success]="cartMessageType === 'success'"
@@ -8,28 +10,32 @@
     {{ cartMessage }}
   </div>
 
-  <div class="filters">
-    <input type="text" [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Pesquisar produto..." />
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-3">
+      <div class="filters mb-0">
+        <input type="text" [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Pesquisar produto..." />
 
-    <select [(ngModel)]="selectedCategory" (ngModelChange)="onFilterChange()">
-      <option value="all">Todas as categorias</option>
-      <option *ngFor="let cat of categories()" [value]="cat._id">{{ cat.name }}</option>
-    </select>
+        <select [(ngModel)]="selectedCategory" (ngModelChange)="onFilterChange()">
+          <option value="all">Todas as categorias</option>
+          <option *ngFor="let cat of categories()" [value]="cat._id">{{ cat.name }}</option>
+        </select>
 
-    <select [(ngModel)]="selectedSupermarket" (ngModelChange)="onFilterChange()">
-      <option value="all">Todos os supermercados</option>
-      <option *ngFor="let supermarket of supermarkets()" [value]="supermarket._id">
-        {{ supermarket.name }} - {{ supermarket.location }}
-      </option>
-    </select>
+        <select [(ngModel)]="selectedSupermarket" (ngModelChange)="onFilterChange()">
+          <option value="all">Todos os supermercados</option>
+          <option *ngFor="let supermarket of supermarkets()" [value]="supermarket._id">
+            {{ supermarket.name }} - {{ supermarket.location }}
+          </option>
+        </select>
 
-    <select [(ngModel)]="sort" (ngModelChange)="onFilterChange()">
-      <option value="asc">Preço: menor para maior</option>
-      <option value="desc">Preço: maior para menor</option>
-    </select>
+        <select [(ngModel)]="sort" (ngModelChange)="onFilterChange()">
+          <option value="asc">Preço: menor para maior</option>
+          <option value="desc">Preço: maior para menor</option>
+        </select>
 
-    <a *ngIf="selectedSupermarket !== 'all'" [routerLink]="getSelectedSupermarketRoute()">Ver reviews</a>
-    <a routerLink="/compare">Comparar preços</a>
+        <a *ngIf="selectedSupermarket !== 'all'" [routerLink]="getSelectedSupermarketRoute()">Ver reviews</a>
+        <a routerLink="/compare">Comparar preços</a>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="loading()">A carregar...</div>

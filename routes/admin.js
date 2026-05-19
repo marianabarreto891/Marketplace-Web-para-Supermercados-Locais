@@ -7,6 +7,7 @@ const categoryController = require("../controllers/categoryController");
 const couponController = require("../controllers/couponController");
 const Product = require("../models/Product");
 
+
 router.use(requireAuth, requireRole(["admin"]));
 
 // Rotas de Admin
@@ -17,6 +18,11 @@ router.get("/users", adminController.listUsers);
 router.get("/reviews", adminController.listReviews);
 router.get("/products", adminController.listProducts);
 router.post("/products/:productId/toggle", adminController.toggleProductStatus);
+
+
+router.get("/refunds", adminController.listRefundRequests);
+router.post("/refunds/:orderId/approve", adminController.approveRefund);
+router.post("/refunds/:orderId/reject", adminController.rejectRefund);
 
 // Rotas de Categorias
 router.get("/categories", categoryController.listCategories);

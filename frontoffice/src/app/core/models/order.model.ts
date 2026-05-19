@@ -28,4 +28,6 @@ export interface Order {
   cancelDeadline?: string | null;
   supermarketReview?: OrderReview | null;
   courierReview?: OrderReview | null;
+  refundRequested?: boolean;
+  refundRequestedAt?: string;
 }

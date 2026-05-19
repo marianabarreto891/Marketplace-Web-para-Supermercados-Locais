@@ -2,14 +2,12 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import {
-  ProductService,
-  Product,
-  SupermarketSummary,
-} from '../../../core/services/product.service';
+import { ProductService, Product, SupermarketSummary } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, finalize, timeout } from 'rxjs/operators';
+import { AuthService } from '../../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-product-list',
@@ -29,74 +27,77 @@ export class ProductListComponent implements OnInit {
   errorMessage = signal('');
   cartMessage = '';
   cartMessageType: 'success' | 'error' | '' = '';
+
+  // Paginação
+  currentPage = signal(1);
+  totalPages = signal(1);
+  totalProducts = signal(0);
+  readonly itemsPerPage = 10;
+
   private searchSubject = new Subject<string>();
 
-  constructor(
-    private productService: ProductService,
-    private cartService: CartService
-  ) {}
+constructor(
+  private productService: ProductService,
+  private cartService: CartService,
+  private auth: AuthService,
+  private router: Router
+) {}
+
 
   ngOnInit() {
-    this.productService
-      .getCategories()
-      .pipe(timeout(10000))
-      .subscribe({
-        next: (cats) => this.categories.set(Array.isArray(cats) ? cats : []),
-        error: () => {
-          this.errorMessage.set('Nao foi possivel carregar as categorias.');
-          this.categories.set([]);
-        },
-      });
-
-    this.productService
-      .getSupermarkets()
-      .pipe(timeout(10000))
-      .subscribe({
-        next: (supermarkets) =>
-          this.supermarkets.set(Array.isArray(supermarkets) ? supermarkets : []),
-        error: () => {
-          this.errorMessage.set('Nao foi possivel carregar os supermercados.');
-          this.supermarkets.set([]);
-        },
-      });
-
+    this.productService.getCategories().pipe(timeout(10000)).subscribe({
+      next: (cats) => this.categories.set(Array.isArray(cats) ? cats : []),
+      error: () => { this.errorMessage.set('Nao foi possivel carregar as categorias.'); this.categories.set([]); },
+    });
+    this.productService.getSupermarkets().pipe(timeout(10000)).subscribe({
+      next: (supermarkets) => this.supermarkets.set(Array.isArray(supermarkets) ? supermarkets : []),
+      error: () => { this.errorMessage.set('Nao foi possivel carregar os supermercados.'); this.supermarkets.set([]); },
+    });
     this.loadProducts();
-    this.searchSubject
-      .pipe(debounceTime(400), distinctUntilChanged())
-      .subscribe(() => this.loadProducts());
+    this.searchSubject.pipe(debounceTime(400), distinctUntilChanged()).subscribe(() => {
+      this.currentPage.set(1);
+      this.loadProducts();
+    });
   }
 
-  onSearchChange() {
-    this.searchSubject.next(this.search);
+  onSearchChange() { this.searchSubject.next(this.search); }
+
+  onFilterChange() {
+    this.currentPage.set(1);
+    this.loadProducts();
   }
 
   loadProducts() {
     this.loading.set(true);
     this.errorMessage.set('');
-    this.productService
-      .getProducts({
-        search: this.search,
-        category: this.selectedCategory,
-        supermarket: this.selectedSupermarket,
-        sort: this.sort,
-      })
-      .pipe(
-        timeout(10000),
-        finalize(() => {
-          this.loading.set(false);
-        })
-      )
-      .subscribe({
-        next: (p) => {
-          this.products.set(Array.isArray(p) ? p : []);
-        },
-        error: () => {
-          this.products.set([]);
-          this.errorMessage.set(
-            'Nao foi possivel carregar os produtos. Confirma se o backend esta a correr em http://localhost:3000.'
-          );
-        },
-      });
+    this.productService.getProducts({
+      search: this.search,
+      category: this.selectedCategory,
+      supermarket: this.selectedSupermarket,
+      sort: this.sort,
+      page: this.currentPage(),
+      limit: this.itemsPerPage,
+    }).pipe(timeout(10000), finalize(() => this.loading.set(false))).subscribe({
+      next: (res) => {
+        this.products.set(Array.isArray(res.products) ? res.products : []);
+        this.totalPages.set(res.totalPages || 1);
+        this.totalProducts.set(res.total || 0);
+      },
+      error: () => {
+        this.products.set([]);
+        this.errorMessage.set('Nao foi possivel carregar os produtos. Confirma se o backend esta a correr em http://localhost:3000.');
+      },
+    });
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
+    this.loadProducts();
+  }
+
+  getPages(): number[] {
+    return Array.from({ length: this.totalPages() }, (_, i) => i + 1);
   }
 
   getImageUrl(img: string) {
@@ -104,10 +105,14 @@ export class ProductListComponent implements OnInit {
   }
 
   addToCart(product: Product) {
-    const result = this.cartService.addProduct(product);
-    this.cartMessage = result.message;
-    this.cartMessageType = result.success ? 'success' : 'error';
+  if (!this.auth.isLoggedIn()) {
+    this.router.navigate(['/login']);
+    return;
   }
+  const result = this.cartService.addProduct(product);
+  this.cartMessage = result.message;
+  this.cartMessageType = result.success ? 'success' : 'error';
+}
 
   getSelectedSupermarketRoute(): string[] {
     return ['/supermarkets', this.selectedSupermarket, 'reviews'];

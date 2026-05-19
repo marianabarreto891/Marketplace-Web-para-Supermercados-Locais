@@ -14,23 +14,28 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <link rel="stylesheet" href="/stylesheets/map.css">
 </head>
-
 <body class="bg-light p-4">
+    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0 fw-bold text-secondary">Administrador</h2>
+    </div>
 
     <div class="container bg-white p-4 rounded shadow-sm">
-        
-        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
-            <h1 class="mb-0">Administrador</h1>
-            <div>
-                <a href="/supermarket/list" class="btn btn-secondary">Ver Supermercados</a>
-                <a href="/admin/categories" class="btn btn-info text-white">Gerir Categorias</a>
-                <a href="/admin/products" class="btn btn-outline-dark">Gerir Produtos</a>
-                <a href="/admin/coupons" class="btn btn-warning text-dark">Gerir Cupões</a>
-                <a href="/admin/reviews" class="btn btn-outline-primary">Ver Reviews</a>
-                <a href="/admin/users" class="btn btn-primary">Ver Todos os Utilizadores</a>
-                <a href="/users/logout" class="btn btn-danger">Terminar Sessão</a>
-            </div>
-        </div>
+   <div class="d-flex flex-wrap gap-2 justify-content-end">
+
+    <a href="/supermarket/list" class="btn btn-info text-white">Ver Supermercados</a>
+    
+    <a href="/admin/categories" class="btn btn-primary">Gerir Categorias</a>
+    <a href="/admin/products" class="btn btn-primary">Gerir Produtos</a>
+    <a href="/admin/coupons" class="btn btn-success">Gerir Cupões</a>
+  
+    <a href="/admin/reviews" class="btn btn-outline-warning text-dark">Ver Reviews</a>
+    <a href="/admin/users" class="btn btn-secondary">Ver Todos os Utilizadores</a>
+
+    <a href="/admin/refunds" class="btn btn-outline-secondary">Reembolsos</a>
+    
+    
+    <a href="/users/logout" class="btn btn-danger">Terminar Sessão</a>
+</div>
 
         <div class="row text-center mb-5 mt-4">
             <div class="col-md-4">

@@ -34,7 +34,6 @@
           <p class="mb-2"><strong>Pagamento:</strong> {{ paymentStatusLabel }}</p>
           <p class="mb-2"><strong>Entrega:</strong> {{ deliveryLabel }}</p>
           <p class="mb-2" *ngIf="order.supermarketLocation">
-            <strong>Filial:</strong> {{ order.supermarketLocation }}
           </p>
           <p class="mb-2"><strong>Cupao:</strong> {{ order.couponCode || 'Sem cupao' }}</p>
           <p class="mb-2"><strong>Criada em:</strong> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
@@ -92,24 +91,23 @@
           <div class="mt-4 d-flex gap-2 flex-wrap">
             <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao histórico</a>
             <a routerLink="/products" class="btn btn-outline-primary">Continuar a comprar</a>
-            <button
-              *ngIf="canPay"
-              class="btn btn-primary"
-              type="button"
-              [disabled]="paymentLoading()"
-              (click)="startStripePayment()"
-            >
+            <button *ngIf="canPay" class="btn btn-primary" type="button" [disabled]="paymentLoading()"
+              (click)="startStripePayment()">
               {{ paymentLoading() ? 'A abrir Stripe...' : 'Pagar com Stripe' }}
             </button>
-            <button
-              *ngIf="canCancel"
-              class="btn btn-outline-danger"
-              type="button"
-              [disabled]="actionLoading()"
-              (click)="cancelOrder()"
-            >
+            <button *ngIf="canCancel" class="btn btn-outline-danger" type="button" [disabled]="actionLoading()"
+              (click)="cancelOrder()">
               {{ actionLoading() ? 'A processar...' : 'Cancelar encomenda' }}
             </button>
+          </div>
+          <button *ngIf="canRequestRefund" class="btn btn-warning" type="button" [disabled]="actionLoading()"
+            (click)="requestRefund()">
+            {{ actionLoading() ? 'A processar...' : 'Pedir reembolso' }}
+          </button>
+
+          <div *ngIf="order.refundRequested" class="alert alert-warning mt-2 mb-0 w-100">
+            Pedido de reembolso submetido em {{ order.refundRequestedAt | date:'dd/MM/yyyy HH:mm' }}. Aguarda a
+            análise do administrador.
           </div>
 
           <small *ngIf="canCancel" class="text-muted d-block mt-2">
@@ -129,46 +127,28 @@
           <form *ngIf="canReview" class="row g-3" (ngSubmit)="submitReview()">
             <div class="col-12 col-lg-6">
               <label class="form-label">Avaliar supermercado</label>
-              <select
-                class="form-select mb-2"
-                [(ngModel)]="ratingSupermarket"
-                name="ratingSupermarket"
-              >
+              <select class="form-select mb-2" [(ngModel)]="ratingSupermarket" name="ratingSupermarket">
                 <option [ngValue]="5">5 estrelas</option>
                 <option [ngValue]="4">4 estrelas</option>
                 <option [ngValue]="3">3 estrelas</option>
                 <option [ngValue]="2">2 estrelas</option>
                 <option [ngValue]="1">1 estrela</option>
               </select>
-              <textarea
-                class="form-control"
-                rows="3"
-                [(ngModel)]="commentSupermarket"
-                name="commentSupermarket"
-                placeholder="Comentário sobre o supermercado e os produtos"
-              ></textarea>
+              <textarea class="form-control" rows="3" [(ngModel)]="commentSupermarket" name="commentSupermarket"
+                placeholder="Comentário sobre o supermercado e os produtos"></textarea>
             </div>
 
             <div class="col-12 col-lg-6" *ngIf="hasCourierReview">
               <label class="form-label">Avaliar estafeta</label>
-              <select
-                class="form-select mb-2"
-                [(ngModel)]="ratingCourier"
-                name="ratingCourier"
-              >
+              <select class="form-select mb-2" [(ngModel)]="ratingCourier" name="ratingCourier">
                 <option [ngValue]="5">5 estrelas</option>
                 <option [ngValue]="4">4 estrelas</option>
                 <option [ngValue]="3">3 estrelas</option>
                 <option [ngValue]="2">2 estrelas</option>
                 <option [ngValue]="1">1 estrela</option>
               </select>
-              <textarea
-                class="form-control"
-                rows="3"
-                [(ngModel)]="commentCourier"
-                name="commentCourier"
-                placeholder="Comentário sobre a entrega"
-              ></textarea>
+              <textarea class="form-control" rows="3" [(ngModel)]="commentCourier" name="commentCourier"
+                placeholder="Comentário sobre a entrega"></textarea>
             </div>
 
             <div class="col-12">

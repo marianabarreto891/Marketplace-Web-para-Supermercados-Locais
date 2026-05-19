@@ -142,7 +142,15 @@ const orderSchema = new mongoose.Schema(
     avaliacaoEstafeta: {
       rating: { type: Number, min: 1, max: 5 },
       comentario: { type: String }
-    }
+    },
+   
+
+    refundRequested: { type: Boolean, default: false },
+    refundRequestedAt: { type: Date, default: null },
+    refundApproved: { type: Boolean, default: false },
+    refundRejected: { type: Boolean, default: false },
+    refundProcessedAt: { type: Date, default: null },
+
 }, { timestamps: true });
  
 module.exports = mongoose.model("Order", orderSchema);

@@ -521,8 +521,22 @@ router.get("/products", async (req, res) => {
       )
       .sort({ price: sortOrder });
 
-    const filtered = products.filter((product) => product.supermarket?.isApproved);
-    return res.json(filtered);
+    const filtered = products.filter(
+      (product) => product.supermarket?.isApproved,
+    );
+
+    // Paginação
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / limit);
+    const paginated = filtered.slice((page - 1) * limit, page * limit);
+    return res.json({
+      products: paginated,
+      total,
+      totalPages,
+      currentPage: page,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -776,6 +790,54 @@ router.post(
     }
   },
 );
+
+/**
+ * @swagger
+ * /api/orders/{id}/refund-request:
+ *   post:
+ *     summary: Submete um pedido de reembolso para uma encomenda
+ *     tags: [Encomendas]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post(
+  "/orders/:id/refund-request",
+  requireJWT,
+  requireClientJWT,
+  async (req, res) => {
+    try {
+     const order = await Order.findOne({
+  _id: req.params.id,
+  cliente: req.user.userId,
+});
+
+      if (!order) {
+        return res.status(404).json({ error: "Encomenda nao encontrada." });
+      }
+
+      if (order.paymentStatus !== "paid") {
+        return res.status(400).json({ error: "So podes pedir reembolso de encomendas ja pagas." });
+      }
+
+      if (["cancelada", "entregue"].includes(order.estado)) {
+        return res.status(400).json({ error: "Nao podes pedir reembolso desta encomenda." });
+      }
+
+      if (order.refundRequested) {
+        return res.status(400).json({ error: "Ja foi feito um pedido de reembolso para esta encomenda." });
+      }
+
+      order.refundRequested = true;
+      order.refundRequestedAt = new Date();
+      await order.save();
+
+      return res.json({ message: "Pedido de reembolso submetido com sucesso. O administrador irá analisar o pedido." });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+);
+
 
 /**
  * @swagger

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedidos de Reembolso</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+  <div class="container bg-white p-4 rounded shadow-sm">
+
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+      <div>
+        <h1 class="mb-1">Pedidos de Reembolso</h1>
+        <p class="text-muted mb-0">Analise e processe os pedidos de reembolso dos clientes.</p>
+      </div>
+      <a href="/admin/dashboard" class="btn btn-outline-secondary">Voltar ao Dashboard</a>
+    </div>
+
+    <% if (!orders.length) { %>
+      <div class="alert alert-info">Não há pedidos de reembolso pendentes.</div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Encomenda</th>
+              <th>Cliente</th>
+              <th>Supermercado</th>
+              <th>Total</th>
+              <th>Pedido em</th>
+              <th>Estado</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(order => { %>
+              <tr>
+                <td>
+                  <div class="fw-semibold">FO-<%= String(order._id).slice(-6).toUpperCase() %></div>
+                  <div class="small text-muted">Pago: <%= order.paidAt ? new Date(order.paidAt).toLocaleString('pt-PT') : '-' %></div>
+                </td>
+                <td>
+                  <div><%= order.cliente ? order.cliente.name : '-' %></div>
+                  <div class="small text-muted"><%= order.cliente ? order.cliente.email : '' %></div>
+                </td>
+                <td>
+                  <div><%= order.supermercado ? order.supermercado.name : '-' %></div>
+                  <div class="small text-muted"><%= order.supermercado ? order.supermercado.location : '' %></div>
+                </td>
+                <td class="fw-semibold">€ <%= Number(order.total).toFixed(2) %></td>
+                <td><%= order.refundRequestedAt ? new Date(order.refundRequestedAt).toLocaleString('pt-PT') : '-' %></td>
+                <td>
+                  <% if (order.refundApproved) { %>
+                    <span class="badge bg-success">Aprovado</span>
+                  <% } else if (order.refundRejected) { %>
+                    <span class="badge bg-danger">Rejeitado</span>
+                  <% } else { %>
+                    <span class="badge bg-warning text-dark">Pendente</span>
+                  <% } %>
+                </td>
+                <td class="text-end">
+                  <% if (!order.refundApproved && !order.refundRejected) { %>
+                    <div class="d-flex justify-content-end gap-2">
+                      <form action="/admin/refunds/<%= order._id %>/approve" method="POST"
+                            onsubmit="return confirm('Confirma a aprovação do reembolso de € <%= Number(order.total).toFixed(2) %>?')">
+                        <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
+                      </form>
+                      <form action="/admin/refunds/<%= order._id %>/reject" method="POST"
+                            onsubmit="return confirm('Confirma a rejeição deste pedido de reembolso?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Rejeitar</button>
+                      </form>
+                    </div>
+                  <% } else { %>
+                    <span class="text-muted small">Processado em <%= order.refundProcessedAt ? new Date(order.refundProcessedAt).toLocaleString('pt-PT') : '-' %></span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>

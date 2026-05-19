@@ -115,4 +115,12 @@ export class OrderService {
   getDeliveryLabel(code: string): string {
     return this.deliveryLabels[code] || code;
   }
+
+  requestRefund(orderId: string) {
+  return this.http.post<{ message: string }>(
+    `${this.apiUrl}/orders/${orderId}/refund-request`,
+    {}
+  );
+}
+
 }

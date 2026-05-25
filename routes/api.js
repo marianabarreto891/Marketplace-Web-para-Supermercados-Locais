@@ -21,6 +21,147 @@ const router = express.Router();
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
+ *
+ *   schemas:
+ *
+ *     RegisterInput:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *         - password
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: Joao Silva
+ *         email:
+ *           type: string
+ *           example: joao@gmail.com
+ *         password:
+ *           type: string
+ *           example: 123456
+ *         address:
+ *           type: string
+ *           example: Rua de Lisboa
+ *         phone:
+ *           type: string
+ *           example: 912345678
+ *
+ *     LoginInput:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           example: joao@gmail.com
+ *         password:
+ *           type: string
+ *           example: 123456
+ *
+ *     Product:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: 665f123abc123
+ *         name:
+ *           type: string
+ *           example: Coca Cola
+ *         description:
+ *           type: string
+ *           example: Refrigerante 1.5L
+ *         price:
+ *           type: number
+ *           example: 2.99
+ *         stock:
+ *           type: number
+ *           example: 10
+ *         image:
+ *           type: string
+ *           example: https://site.com/image.jpg
+ *
+ *     Category:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *           example: Bebidas
+ *
+ *     Supermarket:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *           example: Continente
+ *         location:
+ *           type: string
+ *           example: Porto
+ *         deliveryCost:
+ *           type: number
+ *           example: 4.99
+ *
+ *     OrderItem:
+ *       type: object
+ *       properties:
+ *         productId:
+ *           type: string
+ *         quantity:
+ *           type: number
+ *           example: 2
+ *
+ *     CreateOrderInput:
+ *       type: object
+ *       required:
+ *         - deliveryMethod
+ *         - items
+ *       properties:
+ *         deliveryMethod:
+ *           type: string
+ *           example: estafeta
+ *         couponCode:
+ *           type: string
+ *           example: DESCONTO10
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/OrderItem'
+ *
+ *     RateOrderInput:
+ *       type: object
+ *       required:
+ *         - ratingSupermarket
+ *       properties:
+ *         ratingSupermarket:
+ *           type: number
+ *           example: 5
+ *         commentSupermarket:
+ *           type: string
+ *           example: Excelente servico
+ *         ratingCourier:
+ *           type: number
+ *           example: 5
+ *         commentCourier:
+ *           type: string
+ *           example: Muito simpatico
+ *
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         role:
+ *           type: string
+ *           example: cliente
  */
 
 let stripeClient = null;
@@ -69,7 +210,9 @@ function getClientCancelDeadline(order) {
     return null;
   }
 
-  return new Date(new Date(order.createdAt).getTime() + CLIENT_CANCEL_WINDOW_MS);
+  return new Date(
+    new Date(order.createdAt).getTime() + CLIENT_CANCEL_WINDOW_MS,
+  );
 }
 
 function canClientCancelOrder(order) {
@@ -77,10 +220,10 @@ function canClientCancelOrder(order) {
 
   return Boolean(
     order &&
-      order.estado === "confirmada" &&
-      order.paymentStatus !== "paid" &&
-      cancelDeadline &&
-      Date.now() <= cancelDeadline.getTime(),
+    order.estado === "confirmada" &&
+    order.paymentStatus !== "paid" &&
+    cancelDeadline &&
+    Date.now() <= cancelDeadline.getTime(),
   );
 }
 
@@ -112,9 +255,7 @@ function requireJWT(req, res, next) {
 
 function requireClientJWT(req, res, next) {
   if (req.user.role !== "cliente") {
-    return res
-      .status(403)
-      .json({ error: "Esta area e apenas para clientes" });
+    return res.status(403).json({ error: "Esta area e apenas para clientes" });
   }
 
   return next();
@@ -340,9 +481,7 @@ async function markOrderAsPaid(order, session) {
   order.stripeCheckoutSessionId =
     (session && session.id) || order.stripeCheckoutSessionId || "";
   order.stripePaymentIntentId =
-    (session &&
-      session.payment_intent &&
-      String(session.payment_intent)) ||
+    (session && session.payment_intent && String(session.payment_intent)) ||
     order.stripePaymentIntentId ||
     "";
 
@@ -400,6 +539,17 @@ async function sendStatusEmail(orderId, previousStatus, nextStatus) {
  *   post:
  *     summary: Regista um novo cliente
  *     tags: [Autenticacao]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterInput'
+ *     responses:
+ *       201:
+ *         description: Cliente registado com sucesso
+ *       400:
+ *         description: Email ja registado
  */
 router.post("/auth/register", async (req, res) => {
   try {
@@ -433,6 +583,17 @@ router.post("/auth/register", async (req, res) => {
  *   post:
  *     summary: Faz login na conta de cliente
  *     tags: [Autenticacao]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginInput'
+ *     responses:
+ *       200:
+ *         description: Login efetuado com sucesso
+ *       400:
+ *         description: Credenciais invalidas
  */
 router.post("/auth/login", async (req, res) => {
   try {
@@ -495,6 +656,15 @@ router.get("/auth/me", requireJWT, async (req, res) => {
  *   get:
  *     summary: Lista todos os produtos (com filtros opcionais)
  *     tags: [Produtos]
+ *     responses:
+ *       200:
+ *         description: Lista de produtos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
  */
 router.get("/products", async (req, res) => {
   try {
@@ -548,6 +718,15 @@ router.get("/products", async (req, res) => {
  *   get:
  *     summary: Lista todas as categorias
  *     tags: [Produtos]
+ *     responses:
+ *       200:
+ *         description: Lista de categorias
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Category'
  */
 router.get("/categories", async (req, res) => {
   const categories = await Category.find().sort({ name: 1 });
@@ -560,6 +739,15 @@ router.get("/categories", async (req, res) => {
  *   get:
  *     summary: Compara o preco de um produto em varios supermercados
  *     tags: [Produtos]
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Produtos encontrados
  */
 router.get("/products/compare", async (req, res) => {
   try {
@@ -574,11 +762,16 @@ router.get("/products/compare", async (req, res) => {
       isActive: { $ne: false },
       stock: { $gt: 0 },
     })
-      .populate("supermarket", "name location isApproved deliveryMethods deliveryCost")
+      .populate(
+        "supermarket",
+        "name location isApproved deliveryMethods deliveryCost",
+      )
       .populate("category", "name")
       .sort({ price: 1 });
 
-    const filtered = products.filter((product) => product.supermarket?.isApproved);
+    const filtered = products.filter(
+      (product) => product.supermarket?.isApproved,
+    );
     return res.json(filtered);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -591,6 +784,15 @@ router.get("/products/compare", async (req, res) => {
  *   get:
  *     summary: Lista supermercados aprovados
  *     tags: [Supermercados]
+ *     responses:
+ *       200:
+ *         description: Lista de supermercados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Supermarket'
  */
 router.get("/supermarkets", async (req, res) => {
   try {
@@ -612,6 +814,15 @@ router.get("/supermarkets", async (req, res) => {
  *     tags: [Supermercados]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Reviews do supermercado
  */
 router.get(
   "/supermarkets/:id/reviews",
@@ -677,6 +888,9 @@ router.get(
  *     tags: [Encomendas]
  *     security:
  *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de encomendas
  */
 router.get("/orders/my", requireJWT, requireClientJWT, async (req, res) => {
   try {
@@ -699,6 +913,15 @@ router.get("/orders/my", requireJWT, requireClientJWT, async (req, res) => {
  *     tags: [Encomendas]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Detalhes da encomenda
  */
 router.get("/orders/:id", requireJWT, requireClientJWT, async (req, res) => {
   try {
@@ -727,6 +950,15 @@ router.get("/orders/:id", requireJWT, requireClientJWT, async (req, res) => {
  *     tags: [Encomendas]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Encomenda cancelada
  */
 router.post(
   "/orders/:id/cancel",
@@ -759,14 +991,14 @@ router.post(
 
       if (!canClientCancelOrder(order)) {
         return res.status(400).json({
-          error:
-            "O prazo de 5 minutos para cancelar a encomenda ja terminou.",
+          error: "O prazo de 5 minutos para cancelar a encomenda ja terminou.",
         });
       }
 
       await rollbackStockReservations(
         order.items.map((item) => ({
-          productId: item.product && item.product._id ? item.product._id : item.product,
+          productId:
+            item.product && item.product._id ? item.product._id : item.product,
           quantity: Number(item.quantidade || 0),
         })),
       );
@@ -799,6 +1031,15 @@ router.post(
  *     tags: [Encomendas]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Pedido de reembolso submetido
  */
 router.post(
   "/orders/:id/refund-request",
@@ -806,38 +1047,48 @@ router.post(
   requireClientJWT,
   async (req, res) => {
     try {
-     const order = await Order.findOne({
-  _id: req.params.id,
-  cliente: req.user.userId,
-});
+      const order = await Order.findOne({
+        _id: req.params.id,
+        cliente: req.user.userId,
+      });
 
       if (!order) {
         return res.status(404).json({ error: "Encomenda nao encontrada." });
       }
 
       if (order.paymentStatus !== "paid") {
-        return res.status(400).json({ error: "So podes pedir reembolso de encomendas ja pagas." });
+        return res
+          .status(400)
+          .json({ error: "So podes pedir reembolso de encomendas ja pagas." });
       }
 
       if (["cancelada", "entregue"].includes(order.estado)) {
-        return res.status(400).json({ error: "Nao podes pedir reembolso desta encomenda." });
+        return res
+          .status(400)
+          .json({ error: "Nao podes pedir reembolso desta encomenda." });
       }
 
       if (order.refundRequested) {
-        return res.status(400).json({ error: "Ja foi feito um pedido de reembolso para esta encomenda." });
+        return res
+          .status(400)
+          .json({
+            error: "Ja foi feito um pedido de reembolso para esta encomenda.",
+          });
       }
 
       order.refundRequested = true;
       order.refundRequestedAt = new Date();
       await order.save();
 
-      return res.json({ message: "Pedido de reembolso submetido com sucesso. O administrador irá analisar o pedido." });
+      return res.json({
+        message:
+          "Pedido de reembolso submetido com sucesso. O administrador irá analisar o pedido.",
+      });
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
-  }
+  },
 );
-
 
 /**
  * @swagger
@@ -847,6 +1098,21 @@ router.post(
  *     tags: [Encomendas]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RateOrderInput'
+ *     responses:
+ *       200:
+ *         description: Avaliacao submetida
  */
 router.post(
   "/orders/:id/rate",
@@ -929,6 +1195,15 @@ router.post(
  *     tags: [Encomendas]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateOrderInput'
+ *     responses:
+ *       201:
+ *         description: Encomenda criada com sucesso
  */
 router.post("/orders", requireJWT, requireClientJWT, async (req, res) => {
   try {
@@ -958,13 +1233,18 @@ router.post("/orders", requireJWT, requireClientJWT, async (req, res) => {
         });
       }
 
-      selectionMap.set(productId, (selectionMap.get(productId) || 0) + quantity);
+      selectionMap.set(
+        productId,
+        (selectionMap.get(productId) || 0) + quantity,
+      );
     }
 
-    const selections = [...selectionMap.entries()].map(([productId, quantity]) => ({
-      productId,
-      quantity,
-    }));
+    const selections = [...selectionMap.entries()].map(
+      ([productId, quantity]) => ({
+        productId,
+        quantity,
+      }),
+    );
 
     const productIds = selections.map((selection) => selection.productId);
     const products = await Product.find({
@@ -1034,7 +1314,9 @@ router.post("/orders", requireJWT, requireClientJWT, async (req, res) => {
         }
 
         const precoUnitario = Number(updatedProduct.price);
-        const subtotal = Number((precoUnitario * selection.quantity).toFixed(2));
+        const subtotal = Number(
+          (precoUnitario * selection.quantity).toFixed(2),
+        );
 
         stockReservations.push({
           productId: updatedProduct._id,
@@ -1098,7 +1380,9 @@ router.post("/orders", requireJWT, requireClientJWT, async (req, res) => {
         paymentStatus: "pending",
       });
 
-      await registerCouponUsage(couponData.coupon ? couponData.coupon._id : null);
+      await registerCouponUsage(
+        couponData.coupon ? couponData.coupon._id : null,
+      );
       await sendCreationEmail(order._id);
 
       const populatedOrder = await Order.findById(order._id)
@@ -1123,6 +1407,9 @@ router.post("/orders", requireJWT, requireClientJWT, async (req, res) => {
  *     tags: [Dashboard]
  *     security:
  *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados do dashboard
  */
 router.get(
   "/dashboard/client",
@@ -1149,6 +1436,15 @@ router.get(
  *     tags: [Pagamentos]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: URL de checkout criada
  */
 router.post(
   "/payments/checkout/:orderId",
@@ -1249,6 +1545,15 @@ router.post(
  *     tags: [Pagamentos]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Pagamento confirmado
  */
 router.get(
   "/payments/confirm/:sessionId",
@@ -1264,7 +1569,9 @@ router.get(
         });
       }
 
-      const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
+      const session = await stripe.checkout.sessions.retrieve(
+        req.params.sessionId,
+      );
       const order = await findOrderForSession(session);
 
       if (!order || String(order.cliente) !== String(req.user.userId)) {

@@ -1,41 +1,78 @@
 <section class="container py-4">
-  <a routerLink="/supermarkets" class="btn btn-outline-secondary btn-sm mb-4">← Voltar à lista</a>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <a routerLink="/supermarkets" class="btn btn-outline-secondary btn-sm">Voltar à lista</a>
+  </div>
 
   <div *ngIf="loadingReviews()" class="text-muted py-3">A carregar supermercado...</div>
 
   <ng-container *ngIf="!loadingReviews()">
-    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
-      <div>
-        <h1 class="mb-1">{{ supermarketName() }}</h1>
-        <p *ngIf="supermarketLocation()" class="text-muted mb-0"> {{ supermarketLocation() }}</p>
-      </div>
-      <div *ngIf="reviews()" class="text-end">
-        <div class="fs-3 fw-bold">{{ reviews()!.averageRating.toFixed(1) }}/5 </div>
-        <div class="text-muted">{{ reviews()!.totalReviews }} reviews</div>
+    
+    <div class="card shadow-sm border-0 mb-5">
+      <div class="card-body p-4 p-lg-5">
+        <div class="row">
+          
+          <div class="col-lg-8 border-end-lg pe-lg-5">
+            <h1 class="fw-bold mb-4 text-dark">{{ supermarketName() }}</h1>
+            
+            <div class="row mb-4">
+              <div class="col-md-6 mb-3">
+                <span class="text-muted d-block small text-uppercase fw-semibold">Localização</span>
+                <span class="fs-6">{{ supermarketLocation() || 'Morada não disponível' }}</span>
+              </div>
+            </div>
+
+            <div id="supermarket-map" style="height: 250px; width: 100%; border-radius: 8px; z-index: 1;" class="border shadow-sm"></div>
+          </div>
+
+          <div class="col-lg-4 ps-lg-5 mt-4 mt-lg-0 d-flex flex-column justify-content-center align-items-center text-center">
+            <ng-container *ngIf="reviews()">
+              <h5 class="text-muted mb-3">Avaliação</h5>
+              <div class="display-3 fw-bold text-success mb-2">
+                {{ reviews()!.averageRating.toFixed(1) }}<span class="fs-3 text-muted">/5</span>
+              </div>
+              <p class="text-muted fw-medium">{{ reviews()!.totalReviews }} reviews registadas</p>
+            </ng-container>
+          </div>
+
+        </div>
       </div>
     </div>
-
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
-        <button class="nav-link" [class.active]="activeTab() === 'reviews'" (click)="activeTab.set('reviews')">
-          Reviews ({{ reviews()?.totalReviews || 0 }})
+        <button class="nav-link text-dark fw-semibold" [class.active]="activeTab() === 'products'" (click)="activeTab.set('products')">
+          Catálogo de Produtos ({{ products().length }})
         </button>
       </li>
       <li class="nav-item">
-        <button class="nav-link" [class.active]="activeTab() === 'products'" (click)="activeTab.set('products')">
-          Produtos ({{ products().length }})
+        <button class="nav-link text-dark fw-semibold" [class.active]="activeTab() === 'reviews'" (click)="activeTab.set('reviews')">
+          Reviews de Clientes ({{ reviews()?.totalReviews || 0 }})
         </button>
       </li>
     </ul>
 
-    <div *ngIf="activeTab() === 'reviews'">
-      <div *ngIf="!reviews()" class="card shadow-sm border-0">
-        <div class="card-body p-4 text-muted">
-          Não foi possível carregar as reviews.
-          <a routerLink="/login">Inicia sessão</a> para as ver.
+    <div *ngIf="activeTab() === 'products'">
+      <div *ngIf="loadingProducts()">A carregar produtos...</div>
+      <div class="products-grid" *ngIf="!loadingProducts() && products().length > 0">
+        <div class="product-card" *ngFor="let p of products()">
+          <img [src]="getImageUrl(p.image)" [alt]="p.name" />
+          <div class="product-info">
+            <h3>{{ p.name }}</h3>
+            <p class="category">{{ p.category.name }}</p>
+            <p class="price">{{ p.price | currency:'EUR' }}</p>
+            <p class="stock text-danger fw-bold" *ngIf="p.stock === 0">Esgotado</p>
+            <p class="stock text-success" *ngIf="p.stock > 0">Stock: {{ p.stock }}</p>
+            <button class="btn btn-success btn-sm mt-2 w-100" [disabled]="p.stock === 0" (click)="addToCart(p)">
+              Adicionar ao carrinho
+            </button>
+          </div>
         </div>
       </div>
+      <div *ngIf="!loadingProducts() && products().length === 0" class="text-muted">
+        Sem produtos disponíveis.
+      </div>
+    </div>
 
+    <div *ngIf="activeTab() === 'reviews'">
       <ng-container *ngIf="reviews() as data">
         <div *ngIf="data.reviews.length === 0" class="text-muted">
           Este supermercado ainda não tem reviews.
@@ -49,38 +86,16 @@
                   <div class="small text-muted">Encomenda #{{ review.displayId }}</div>
                 </div>
                 <div class="text-end">
-                  <div class="fw-semibold">{{ review.rating }}/5</div>
+                  <div class="fw-bold text-success">{{ review.rating }}/5</div>
                   <div class="small text-muted">{{ review.createdAt | date:'dd/MM/yyyy' }}</div>
                 </div>
               </div>
-              <p class="mb-0 text-muted">{{ review.comment || 'Sem comentário.' }}</p>
+              <p class="mb-0 mt-2 text-dark">{{ review.comment || 'Sem comentário.' }}</p>
             </div>
           </article>
         </div>
       </ng-container>
     </div>
 
-    <div *ngIf="activeTab() === 'products'">
-      <div *ngIf="loadingProducts()">A carregar produtos...</div>
-      <div class="products-grid" *ngIf="!loadingProducts() && products().length > 0">
-        <div class="product-card" *ngFor="let p of products()">
-          <img [src]="getImageUrl(p.image)" [alt]="p.name" />
-          <div class="product-info">
-            <h3>{{ p.name }}</h3>
-            <p class="category">{{ p.category.name }}</p>
-            <p class="price">{{ p.price | currency:'EUR' }}</p>
-            <p class="stock" *ngIf="p.stock === 0">Esgotado</p>
-            <p class="stock" *ngIf="p.stock > 0">Stock: {{ p.stock }}</p>
-            <button class="btn btn-success btn-sm mt-2 w-100"
-              [disabled]="p.stock === 0" (click)="addToCart(p)">
-              Adicionar ao carrinho
-            </button>
-          </div>
-        </div>
-      </div>
-      <div *ngIf="!loadingProducts() && products().length === 0" class="text-muted">
-        Sem produtos disponíveis.
-      </div>
-    </div>
   </ng-container>
 </section>

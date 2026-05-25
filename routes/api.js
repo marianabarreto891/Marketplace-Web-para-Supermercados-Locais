@@ -833,7 +833,7 @@ router.get(
       const supermarket = await Supermarket.findOne({
         _id: req.params.id,
         isApproved: true,
-      }).select("name location");
+      }).select("name location lat lon");
 
       if (!supermarket) {
         return res.status(404).json({ error: "Supermercado nao encontrado." });
@@ -869,6 +869,8 @@ router.get(
           id: String(supermarket._id),
           name: supermarket.name,
           location: supermarket.location || "-",
+          lat: supermarket.lat,
+          lon: supermarket.lon,
         },
         averageRating,
         totalReviews: reviews.length,
@@ -1069,11 +1071,9 @@ router.post(
       }
 
       if (order.refundRequested) {
-        return res
-          .status(400)
-          .json({
-            error: "Ja foi feito um pedido de reembolso para esta encomenda.",
-          });
+        return res.status(400).json({
+          error: "Ja foi feito um pedido de reembolso para esta encomenda.",
+        });
       }
 
       order.refundRequested = true;

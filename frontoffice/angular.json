@@ -20,12 +20,16 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
-            ],
+              "src/favicon.ico",
+              "src/assets",
+           {
+            "glob": "**/*",
+            "input": "node_modules/leaflet/dist/images",
+            "output": "/assets/"
+            }
+        ],
             "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
               "src/styles.css"
             ]
           },

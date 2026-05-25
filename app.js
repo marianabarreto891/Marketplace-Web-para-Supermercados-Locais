@@ -14,7 +14,8 @@ const swaggerJsDoc = require("swagger-jsdoc");
 
 var app = express();
 
-app.use(cors({ origin: "http://localhost:4200", credentials: true }));
+
+app.use(cors({ origin: ["http://localhost:4200", "http://localhost:3000", "http://127.0.0.1:3000"], credentials: true }));
 
 const swaggerOptions = {
   swaggerDefinition: {

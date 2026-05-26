@@ -12,3 +12,33 @@ body {
 .action-buttons-container {
   padding-top: 1.5rem;
 }
+
+.review-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  white-space: nowrap;
+}
+
+.review-star {
+  display: inline-flex;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: #d6dbe3;
+}
+
+.review-star svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.review-star-filled {
+  color: #f4b400;
+}
+
+.review-score {
+  margin-left: 0.35rem;
+  color: #1f2937;
+  font-weight: 700;
+}

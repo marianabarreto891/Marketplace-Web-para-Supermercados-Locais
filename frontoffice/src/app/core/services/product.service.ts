@@ -20,6 +20,11 @@ export interface SupermarketSummary {
   location: string;
 }
 
+export interface ProductDetailResponse {
+  product: Product;
+  alternatives: Product[];
+}
+
 export interface SupermarketReview {
   orderId: string;
   displayId: string;
@@ -99,6 +104,11 @@ export class ProductService {
     return this.http.get<Product[]>(`${this.apiUrl}/products/compare`, {
       params: new HttpParams().set('name', name).set('_t', Date.now().toString())
     });
+  }
+
+  getProductDetail(productId: string) {
+    const params = new HttpParams().set('_t', Date.now().toString());
+    return this.http.get<ProductDetailResponse>(`${this.apiUrl}/products/${productId}`, { params });
   }
 
   getSupermarketReviews(supermarketId: string) {

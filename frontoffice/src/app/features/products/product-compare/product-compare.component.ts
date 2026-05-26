@@ -20,11 +20,24 @@ export class ProductCompareComponent {
   constructor(private productService: ProductService) {}
 
   compare() {
-    if (!this.searchName.trim()) return;
+    const normalizedSearch = this.searchName.trim();
+
+    if (!normalizedSearch) {
+      return;
+    }
+
+    if (normalizedSearch.length < 3) {
+      this.searched.set(false);
+      this.results.set([]);
+      this.errorMessage.set('Escreve pelo menos 3 letras para comparar produtos.');
+      return;
+    }
+
+    this.searchName = normalizedSearch;
     this.loading.set(true);
     this.searched.set(true);
     this.errorMessage.set('');
-    this.productService.compareByName(this.searchName).subscribe({
+    this.productService.compareByName(normalizedSearch).subscribe({
       next: r => {
         this.results.set(Array.isArray(r) ? r : []);
         this.loading.set(false);
@@ -39,5 +52,13 @@ export class ProductCompareComponent {
 
   cheapest(): Product | null {
     return this.results().length ? this.results()[0] : null;
+  }
+
+  distinctProductNames(): string[] {
+    return [...new Set(this.results().map(product => product.name.trim()).filter(Boolean))];
+  }
+
+  hasMultipleProducts(): boolean {
+    return this.distinctProductNames().length > 1;
   }
 }

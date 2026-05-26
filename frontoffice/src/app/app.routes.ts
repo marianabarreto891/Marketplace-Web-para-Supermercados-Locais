@@ -19,6 +19,11 @@ export const routes: Routes = [
       import('./features/products/product-list/product-list.component').then((m) => m.ProductListComponent),
   },
   {
+    path: 'products/:id',
+    loadComponent: () =>
+      import('./features/products/product-detail/product-detail.component').then((m) => m.ProductDetailComponent),
+  },
+  {
     path: 'compare',
     loadComponent: () =>
       import('./features/products/product-compare/product-compare.component').then((m) => m.ProductCompareComponent),

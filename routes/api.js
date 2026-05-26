@@ -183,6 +183,18 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
+function escapeRegex(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeProductName(value) {
+  return normalizeText(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
 function normalizeEmail(value) {
   return normalizeText(value).toLowerCase();
 }
@@ -757,14 +769,25 @@ router.get("/categories", async (req, res) => {
  */
 router.get("/products/compare", async (req, res) => {
   try {
-    const { name } = req.query;
+    const name = normalizeText(req.query.name);
 
     if (!name) {
       return res.status(400).json({ error: "Nome obrigatorio" });
     }
 
-    const products = await Product.find({
-      name: { $regex: name, $options: "i" },
+    if (name.length < 3) {
+      return res.status(400).json({
+        error: "Indica pelo menos 3 letras para comparar produtos.",
+      });
+    }
+
+    const normalizedName = normalizeProductName(name);
+    const escapedName = escapeRegex(name);
+    const startsWithRegex = new RegExp(`(^|\\s)${escapedName}`, "i");
+    const containsRegex = new RegExp(escapedName, "i");
+
+    let products = await Product.find({
+      name: { $regex: startsWithRegex },
       isActive: { $ne: false },
       stock: { $gt: 0 },
     })
@@ -775,10 +798,89 @@ router.get("/products/compare", async (req, res) => {
       .populate("category", "name")
       .sort({ price: 1 });
 
-    const filtered = products.filter(
+    if (!products.length) {
+      products = await Product.find({
+        name: { $regex: containsRegex },
+        isActive: { $ne: false },
+        stock: { $gt: 0 },
+      })
+        .populate(
+          "supermarket",
+          "name location isApproved deliveryMethods deliveryCost",
+        )
+        .populate("category", "name")
+        .sort({ price: 1 });
+    }
+
+    const exactMatches = products.filter(
+      (product) => normalizeProductName(product.name) === normalizedName,
+    );
+
+    const filtered = (exactMatches.length ? exactMatches : products).filter(
       (product) => product.supermarket?.isApproved,
     );
     return res.json(filtered);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Consulta o detalhe de um produto e compara alternativas
+ *     tags: [Produtos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Detalhe do produto com alternativas noutros supermercados
+ */
+router.get("/products/:id", async (req, res) => {
+  try {
+    const product = await Product.findOne({
+      _id: req.params.id,
+      isActive: { $ne: false },
+    })
+      .populate("category", "name")
+      .populate(
+        "supermarket",
+        "name location isApproved deliveryMethods deliveryCost",
+      );
+
+    if (!product || !product.supermarket?.isApproved) {
+      return res.status(404).json({ error: "Produto nao encontrado." });
+    }
+
+    const exactNameRegex = new RegExp(`^${escapeRegex(product.name)}$`, "i");
+    const products = await Product.find({
+      name: { $regex: exactNameRegex },
+      isActive: { $ne: false },
+      stock: { $gt: 0 },
+    })
+      .populate("category", "name")
+      .populate(
+        "supermarket",
+        "name location isApproved deliveryMethods deliveryCost",
+      )
+      .sort({ price: 1 });
+
+    const normalizedName = normalizeProductName(product.name);
+    const alternatives = products.filter(
+      (item) =>
+        item.supermarket?.isApproved &&
+        normalizeProductName(item.name) === normalizedName,
+    );
+
+    return res.json({
+      product,
+      alternatives,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -938,7 +1040,7 @@ router.get("/orders/:id", requireJWT, requireClientJWT, async (req, res) => {
       cliente: req.user.userId,
     })
       .populate("supermercado", "name")
-      .populate("items.product", "image");
+      .populate("items.product", "image")
       .populate("estafeta", "name");
 
     if (!order) {
@@ -1420,6 +1522,17 @@ router.post("/orders", requireJWT, requireClientJWT, async (req, res) => {
       });
     }
 
+    const approvedSupermarket = await Supermarket.findOne({
+      _id: supermarket._id,
+      isApproved: true,
+    }).select("_id");
+
+    if (!approvedSupermarket) {
+      return res.status(400).json({
+        error: "O supermercado destes produtos nao esta disponivel.",
+      });
+    }
+
     if (!supermarket.deliveryMethods.includes(deliveryMethod)) {
       return res.status(400).json({
         error: "O supermercado selecionado nao suporta esse metodo de entrega.",
@@ -1436,6 +1549,7 @@ router.post("/orders", requireJWT, requireClientJWT, async (req, res) => {
           {
             _id: selection.productId,
             supermarket: supermarket._id,
+            isActive: { $ne: false },
             stock: { $gte: selection.quantity },
           },
           { $inc: { stock: -selection.quantity } },

@@ -1,0 +1,14 @@
+<%
+  const safeRating = Math.max(0, Math.min(5, Number(rating) || 0));
+  const filledStars = Math.round(safeRating);
+%>
+<span class="review-stars" aria-label="<%= safeRating %> de 5 estrelas">
+  <% for (let star = 1; star <= 5; star += 1) { %>
+    <span class="review-star <%= star <= filledStars ? 'review-star-filled' : '' %>">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9L12 2.6z" />
+      </svg>
+    </span>
+  <% } %>
+  <span class="review-score"><%= safeRating %>/5</span>
+</span>

@@ -1,24 +1,37 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <a routerLink="/products">Marketplace</a>
+    <a routerLink="/products" (click)="closeMenu()">Marketplace</a>
   </div>
 
-  <div class="navbar-links">
-    <a routerLink="/products" routerLinkActive="active">Produtos</a>
-    <a routerLink="/compare" routerLinkActive="active">Comparar preços</a>
-    <a routerLink="/supermarkets" routerLinkActive="active">Supermercados</a>
-    <a *ngIf="auth.isLoggedIn()" routerLink="/cart" routerLinkActive="active">
-      Carrinho
-      <span *ngIf="cart.itemCount() > 0">({{ cart.itemCount() }})</span>
-    </a>
-    <a *ngIf="auth.isLoggedIn()" routerLink="/orders" routerLinkActive="active">Encomendas</a>
-    <a *ngIf="auth.isLoggedIn()" routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    <a *ngIf="auth.isLoggedIn()" routerLink="/profile" routerLinkActive="active">Perfil</a>
-  </div>
+  <button
+    type="button"
+    class="navbar-toggle"
+    aria-label="Abrir menu"
+    [attr.aria-expanded]="menuOpen()"
+    (click)="toggleMenu()">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 
-  <div class="navbar-user">
-    <span *ngIf="auth.currentUser() as u">Olá, {{ u.name }}</span>
-    <button *ngIf="auth.isLoggedIn()" (click)="auth.logout()">Sair</button>
-    <a *ngIf="!auth.isLoggedIn()" routerLink="/login" class="navbar-login-btn">Entrar</a>
+  <div class="navbar-menu" [class.open]="menuOpen()">
+    <div class="navbar-links">
+      <a routerLink="/products" routerLinkActive="active" (click)="closeMenu()">Produtos</a>
+      <a routerLink="/compare" routerLinkActive="active" (click)="closeMenu()">Comparar precos</a>
+      <a routerLink="/supermarkets" routerLinkActive="active" (click)="closeMenu()">Supermercados</a>
+      <a *ngIf="auth.isLoggedIn()" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">
+        Carrinho
+        <span *ngIf="cart.itemCount() > 0">({{ cart.itemCount() }})</span>
+      </a>
+      <a *ngIf="auth.isLoggedIn()" routerLink="/orders" routerLinkActive="active" (click)="closeMenu()">Encomendas</a>
+      <a *ngIf="auth.isLoggedIn()" routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+      <a *ngIf="auth.isLoggedIn()" routerLink="/profile" routerLinkActive="active" (click)="closeMenu()">Perfil</a>
+    </div>
+
+    <div class="navbar-user">
+      <span *ngIf="auth.currentUser() as u">Ola, {{ u.name }}</span>
+      <button *ngIf="auth.isLoggedIn()" (click)="logout()">Sair</button>
+      <a *ngIf="!auth.isLoggedIn()" routerLink="/login" class="navbar-login-btn" (click)="closeMenu()">Entrar</a>
+    </div>
   </div>
 </nav>

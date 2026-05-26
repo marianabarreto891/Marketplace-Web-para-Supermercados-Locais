@@ -7,11 +7,12 @@ import {
   SupermarketReviewsResponse,
   SupermarketCouriersResponse,
 } from '../../../core/services/product.service';
+import { RatingStarsComponent } from '../../shared/rating-stars/rating-stars.component';
 
 @Component({
   selector: 'app-supermarket-reviews',
   standalone: true,
-  imports: [CommonModule, RouterLink, PageHeaderComponent],
+  imports: [CommonModule, RouterLink, PageHeaderComponent, RatingStarsComponent],
   templateUrl: './supermarket-reviews.component.html',
 })
 export class SupermarketReviewsComponent implements OnInit {

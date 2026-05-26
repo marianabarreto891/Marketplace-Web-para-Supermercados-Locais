@@ -1,0 +1,101 @@
+<div class="product-detail-container">
+  <a routerLink="/products" class="back-link">Voltar aos produtos</a>
+
+  <div *ngIf="cartMessage()"
+    [class.success]="cartMessageType() === 'success'"
+    [class.error]="cartMessageType() === 'error'">
+    {{ cartMessage() }}
+  </div>
+
+  <div *ngIf="loading()">A carregar...</div>
+  <div *ngIf="!loading() && errorMessage()" class="error">{{ errorMessage() }}</div>
+
+  <ng-container *ngIf="!loading() && !errorMessage() && product() as p">
+    <section class="product-detail-hero">
+      <div class="product-detail-image">
+        <img [src]="getImageUrl(p.image)" [alt]="p.name" />
+      </div>
+
+      <div class="product-detail-info">
+        <span class="product-detail-category">{{ p.category.name }}</span>
+        <h1>{{ p.name }}</h1>
+        <p class="product-detail-description">
+          {{ p.description || 'Sem descricao disponivel.' }}
+        </p>
+
+        <dl class="product-detail-meta">
+          <div>
+            <dt>Supermercado</dt>
+            <dd>{{ p.supermarket.name }}</dd>
+          </div>
+          <div>
+            <dt>Localizacao</dt>
+            <dd>{{ p.supermarket.location }}</dd>
+          </div>
+          <div>
+            <dt>Stock</dt>
+            <dd>{{ p.stock > 0 ? p.stock + ' unidades' : 'Esgotado' }}</dd>
+          </div>
+        </dl>
+
+        <p class="product-detail-price">{{ p.price | currency:'EUR' }}</p>
+
+        <div class="product-detail-actions">
+          <button class="btn btn-success"
+            [disabled]="p.stock === 0"
+            (click)="addToCart(p)">
+            Adicionar ao carrinho
+          </button>
+          <a [routerLink]="['/supermarkets', p.supermarket._id, 'reviews']" class="btn btn-outline-primary">
+            Ver reviews do supermercado
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="product-price-panel">
+      <div class="product-price-heading">
+        <div>
+          <h2>Comparacao de precos</h2>
+          <p>O mesmo produto nos supermercados disponiveis.</p>
+        </div>
+        <span *ngIf="cheapest() as cheapestProduct">
+          Mais barato: {{ cheapestProduct.supermarket.name }}
+        </span>
+      </div>
+
+      <div class="table-scroll" *ngIf="alternatives().length > 0; else noAlternatives">
+        <table>
+          <thead>
+            <tr>
+              <th>Supermercado</th>
+              <th>Localizacao</th>
+              <th>Preco</th>
+              <th>Stock</th>
+              <th>Acao</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let option of alternatives()" [class.cheapest]="option._id === cheapest()._id">
+              <td>{{ option.supermarket.name }}</td>
+              <td>{{ option.supermarket.location }}</td>
+              <td>{{ option.price | currency:'EUR' }}</td>
+              <td>{{ option.stock > 0 ? 'Disponivel' : 'Esgotado' }}</td>
+              <td>
+                <button class="btn btn-success btn-sm"
+                  [disabled]="option.stock === 0"
+                  (click)="addToCart(option)">
+                  Comprar aqui
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noAlternatives>
+        <p class="text-muted mb-0">Ainda nao existem alternativas disponiveis para este produto.</p>
+      </ng-template>
+    </section>
+  </ng-container>
+</div>

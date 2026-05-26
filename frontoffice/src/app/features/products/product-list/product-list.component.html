@@ -57,6 +57,9 @@
         <p class="price">{{ p.price | currency:'EUR' }}</p>
         <p class="stock" *ngIf="p.stock === 0">Esgotado</p>
         <p class="stock" *ngIf="p.stock > 0">Stock: {{ p.stock }}</p>
+        <a class="btn btn-outline-primary btn-sm mt-2 w-100" [routerLink]="['/products', p._id]">
+          Detalhes
+        </a>
         <button class="btn btn-success btn-sm mt-2 w-100"
           [disabled]="p.stock === 0" (click)="addToCart(p)">
           Adicionar ao carrinho

@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CourierService, CourierReviewsResponse } from '../../../core/services/courier.service';
+import { RatingStarsComponent } from '../../shared/rating-stars/rating-stars.component';
 
 @Component({
   selector: 'app-courier-reviews',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RatingStarsComponent],
   templateUrl: './courier-reviews.component.html',
 })
 export class CourierReviewsComponent implements OnInit {

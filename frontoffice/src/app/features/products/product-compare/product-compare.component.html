@@ -1,11 +1,11 @@
 <div class="compare-container">
-  <h2>Comparar preços</h2>
+  <h2>Comparar precos</h2>
 
   <div class="search-bar">
     <input
       type="text"
       [(ngModel)]="searchName"
-      placeholder="Nome do produto (ex: Leite)"
+      placeholder="Nome do produto (minimo 3 letras)"
       (keyup.enter)="compare()"
     />
     <button (click)="compare()">Comparar</button>
@@ -13,7 +13,7 @@
 
   <div *ngIf="loading()">A carregar...</div>
 
-  <div *ngIf="!loading() && errorMessage()">
+  <div *ngIf="!loading() && errorMessage()" class="error">
     {{ errorMessage() }}
   </div>
 
@@ -24,23 +24,45 @@
 
     <div *ngIf="results().length > 0">
       <p class="tip" *ngIf="cheapest() as cheapestProduct">
-        Mais barato: <strong>{{ cheapestProduct.supermarket.name }}</strong>
-        - {{ cheapestProduct.price | currency:'EUR' }}
+        <ng-container *ngIf="!hasMultipleProducts(); else mixedResultsTip">
+          Mais barato para <strong>{{ cheapestProduct.name }}</strong>:
+          <strong>{{ cheapestProduct.supermarket.name }}</strong>
+          - {{ cheapestProduct.price | currency:'EUR' }}
+        </ng-container>
+        <ng-template #mixedResultsTip>
+          Opcao mais barata encontrada:
+          <strong>{{ cheapestProduct.name }}</strong>
+          em <strong>{{ cheapestProduct.supermarket.name }}</strong>
+          - {{ cheapestProduct.price | currency:'EUR' }}
+        </ng-template>
+      </p>
+
+      <p class="compare-note" *ngIf="hasMultipleProducts()">
+        A pesquisa encontrou varios produtos diferentes. Usa a coluna
+        <strong>Produto</strong> para distinguir os resultados ou escreve um
+        nome mais especifico para comparar apenas um artigo.
       </p>
 
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
+              <th>Produto</th>
               <th>Supermercado</th>
-              <th>Preço</th>
+              <th>Preco</th>
               <th>Stock</th>
-              <th>Localização</th>
+              <th>Localizacao</th>
               <th>Reviews</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let p of results()" [class.cheapest]="p === cheapest()">
+              <td>
+                <div class="compare-product-cell">
+                  <strong>{{ p.name }}</strong>
+                  <span *ngIf="p.category.name">{{ p.category.name }}</span>
+                </div>
+              </td>
               <td>{{ p.supermarket.name }}</td>
               <td>{{ p.price | currency:'EUR' }}</td>
               <td>{{ p.stock > 0 ? 'Disponivel' : 'Esgotado' }}</td>

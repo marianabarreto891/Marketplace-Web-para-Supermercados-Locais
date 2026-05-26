@@ -5,13 +5,14 @@ import { ProductService, SupermarketReviewsResponse, SupermarketCouriersResponse
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
+import { RatingStarsComponent } from '../../shared/rating-stars/rating-stars.component';
 
 import * as L from 'leaflet';
 
 @Component({
   selector: 'app-supermarket-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RatingStarsComponent],
   templateUrl: './supermarket-detail.component.html',
 })
 export class SupermarketDetailComponent implements OnInit, OnDestroy {

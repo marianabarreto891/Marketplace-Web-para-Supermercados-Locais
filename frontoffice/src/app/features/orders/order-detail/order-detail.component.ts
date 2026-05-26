@@ -6,11 +6,12 @@ import { combineLatest } from 'rxjs';
 import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { Order } from '../../../core/models/order.model';
 import { OrderService } from '../../../core/services/order.service';
+import { RatingStarsComponent } from '../../shared/rating-stars/rating-stars.component';
 
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent],
+  imports: [CommonModule, FormsModule, RouterLink, PageHeaderComponent, RatingStarsComponent],
   templateUrl: './order-detail.component.html',
 })
 export class OrderDetailComponent implements OnInit {

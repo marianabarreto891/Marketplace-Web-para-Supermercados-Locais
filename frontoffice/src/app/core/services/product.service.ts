@@ -30,14 +30,32 @@ export interface SupermarketReview {
 }
 
 export interface SupermarketReviewsResponse {
-  supermarket: {
-    id: string;
-    name: string;
-    location: string;
-  };
+  supermarket: { id: string; name: string; location: string; };
   averageRating: number;
   totalReviews: number;
   reviews: SupermarketReview[];
+}
+
+export interface CourierReviewEntry {
+  orderId: string;
+  displayId: string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface CourierSummary {
+  courierId: string;
+  courierName: string;
+  totalReviews: number;
+  averageRating: number;
+  reviews: CourierReviewEntry[];
+}
+
+export interface SupermarketCouriersResponse {
+  supermarket: { id: string; name: string };
+  couriers: CourierSummary[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -46,27 +64,26 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-
-getProducts(filters: {
-  search?: string;
-  category?: string;
-  sort?: string;
-  supermarket?: string;
-  page?: number;
-  limit?: number;
-}) {
-  let params = new HttpParams();
-  if (filters.search) params = params.set('search', filters.search);
-  if (filters.category && filters.category !== 'all') params = params.set('category', filters.category);
-  if (filters.supermarket && filters.supermarket !== 'all') params = params.set('supermarket', filters.supermarket);
-  if (filters.sort) params = params.set('sort', filters.sort);
-  if (filters.page) params = params.set('page', filters.page.toString());
-  if (filters.limit) params = params.set('limit', filters.limit.toString());
-  params = params.set('_t', Date.now().toString());
-  return this.http.get<{ products: Product[]; total: number; totalPages: number; currentPage: number }>(
-    `${this.apiUrl}/products`, { params }
-  );
-}
+  getProducts(filters: {
+    search?: string;
+    category?: string;
+    sort?: string;
+    supermarket?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    let params = new HttpParams();
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.category && filters.category !== 'all') params = params.set('category', filters.category);
+    if (filters.supermarket && filters.supermarket !== 'all') params = params.set('supermarket', filters.supermarket);
+    if (filters.sort) params = params.set('sort', filters.sort);
+    if (filters.page) params = params.set('page', filters.page.toString());
+    if (filters.limit) params = params.set('limit', filters.limit.toString());
+    params = params.set('_t', Date.now().toString());
+    return this.http.get<{ products: Product[]; total: number; totalPages: number; currentPage: number }>(
+      `${this.apiUrl}/products`, { params }
+    );
+  }
 
   getCategories() {
     const params = new HttpParams().set('_t', Date.now().toString());
@@ -75,16 +92,12 @@ getProducts(filters: {
 
   getSupermarkets() {
     const params = new HttpParams().set('_t', Date.now().toString());
-    return this.http.get<SupermarketSummary[]>(`${this.apiUrl}/supermarkets`, {
-      params,
-    });
+    return this.http.get<SupermarketSummary[]>(`${this.apiUrl}/supermarkets`, { params });
   }
 
   compareByName(name: string) {
     return this.http.get<Product[]>(`${this.apiUrl}/products/compare`, {
-      params: new HttpParams()
-        .set('name', name)
-        .set('_t', Date.now().toString())
+      params: new HttpParams().set('name', name).set('_t', Date.now().toString())
     });
   }
 
@@ -92,6 +105,14 @@ getProducts(filters: {
     const params = new HttpParams().set('_t', Date.now().toString());
     return this.http.get<SupermarketReviewsResponse>(
       `${this.apiUrl}/supermarkets/${supermarketId}/reviews`,
+      { params }
+    );
+  }
+
+  getSupermarketCouriers(supermarketId: string) {
+    const params = new HttpParams().set('_t', Date.now().toString());
+    return this.http.get<SupermarketCouriersResponse>(
+      `${this.apiUrl}/supermarkets/${supermarketId}/couriers`,
       { params }
     );
   }

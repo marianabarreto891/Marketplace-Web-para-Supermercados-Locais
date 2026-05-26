@@ -30,8 +30,7 @@
           <p class="mb-2"><strong>Estado:</strong> {{ statusLabel }}</p>
           <p class="mb-2"><strong>Pagamento:</strong> {{ paymentStatusLabel }}</p>
           <p class="mb-2"><strong>Entrega:</strong> {{ deliveryLabel }}</p>
-          <p class="mb-2" *ngIf="order.supermarketLocation">
-          </p>
+          <p class="mb-2" *ngIf="order.supermarketLocation"></p>
           <p class="mb-2"><strong>Cupao:</strong> {{ order.couponCode || 'Sem cupao' }}</p>
           <p class="mb-2"><strong>Criada em:</strong> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
           <p class="mb-0" *ngIf="order.paidAt">
@@ -85,7 +84,8 @@
             <strong>EUR {{ order.total.toFixed(2) }}</strong>
           </div>
 
-          <div class="mt-4 d-flex gap-2 flex-wrap">
+          <!-- Botões  -->
+          <div class="mt-4 d-flex gap-2 flex-wrap align-items-center">
             <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao histórico</a>
             <a routerLink="/products" class="btn btn-outline-primary">Continuar a comprar</a>
             <button *ngIf="canPay" class="btn btn-primary" type="button" [disabled]="paymentLoading()"
@@ -96,20 +96,30 @@
               (click)="cancelOrder()">
               {{ actionLoading() ? 'A processar...' : 'Cancelar encomenda' }}
             </button>
-          </div>
-          <button *ngIf="canRequestRefund" class="btn btn-warning" type="button" [disabled]="actionLoading()"
-            (click)="requestRefund()">
-            {{ actionLoading() ? 'A processar...' : 'Pedir reembolso' }}
-          </button>
-
-          <div *ngIf="order.refundRequested" class="alert alert-warning mt-2 mb-0 w-100">
-            Pedido de reembolso submetido em {{ order.refundRequestedAt | date:'dd/MM/yyyy HH:mm' }}. Aguarda a
-            análise do administrador.
+            <button *ngIf="canRequestRefund" class="btn btn-warning" type="button" [disabled]="actionLoading()"
+              (click)="requestRefund()">
+              {{ actionLoading() ? 'A processar...' : 'Pedir reembolso' }}
+            </button>
           </div>
 
           <small *ngIf="canCancel" class="text-muted d-block mt-2">
             Pode cancelar esta encomenda até às {{ cancelDeadlineLabel }}.
           </small>
+
+          <!-- Estado do reembolso -->
+          <div *ngIf="order.refundApproved" class="alert alert-success mt-3 mb-0">
+            <strong> Reembolso aceite</strong> — O seu reembolso foi aprovado
+            <span *ngIf="order.refundProcessedAt"> em {{ order.refundProcessedAt | date:'dd/MM/yyyy HH:mm' }}</span>.
+          </div>
+
+          <div *ngIf="order.refundRejected" class="alert alert-danger mt-3 mb-0">
+            <strong>Reembolso rejeitado</strong> — O pedido de reembolso não foi aprovado
+            <span *ngIf="order.refundProcessedAt"> em {{ order.refundProcessedAt | date:'dd/MM/yyyy HH:mm' }}</span>.
+          </div>
+
+          <div *ngIf="order.refundRequested && !order.refundApproved && !order.refundRejected" class="alert alert-warning mt-3 mb-0">
+            <strong> Reembolso pendente</strong> — Pedido submetido em {{ order.refundRequestedAt | date:'dd/MM/yyyy HH:mm' }}. Aguarda análise.
+          </div>
         </div>
       </div>
     </div>
@@ -162,20 +172,24 @@
                 <div class="fw-semibold mb-1">{{ order.supermarketReview.rating }}/5</div>
                 <p class="text-muted mb-0">
                   {{ order.supermarketReview.comment || 'Sem comentário.' }}
-                </p>
-              </div>
-            </div>
-
-            <div class="col-12 col-lg-6" *ngIf="order.courierReview">
-              <div class="border rounded p-3 h-100">
-                <h3 class="h6 mb-2">Review do estafeta</h3>
-                <div class="fw-semibold mb-1">{{ order.courierReview.rating }}/5</div>
-                <p class="text-muted mb-0">
-                  {{ order.courierReview.comment || 'Sem comentário.' }}
-                </p>
-              </div>
-            </div>
-          </div>
+                  </p>
+                  </div>
+                  </div>
+                  
+                  <div class="col-12 col-lg-6" *ngIf="order.courierReview">
+                    <div class="border rounded p-3 h-100">
+                      <h3 class="h6 mb-2">Review do estafeta</h3>
+                      <div class="fw-semibold mb-1">{{ order.courierReview.rating }}/5</div>
+                      <p class="text-muted mb-0">
+                        {{ order.courierReview.comment || 'Sem comentário.' }}
+                      </p>
+                      <a *ngIf="order.courierId" [routerLink]="['/couriers', order.courierId, 'reviews']"
+                        class="btn btn-sm btn-outline-secondary mt-2">
+                        Ver todas as reviews deste estafeta
+                      </a>
+                    </div>
+                  </div>
+                  </div>
 
           <div *ngIf="!canReview && !order.supermarketReview && !order.courierReview" class="text-muted">
             A review fica disponível quando a encomenda estiver entregue!

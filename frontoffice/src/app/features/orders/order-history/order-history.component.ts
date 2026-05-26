@@ -23,11 +23,14 @@ export class OrderHistoryComponent implements OnInit {
     { value: 'cancelada', label: 'Cancelada' },
   ];
 
+  readonly PAGE_SIZE = 5;
+
   readonly orders = signal<Order[]>([]);
   readonly loading = signal(true);
   readonly errorMessage = signal('');
   readonly actionOrderId = signal('');
   selectedStatus = 'all';
+  currentPage = 1;
 
   constructor(private orderService: OrderService) {}
 
@@ -35,6 +38,7 @@ export class OrderHistoryComponent implements OnInit {
     this.orderService.getMyOrders().subscribe({
       next: (orders) => {
         this.orders.set(orders);
+        this.currentPage = 1;
       },
       error: (error) => {
         this.errorMessage.set(
@@ -54,8 +58,30 @@ export class OrderHistoryComponent implements OnInit {
     if (this.selectedStatus === 'all') {
       return this.orders();
     }
-
     return this.orders().filter((order) => order.status === this.selectedStatus);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredOrders.length / this.PAGE_SIZE));
+  }
+
+  get pagedOrders(): Order[] {
+    const start = (this.currentPage - 1) * this.PAGE_SIZE;
+    return this.filteredOrders.slice(start, start + this.PAGE_SIZE);
+  }
+
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  onStatusChange(): void {
+    this.currentPage = 1;
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
   getStatusLabel(status: string): string {

@@ -127,20 +127,32 @@
                     <td><%= order.supermercado ? order.supermercado.name : "-" %></td>
                     <% if (role !== "cliente") { %>
                       <td>
-                        <div class="fw-semibold"><%= order.cliente ? order.cliente.name : "-" %></div>
-                        <div class="small text-muted"><%= order.cliente ? order.cliente.email : "" %></div>
+                        <div class="fw-semibold">
+                          <%= order.cliente ? order.cliente.name : "-" %>
+                        </div>
+                        <div class="small text-muted">
+                          <%= order.cliente ? order.cliente.email : "" %>
+                        </div>
                       </td>
-                    <% } %>
-                    <td><%= deliveryLabels[order.metodoEntrega] || order.metodoEntrega %></td>
-                    <td>
-                      <span class="badge <%= statusClasses[order.estado] %>"><%= statusLabels[order.estado] %></span>
-                      <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && !order.estafeta && order.estado === "confirmada") { %>
-                        <div class="small text-muted mt-1">A aguardar preparação do supermercado</div>
                       <% } %>
-                    </td>
-                    <% if (role !== "cliente") { %>
-                      <td>
-                        <% if (order.estafetaDisplayName && order.estafetaDisplayName !== "-") { %>
+                        <td>
+                          <%= deliveryLabels[order.metodoEntrega] || order.metodoEntrega %>
+                        </td>
+                        <td>
+                          <span class="badge <%= statusClasses[order.estado] %>">
+                            <%= statusLabels[order.estado] %>
+                          </span>
+                          <% if (order.refundRequested && !order.refundApproved && !order.refundRejected && (role==="supermercado" ||
+                            role==="admin" )) { %>
+                            <div class="small text-warning fw-semibold mt-1"> Reembolso pendente</div>
+                            <% } %>
+                              <% if (role==="estafeta" && order.metodoEntrega==="estafeta" && !order.estafeta && order.estado==="confirmada" )
+                                { %>
+                                <div class="small text-muted mt-1">A aguardar preparação do supermercado</div>
+                                <% } %>
+                        </td>
+                        <% if (role !=="cliente" ) { %>
+                          <td>       <% if (order.estafetaDisplayName && order.estafetaDisplayName !== "-") { %>
                           <%= order.estafetaDisplayName %>
                         <% } else if (role === "estafeta" && order.estado === "em_preparacao") { %>
                           Disponível

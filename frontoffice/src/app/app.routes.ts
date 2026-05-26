@@ -68,11 +68,19 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/dashboard/client-dashboard/client-dashboard.component').then((m) => m.ClientDashboardComponent),
   },
+
   {
     path: 'profile',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/profile/client-profile/client-profile.component').then((m) => m.ClientProfileComponent),
   },
+  {
+    path: 'couriers/:id/reviews',
+    loadComponent: () =>
+      import('./features/couriers/courier-reviews/courier-reviews.component').then((m) => m.CourierReviewsComponent),
+  },
   { path: '**', redirectTo: 'products' },
+
 ];
+

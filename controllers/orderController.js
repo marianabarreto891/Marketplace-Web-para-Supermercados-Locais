@@ -1241,4 +1241,82 @@ exports.rateOrder = async (req, res) => {
     console.error("Erro ao avaliar:", error);
     return res.status(500).send("Erro ao processar a avaliacao.");
   }
+  
+
+  
 };
+
+exports.acceptRefund = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate("supermercado");
+
+    if (!order) {
+      return res.status(404).send("Encomenda não encontrada.");
+    }
+
+    const isAdmin = req.session.role === "admin";
+    const isManager =
+      order.supermercado &&
+      String(order.supermercado.manager) === String(req.session.userId);
+
+    if (!isAdmin && !isManager) {
+      return res.status(403).send("Sem permissão para aceitar este reembolso.");
+    }
+
+    if (!order.refundRequested) {
+      return res.status(400).send("Não existe pedido de reembolso para esta encomenda.");
+    }
+
+    if (order.refundApproved || order.refundRejected) {
+      return res.status(400).send("Este pedido de reembolso já foi processado.");
+    }
+
+    order.refundApproved = true;
+    order.refundRejected = false;
+    order.refundProcessedAt = new Date();
+    await order.save();
+
+    return redirectToOrderDetail(res, order._id);
+  } catch (error) {
+    console.error("Erro ao aceitar reembolso:", error);
+    return res.status(500).send("Erro ao aceitar reembolso.");
+  }
+};
+
+exports.rejectRefund = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate("supermercado");
+
+    if (!order) {
+      return res.status(404).send("Encomenda não encontrada.");
+    }
+
+    const isAdmin = req.session.role === "admin";
+    const isManager =
+      order.supermercado &&
+      String(order.supermercado.manager) === String(req.session.userId);
+
+    if (!isAdmin && !isManager) {
+      return res.status(403).send("Sem permissão para rejeitar este reembolso.");
+    }
+
+    if (!order.refundRequested) {
+      return res.status(400).send("Não existe pedido de reembolso para esta encomenda.");
+    }
+
+    if (order.refundApproved || order.refundRejected) {
+      return res.status(400).send("Este pedido de reembolso já foi processado.");
+    }
+
+    order.refundApproved = false;
+    order.refundRejected = true;
+    order.refundProcessedAt = new Date();
+    await order.save();
+
+    return redirectToOrderDetail(res, order._id);
+  } catch (error) {
+    console.error("Erro ao rejeitar reembolso:", error);
+    return res.status(500).send("Erro ao rejeitar reembolso.");
+  }
+};
+

@@ -123,4 +123,18 @@ export class OrderService {
   );
 }
 
+acceptRefund(orderId: string) {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/orders/${orderId}/refund-accept`,
+      {}
+    );
+  }
+
+  rejectRefund(orderId: string) {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/orders/${orderId}/refund-reject`,
+      {}
+    );
+  }
+
 }

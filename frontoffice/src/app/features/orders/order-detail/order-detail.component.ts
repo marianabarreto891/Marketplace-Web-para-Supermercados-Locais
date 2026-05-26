@@ -186,10 +186,17 @@ export class OrderDetailComponent implements OnInit {
   }
 get canRequestRefund(): boolean {
   const order = this.order();
-  return !!order &&
+  if (!order) {
+    return false;
+  }
+
+  return (
     order.paymentStatus === 'paid' &&
     !['cancelada', 'entregue'].includes(order.status) &&
-    !order.refundRequested;
+    !order.refundRequested &&
+    !order.refundApproved &&
+    !order.refundRejected
+  );
 }
 
 requestRefund(): void {

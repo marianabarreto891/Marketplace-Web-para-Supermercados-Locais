@@ -193,12 +193,42 @@
             <% if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta && !courierHasDeliveryInProgress) { %>
               <form action="/orders/<%= order._id %>/claim" method="POST" class="mb-3">
                 <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Aceitar entrega</button>
-              </form>
-            <% } else if (role === "estafeta" && order.metodoEntrega === "estafeta" && order.estado === "em_preparacao" && !order.estafeta && courierHasDeliveryInProgress) { %>
-              <div class="alert alert-warning">
-                Já tem uma entrega em curso! Termine-a antes de aceitar outra.
-              </div>
-            <% } %>
+                </form>
+                <% } else if (role==="estafeta" && order.metodoEntrega==="estafeta" && order.estado==="em_preparacao" && !order.estafeta
+                  && courierHasDeliveryInProgress) { %>
+                  <div class="alert alert-warning">
+                    Já tem uma entrega em curso! Termine-a antes de aceitar outra.
+                  </div>
+                  <% } %>
+                
+                    <!-- Reembolso: apenas o supermercado vê e decide -->
+                    <% if ((role==="supermercado" ) && order.refundRequested && !order.refundApproved &&
+                      !order.refundRejected) { %>
+                      <div class="alert alert-warning mb-3">
+                        <strong> Pedido de reembolso pendente</strong><br>
+                        <small>Submetido em <%= new Date(order.refundRequestedAt).toLocaleString("pt-PT") %></small>
+                      </div>
+                      <form action="/orders/<%= order._id %>/refund-accept" method="POST" class="mb-2">
+                        <button type="submit" class="btn btn-success w-100"> Aceitar reembolso</button>
+                      </form>
+                      <form action="/orders/<%= order._id %>/refund-reject" method="POST" class="mb-3">
+                        <button type="submit" class="btn btn-danger w-100"> Rejeitar reembolso</button>
+                      </form>
+                      <% } %>
+                
+                        <% if (order.refundApproved) { %>
+                          <div class="alert alert-success mb-3">
+                            <strong>Reembolso aceite</strong><br>
+                            <small>Processado em <%= new Date(order.refundProcessedAt).toLocaleString("pt-PT") %></small>
+                          </div>
+                          <% } %>
+                
+                            <% if (order.refundRejected) { %>
+                              <div class="alert alert-danger mb-3">
+                                <strong>Reembolso rejeitado</strong><br>
+                                <small>Processado em <%= new Date(order.refundProcessedAt).toLocaleString("pt-PT") %></small>
+                              </div>
+                              <% } %>
 
             <% if (allowedTransitions.length) { %>
               <div class="d-grid gap-2">

@@ -24,10 +24,10 @@ const supermarketSchema = new mongoose.Schema(
 
     isApproved: { type: Boolean, default: false },
     toApprove: { type: Boolean, default: false },
-    rejectionReason: { type: String, default: "" } 
+    rejectionReason: { type: String, default: "" },
+    acceptsRefunds: { type: Boolean, default: true },
   },
-  { timestamps: true },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Supermarket", supermarketSchema);

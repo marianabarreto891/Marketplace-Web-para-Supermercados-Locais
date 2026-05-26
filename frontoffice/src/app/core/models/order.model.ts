@@ -13,6 +13,7 @@ export interface Order {
   supermarketId: string;
   supermarketName: string;
   supermarketLocation?: string;
+  courierId?: string;
   items: OrderItem[];
   status: string;
   paymentStatus: string;
@@ -30,4 +31,7 @@ export interface Order {
   courierReview?: OrderReview | null;
   refundRequested?: boolean;
   refundRequestedAt?: string;
+  refundApproved?: boolean;     
+  refundRejected?: boolean;      
+  refundProcessedAt?: string; 
 }

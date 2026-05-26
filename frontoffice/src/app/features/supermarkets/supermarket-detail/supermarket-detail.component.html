@@ -37,6 +37,7 @@
         </div>
       </div>
     </div>
+
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
         <button class="nav-link text-dark fw-semibold" [class.active]="activeTab() === 'products'" (click)="activeTab.set('products')">
@@ -48,8 +49,14 @@
           Reviews de Clientes ({{ reviews()?.totalReviews || 0 }})
         </button>
       </li>
+      <li class="nav-item">
+        <button class="nav-link text-dark fw-semibold" [class.active]="activeTab() === 'couriers'" (click)="activeTab.set('couriers')">
+          Reviews de Estafetas ({{ couriers()?.couriers?.length || 0 }})
+        </button>
+      </li>
     </ul>
 
+    <!-- Tab: Produtos -->
     <div *ngIf="activeTab() === 'products'">
       <div *ngIf="loadingProducts()">A carregar produtos...</div>
       <div class="products-grid" *ngIf="!loadingProducts() && products().length > 0">
@@ -72,6 +79,7 @@
       </div>
     </div>
 
+    <!--Reviews -->
     <div *ngIf="activeTab() === 'reviews'">
       <ng-container *ngIf="reviews() as data">
         <div *ngIf="data.reviews.length === 0" class="text-muted">
@@ -95,6 +103,41 @@
           </article>
         </div>
       </ng-container>
+    </div>
+
+    <!-- Tab: Estafetas -->
+    <div *ngIf="activeTab() === 'couriers'">
+      <div *ngIf="!couriers() || couriers()!.couriers.length === 0" class="text-muted">
+        Ainda não há estafetas com reviews para este supermercado.
+      </div>
+
+      <div *ngIf="couriers() as cd" class="d-grid gap-4">
+        <div *ngFor="let courier of cd.couriers" class="card shadow-sm border-0">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+              <div>
+                <h3 class="h5 mb-0">{{ courier.courierName }}</h3>
+                <div class="small text-muted">{{ courier.totalReviews }} review{{ courier.totalReviews !== 1 ? 's' : '' }}</div>
+              </div>
+              <div class="text-end">
+                <div class="fs-4 fw-bold text-success">{{ courier.averageRating.toFixed(1) }}/5</div>
+                <a [routerLink]="['/couriers', courier.courierId, 'reviews']" class="small text-primary">
+                  Ver todas as reviews
+                </a>
+              </div>
+            </div>
+            <div class="d-grid gap-2">
+              <article *ngFor="let review of courier.reviews.slice(0, 2)" class="border rounded p-3">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
+                  <div class="fw-semibold small">{{ review.customerName }}</div>
+                  <div class="small text-muted">{{ review.rating }}/5</div>
+                </div>
+                <p class="mb-0 text-muted small">{{ review.comment || 'Sem comentário.' }}</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </ng-container>

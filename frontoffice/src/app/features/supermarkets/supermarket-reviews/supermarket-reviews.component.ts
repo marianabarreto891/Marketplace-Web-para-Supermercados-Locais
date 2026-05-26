@@ -5,6 +5,7 @@ import { PageHeaderComponent } from '../../layout/page-header/page-header.compon
 import {
   ProductService,
   SupermarketReviewsResponse,
+  SupermarketCouriersResponse,
 } from '../../../core/services/product.service';
 
 @Component({
@@ -19,29 +20,28 @@ export class SupermarketReviewsComponent implements OnInit {
 
   readonly supermarketId = this.route.snapshot.paramMap.get('id') || '';
   readonly data = signal<SupermarketReviewsResponse | null>(null);
+  readonly couriersData = signal<SupermarketCouriersResponse | null>(null);
   readonly loading = signal(true);
   readonly errorMessage = signal('');
+  readonly activeTab = signal<'supermarket' | 'couriers'>('supermarket');
 
   ngOnInit(): void {
     this.productService.getSupermarketReviews(this.supermarketId).subscribe({
-      next: (response) => {
-        this.data.set(response);
-      },
+      next: (response) => this.data.set(response),
       error: (error) => {
-        this.errorMessage.set(
-          error?.error?.error ||
-            error?.error?.message ||
-            'Nao foi possivel carregar as reviews deste supermercado.'
-        );
+        this.errorMessage.set(error?.error?.error || 'Não foi possível carregar as reviews.');
         this.loading.set(false);
       },
-      complete: () => {
-        this.loading.set(false);
-      },
+      complete: () => this.loading.set(false),
+    });
+
+    this.productService.getSupermarketCouriers(this.supermarketId).subscribe({
+      next: (response) => this.couriersData.set(response),
+      error: () => {},
     });
   }
 
-  get stars(): number[] {
-    return [1, 2, 3, 4, 5];
+  setTab(tab: 'supermarket' | 'couriers'): void {
+    this.activeTab.set(tab);
   }
 }

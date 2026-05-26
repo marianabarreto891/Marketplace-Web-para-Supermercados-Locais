@@ -288,6 +288,7 @@ function mapOrderForClient(order) {
     supermarketLocation: order.supermercado
       ? order.supermercado.location || "-"
       : "-",
+    courierId: order.estafeta ? String(order.estafeta._id || order.estafeta) : null,
     items: Array.isArray(order.items)
       ? order.items.map(mapOrderItemForClient)
       : [],
@@ -305,6 +306,11 @@ function mapOrderForClient(order) {
     cancelDeadline: cancelDeadline ? cancelDeadline.toISOString() : null,
     supermarketReview: mapReviewForClient(order.avaliacaoSupermercado),
     courierReview: mapReviewForClient(order.avaliacaoEstafeta),
+    refundRequested: order.refundRequested || false,         
+    refundRequestedAt: order.refundRequestedAt || null,       
+    refundApproved: order.refundApproved || false,            
+    refundRejected: order.refundRejected || false,            
+    refundProcessedAt: order.refundProcessedAt || null,       
   };
 }
 
@@ -933,6 +939,7 @@ router.get("/orders/:id", requireJWT, requireClientJWT, async (req, res) => {
     })
       .populate("supermercado", "name")
       .populate("items.product", "image");
+      .populate("estafeta", "name");
 
     if (!order) {
       return res.status(404).json({ error: "Encomenda nao encontrada" });
@@ -1075,19 +1082,147 @@ router.post(
           error: "Ja foi feito um pedido de reembolso para esta encomenda.",
         });
       }
-
+      // Verificar se o supermercado aceita reembolsos
+      const supermarket = await Supermarket.findById(order.supermercado);
+      if (supermarket && supermarket.acceptsRefunds === false) {
+        return res
+          .status(400)
+          .json({
+            error: "Este supermercado nao aceita pedidos de reembolso.",
+          });
+      }
       order.refundRequested = true;
       order.refundRequestedAt = new Date();
       await order.save();
 
       return res.json({
-        message:
-          "Pedido de reembolso submetido com sucesso. O administrador irá analisar o pedido.",
-      });
+  message: "Pedido de reembolso submetido com sucesso. O supermercado irá analisar o pedido.",
+});
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
   },
+);
+
+/**
+ * @swagger
+ * /api/orders/{id}/refund-accept:
+ *   post:
+ *     summary: Aceita o pedido de reembolso de uma encomenda
+ *     tags: [Encomendas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da encomenda
+ *     responses:
+ *       200:
+ *         description: Reembolso aceite com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Reembolso aceite com sucesso.
+ *       403:
+ *         description: Sem permissão
+ *       404:
+ *         description: Encomenda não encontrada
+ *       400:
+ *         description: Pedido já processado ou inexistente
+ */
+router.post(
+  "/orders/:id/refund-accept",
+  requireJWT,
+  async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.id).populate("supermercado");
+      if (!order) return res.status(404).json({ error: "Encomenda nao encontrada." });
+
+      const isAdmin = req.user.role === "admin";
+      const isManager = order.supermercado && String(order.supermercado.manager) === String(req.user.userId);
+      if (!isAdmin && !isManager) return res.status(403).json({ error: "Sem permissao para aceitar este reembolso." });
+
+      if (!order.refundRequested) return res.status(400).json({ error: "Nao existe pedido de reembolso para esta encomenda." });
+      if (order.refundApproved || order.refundRejected) return res.status(400).json({ error: "Este pedido de reembolso ja foi processado." });
+
+      order.refundApproved = true;
+      order.refundRejected = false;
+      order.refundProcessedAt = new Date();
+      await order.save();
+
+      return res.json({ message: "Reembolso aceite com sucesso." });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+);
+
+
+/**
+ * @swagger
+ * /api/orders/{id}/refund-reject:
+ *   post:
+ *     summary: Rejeita o pedido de reembolso de uma encomenda
+ *     tags: [Encomendas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da encomenda
+ *     responses:
+ *       200:
+ *         description: Reembolso rejeitado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Reembolso rejeitado.
+ *       403:
+ *         description: Sem permissão
+ *       404:
+ *         description: Encomenda não encontrada
+ *       400:
+ *         description: Pedido já processado ou inexistente
+ */
+router.post(
+  "/orders/:id/refund-reject",
+  requireJWT,
+  async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.id).populate("supermercado");
+      if (!order) return res.status(404).json({ error: "Encomenda nao encontrada." });
+
+      const isAdmin = req.user.role === "admin";
+      const isManager = order.supermercado && String(order.supermercado.manager) === String(req.user.userId);
+      if (!isAdmin && !isManager) return res.status(403).json({ error: "Sem permissao para rejeitar este reembolso." });
+
+      if (!order.refundRequested) return res.status(400).json({ error: "Nao existe pedido de reembolso para esta encomenda." });
+      if (order.refundApproved || order.refundRejected) return res.status(400).json({ error: "Este pedido de reembolso ja foi processado." });
+
+      order.refundApproved = false;
+      order.refundRejected = true;
+      order.refundProcessedAt = new Date();
+      await order.save();
+
+      return res.json({ message: "Reembolso rejeitado." });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 );
 
 /**
@@ -1593,6 +1728,141 @@ router.get(
     }
   },
 );
+
+/**
+ * @swagger
+ * /api/couriers/{id}/reviews:
+ *   get:
+ *     summary: Lista as reviews de um estafeta
+ *     tags: [Estafetas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do estafeta
+ *     responses:
+ *       200:
+ *         description: Reviews do estafeta
+ *       404:
+ *         description: Estafeta não encontrado
+ */
+router.get("/couriers/:id/reviews", requireJWT, requireClientJWT, async (req, res) => {
+  try {
+    const courier = await User.findOne({ _id: req.params.id, role: "estafeta" }).select("name");
+
+    if (!courier) {
+      return res.status(404).json({ error: "Estafeta não encontrado." });
+    }
+
+    const reviewedOrders = await Order.find({
+      estafeta: courier._id,
+      "avaliacaoEstafeta.rating": { $exists: true },
+    })
+      .populate("cliente", "name")
+      .sort({ updatedAt: -1 });
+
+    const reviews = reviewedOrders.map((order) => ({
+      orderId: String(order._id),
+      displayId: formatOrderDisplayId(order._id),
+      customerName: order.cliente ? order.cliente.name : "Cliente",
+      rating: Number(order.avaliacaoEstafeta.rating || 0),
+      comment: order.avaliacaoEstafeta.comentario || "",
+      createdAt: order.updatedAt || order.createdAt,
+    }));
+
+    const averageRating = reviews.length
+      ? Number((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1))
+      : 0;
+
+    return res.json({
+      courier: { id: String(courier._id), name: courier.name },
+      averageRating,
+      totalReviews: reviews.length,
+      reviews,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+
+
+/**
+ * @swagger
+ * /api/supermarkets/{id}/couriers:
+ *   get:
+ *     summary: Lista os estafetas de um supermercado
+ *     tags: [Supermercados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do supermercado
+ *     responses:
+ *       200:
+ *         description: Estafetas do supermercado
+ *       404:
+ *         description: Supermercado não encontrado
+ */
+router.get("/supermarkets/:id/couriers", requireJWT, requireClientJWT, async (req, res) => {
+  try {
+    const supermarket = await Supermarket.findOne({ _id: req.params.id, isApproved: true }).select("name location");
+
+    if (!supermarket) {
+      return res.status(404).json({ error: "Supermercado não encontrado." });
+    }
+
+    const orders = await Order.find({
+      supermercado: supermarket._id,
+      estafeta: { $ne: null },
+      "avaliacaoEstafeta.rating": { $exists: true },
+    }).populate("cliente", "name");
+
+    const courierMap = new Map();
+
+    for (const order of orders) {
+      const courierId = String(order.estafeta);
+      if (!courierMap.has(courierId)) {
+        courierMap.set(courierId, {
+          courierId,
+          courierName: order.nomeEstafeta || "Estafeta",
+          reviews: [],
+        });
+      }
+      courierMap.get(courierId).reviews.push({
+        orderId: String(order._id),
+        displayId: formatOrderDisplayId(order._id),
+        customerName: order.cliente ? order.cliente.name : "Cliente",
+        rating: Number(order.avaliacaoEstafeta.rating || 0),
+        comment: order.avaliacaoEstafeta.comentario || "",
+        createdAt: order.updatedAt || order.createdAt,
+      });
+    }
+
+    const couriers = [...courierMap.values()].map((c) => ({
+      courierId: c.courierId,
+      courierName: c.courierName,
+      totalReviews: c.reviews.length,
+      averageRating: Number(
+        (c.reviews.reduce((sum, r) => sum + r.rating, 0) / c.reviews.length).toFixed(1)
+      ),
+      reviews: c.reviews,
+    }));
+
+    return res.json({ supermarket: { id: String(supermarket._id), name: supermarket.name }, couriers });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 
 module.exports = router;
 module.exports.requireJWT = requireJWT;

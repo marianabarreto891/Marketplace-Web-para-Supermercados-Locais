@@ -55,32 +55,27 @@
                     <span class="badge bg-success">Aprovado</span>
                   <% } else if (order.refundRejected) { %>
                     <span class="badge bg-danger">Rejeitado</span>
-                  <% } else { %>
-                    <span class="badge bg-warning text-dark">Pendente</span>
-                  <% } %>
-                </td>
-                <td class="text-end">
-                  <% if (!order.refundApproved && !order.refundRejected) { %>
-                    <div class="d-flex justify-content-end gap-2">
-                      <form action="/admin/refunds/<%= order._id %>/approve" method="POST"
-                            onsubmit="return confirm('Confirma a aprovação do reembolso de € <%= Number(order.total).toFixed(2) %>?')">
-                        <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
-                      </form>
-                      <form action="/admin/refunds/<%= order._id %>/reject" method="POST"
-                            onsubmit="return confirm('Confirma a rejeição deste pedido de reembolso?')">
-                        <button type="submit" class="btn btn-sm btn-danger">Rejeitar</button>
-                      </form>
-                    </div>
-                  <% } else { %>
-                    <span class="text-muted small">Processado em <%= order.refundProcessedAt ? new Date(order.refundProcessedAt).toLocaleString('pt-PT') : '-' %></span>
-                  <% } %>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    <% } %>
-  </div>
-</body>
-</html>
+                    <% } else { %>
+                      <span class="badge bg-warning text-dark">Pendente</span>
+                      <% } %>
+                        </td>
+                        <td class="text-end">
+                          <span class="text-muted small">
+                            <% if (!order.refundApproved && !order.refundRejected) { %>
+                              Pendente
+                              <% } else { %>
+                                Processado em <%= order.refundProcessedAt ? new Date(order.refundProcessedAt).toLocaleString('pt-PT')
+                                  : '-' %>
+                                  <% } %>
+                                    </span>
+                                    </td>
+                                    </tr>
+                                    <% }) %>
+                                      </tbody>
+                                      </table>
+                                      </div>
+                                      <% } %>
+                                        </div>
+                                        </body>
+                                  
+                                        </html>

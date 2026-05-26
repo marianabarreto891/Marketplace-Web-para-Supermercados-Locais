@@ -40,7 +40,7 @@ export class LoginComponent {
 
     this.auth.login(this.email, this.password).subscribe({
       next: () => {
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/supermarkets';
         this.router.navigateByUrl(returnUrl);
       },
       error: err => this.error = err.error?.error || 'Erro ao fazer login'

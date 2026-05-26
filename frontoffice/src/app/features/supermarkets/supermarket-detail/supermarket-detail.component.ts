@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ProductService, SupermarketReviewsResponse, Product } from '../../../core/services/product.service';
+import { ProductService, SupermarketReviewsResponse, SupermarketCouriersResponse, Product } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
@@ -17,10 +17,11 @@ import * as L from 'leaflet';
 export class SupermarketDetailComponent implements OnInit, OnDestroy {
   supermarketId = '';
   reviews = signal<SupermarketReviewsResponse | null>(null);
+  couriers = signal<SupermarketCouriersResponse | null>(null);
   products = signal<Product[]>([]);
   loadingReviews = signal(true);
   loadingProducts = signal(true);
-  activeTab = signal<'reviews' | 'products'>('reviews');
+  activeTab = signal<'reviews' | 'products' | 'couriers'>('products');
 
   private map: L.Map | undefined;
 
@@ -48,9 +49,9 @@ export class SupermarketDetailComponent implements OnInit, OnDestroy {
     this.supermarketId = this.route.snapshot.paramMap.get('id') || '';
 
     this.productService.getSupermarketReviews(this.supermarketId).subscribe({
-      next: (data) => { 
-        this.reviews.set(data); 
-        this.loadingReviews.set(false); 
+      next: (data) => {
+        this.reviews.set(data);
+        this.loadingReviews.set(false);
 
         setTimeout(() => {
           const lat = (data.supermarket as any)?.lat;
@@ -58,30 +59,30 @@ export class SupermarketDetailComponent implements OnInit, OnDestroy {
           const name = data.supermarket?.name || 'Supermercado';
           const location = data.supermarket?.location || '';
 
-
           if (lat && lon) {
             this.inicializeMap(lat, lon, name);
-          } 
-          else if (location) {
+          } else if (location) {
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location + ', Portugal')}`)
               .then(res => res.json())
               .then(results => {
                 if (results && results.length > 0) {
-                  const latFound = parseFloat(results[0].lat);
-                  const lonFound = parseFloat(results[0].lon);
-                  this.inicializeMap(latFound, lonFound, name);
+                  this.inicializeMap(parseFloat(results[0].lat), parseFloat(results[0].lon), name);
                 } else {
                   this.inicializeMap(39.3999, -8.2245, name);
                 }
               })
-              .catch(() => this.inicializeMap(39.3999, -8.2245, name)); 
+              .catch(() => this.inicializeMap(39.3999, -8.2245, name));
           } else {
             this.inicializeMap(39.3999, -8.2245, name);
           }
         }, 100);
-
       },
       error: () => this.loadingReviews.set(false),
+    });
+
+    this.productService.getSupermarketCouriers(this.supermarketId).subscribe({
+      next: (data) => this.couriers.set(data),
+      error: () => {},
     });
 
     this.productService.getProducts({ supermarket: this.supermarketId, sort: 'asc', page: 1, limit: 100 }).subscribe({
@@ -98,9 +99,7 @@ export class SupermarketDetailComponent implements OnInit, OnDestroy {
   }
 
   inicializeMap(lat: number, lon: number, name: string) {
-    if (this.map) {
-      this.map.remove();
-    }
+    if (this.map) this.map.remove();
 
     this.map = L.map('supermarket-map').setView([lat, lon], 14);
 
@@ -109,8 +108,6 @@ export class SupermarketDetailComponent implements OnInit, OnDestroy {
       attribution: '© OpenStreetMap'
     }).addTo(this.map);
 
-    
-    
     const customIcon = L.icon({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -121,7 +118,7 @@ export class SupermarketDetailComponent implements OnInit, OnDestroy {
       tooltipAnchor: [16, -28],
       shadowSize: [41, 41]
     });
- 
+
     L.marker([lat, lon], { icon: customIcon }).addTo(this.map)
       .bindPopup(`<b>${name}</b>`)
       .openPopup();

@@ -56,7 +56,7 @@
       </li>
     </ul>
 
-    <!-- Tab: Produtos -->
+    <!-- Produtos -->
     <div *ngIf="activeTab() === 'products'">
       <div *ngIf="loadingProducts()">A carregar produtos...</div>
       <div class="products-grid" *ngIf="!loadingProducts() && products().length > 0">
@@ -105,7 +105,7 @@
       </ng-container>
     </div>
 
-    <!-- Tab: Estafetas -->
+    <!-- Estafetas -->
     <div *ngIf="activeTab() === 'couriers'">
       <div *ngIf="!couriers() || couriers()!.couriers.length === 0" class="text-muted">
         Ainda não há estafetas com reviews para este supermercado.

@@ -20,7 +20,7 @@
         <span class="product-detail-category">{{ p.category.name }}</span>
         <h1>{{ p.name }}</h1>
         <p class="product-detail-description">
-          {{ p.description || 'Sem descricao disponivel.' }}
+          {{ p.description || 'Sem descrição disponível.' }}
         </p>
 
         <dl class="product-detail-meta">
@@ -29,7 +29,7 @@
             <dd>{{ p.supermarket.name }}</dd>
           </div>
           <div>
-            <dt>Localizacao</dt>
+            <dt>Localização</dt>
             <dd>{{ p.supermarket.location }}</dd>
           </div>
           <div>
@@ -56,8 +56,8 @@
     <section class="product-price-panel">
       <div class="product-price-heading">
         <div>
-          <h2>Comparacao de precos</h2>
-          <p>O mesmo produto nos supermercados disponiveis.</p>
+          <h2>Comparação de preços</h2>
+          <p>O mesmo produto nos supermercados disponíveis.</p>
         </div>
         <span *ngIf="cheapest() as cheapestProduct">
           Mais barato: {{ cheapestProduct.supermarket.name }}
@@ -69,10 +69,10 @@
           <thead>
             <tr>
               <th>Supermercado</th>
-              <th>Localizacao</th>
-              <th>Preco</th>
+              <th>Localização</th>
+              <th>Preço</th>
               <th>Stock</th>
-              <th>Acao</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody>
@@ -80,7 +80,7 @@
               <td>{{ option.supermarket.name }}</td>
               <td>{{ option.supermarket.location }}</td>
               <td>{{ option.price | currency:'EUR' }}</td>
-              <td>{{ option.stock > 0 ? 'Disponivel' : 'Esgotado' }}</td>
+              <td>{{ option.stock > 0 ? 'Disponível' : 'Esgotado' }}</td>
               <td>
                 <button class="btn btn-success btn-sm"
                   [disabled]="option.stock === 0"
@@ -94,7 +94,7 @@
       </div>
 
       <ng-template #noAlternatives>
-        <p class="text-muted mb-0">Ainda nao existem alternativas disponiveis para este produto.</p>
+        <p class="text-muted mb-0">Ainda não existem alternativas disponíveis para este produto!</p>
       </ng-template>
     </section>
   </ng-container>

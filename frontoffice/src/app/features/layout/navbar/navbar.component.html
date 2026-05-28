@@ -29,7 +29,7 @@
     </div>
 
     <div class="navbar-user">
-      <span *ngIf="auth.currentUser() as u">Ola, {{ u.name }}</span>
+      <span *ngIf="auth.currentUser() as u">Olá, {{ u.name }}</span>
       <button *ngIf="auth.isLoggedIn()" (click)="logout()">Sair</button>
       <a *ngIf="!auth.isLoggedIn()" routerLink="/login" class="navbar-login-btn" (click)="closeMenu()">Entrar</a>
     </div>

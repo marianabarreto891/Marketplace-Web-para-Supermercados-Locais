@@ -43,7 +43,7 @@
       </li>
     </ul>
 
-    <!-- Tab: Supermercado -->
+    <!-- Supermercado -->
     <div *ngIf="activeTab() === 'supermarket'" class="card shadow-sm border-0">
       <div class="card-body p-4">
         <div *ngIf="data.reviews.length === 0" class="text-muted">
@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <!-- Tab: Estafetas -->
+    <!-- Estafetas -->
     <div *ngIf="activeTab() === 'couriers'">
       <div *ngIf="!couriersData() || couriersData()!.couriers.length === 0" class="card shadow-sm border-0">
         <div class="card-body p-4 text-muted">

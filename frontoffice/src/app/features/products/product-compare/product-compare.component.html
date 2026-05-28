@@ -1,11 +1,11 @@
 <div class="compare-container">
-  <h2>Comparar precos</h2>
+  <h2>Comparar preços</h2>
 
   <div class="search-bar">
     <input
       type="text"
       [(ngModel)]="searchName"
-      placeholder="Nome do produto (minimo 3 letras)"
+      placeholder="Nome do produto (mínimo 3 letras)"
       (keyup.enter)="compare()"
     />
     <button (click)="compare()">Comparar</button>
@@ -30,7 +30,7 @@
           - {{ cheapestProduct.price | currency:'EUR' }}
         </ng-container>
         <ng-template #mixedResultsTip>
-          Opcao mais barata encontrada:
+          Opção mais barata encontrada:
           <strong>{{ cheapestProduct.name }}</strong>
           em <strong>{{ cheapestProduct.supermarket.name }}</strong>
           - {{ cheapestProduct.price | currency:'EUR' }}
@@ -38,8 +38,8 @@
       </p>
 
       <p class="compare-note" *ngIf="hasMultipleProducts()">
-        A pesquisa encontrou varios produtos diferentes. Usa a coluna
-        <strong>Produto</strong> para distinguir os resultados ou escreve um
+        A pesquisa encontrou vários produtos diferentes. Use a coluna
+        <strong>Produto</strong> para distinguir os resultados ou escreva um
         nome mais especifico para comparar apenas um artigo.
       </p>
 
@@ -49,9 +49,9 @@
             <tr>
               <th>Produto</th>
               <th>Supermercado</th>
-              <th>Preco</th>
+              <th>Preço</th>
               <th>Stock</th>
-              <th>Localizacao</th>
+              <th>Localização</th>
               <th>Reviews</th>
             </tr>
           </thead>
@@ -65,7 +65,7 @@
               </td>
               <td>{{ p.supermarket.name }}</td>
               <td>{{ p.price | currency:'EUR' }}</td>
-              <td>{{ p.stock > 0 ? 'Disponivel' : 'Esgotado' }}</td>
+              <td>{{ p.stock > 0 ? 'Disponível' : 'Esgotado' }}</td>
               <td>{{ p.supermarket.location }}</td>
               <td>
                 <a

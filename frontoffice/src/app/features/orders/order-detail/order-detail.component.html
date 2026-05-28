@@ -31,7 +31,7 @@
           <p class="mb-2"><strong>Pagamento:</strong> {{ paymentStatusLabel }}</p>
           <p class="mb-2"><strong>Entrega:</strong> {{ deliveryLabel }}</p>
           <p class="mb-2" *ngIf="order.supermarketLocation"></p>
-          <p class="mb-2"><strong>Cupao:</strong> {{ order.couponCode || 'Sem cupao' }}</p>
+          <p class="mb-2"><strong>Cupão:</strong> {{ order.couponCode || 'Sem cupão' }}</p>
           <p class="mb-2"><strong>Criada em:</strong> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
           <p class="mb-0" *ngIf="order.paidAt">
             <strong>Paga em:</strong> {{ order.paidAt | date:'dd/MM/yyyy HH:mm' }}
@@ -50,7 +50,7 @@
                 <tr>
                   <th>Produto</th>
                   <th class="text-center">Qtd</th>
-                  <th class="text-end">Preco</th>
+                  <th class="text-end">Preço</th>
                   <th class="text-end">Subtotal</th>
                 </tr>
               </thead>
@@ -84,7 +84,6 @@
             <strong>EUR {{ order.total.toFixed(2) }}</strong>
           </div>
 
-          <!-- Botões  -->
           <div class="mt-4 d-flex gap-2 flex-wrap align-items-center">
             <a routerLink="/orders" class="btn btn-outline-secondary">Voltar ao histórico</a>
             <a routerLink="/products" class="btn btn-outline-primary">Continuar a comprar</a>
